@@ -1,9 +1,12 @@
 from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
+load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -13,13 +16,38 @@ db = SQLAlchemy(app)
 def index():
     return "index page"
 
+
+#################USER ENDPOINTS START#####################
+@app.route('/createUser', methods=['POST'])
+def createUser():
+    '''
+    Create a new user and save in DB
+    '''
+    if not request.is_json:
+        return {"error": "Invalid input, send user details in JSON format"}, 400
+    
+    data = request.get_json()
+
+    user = User(
+        username=data.get('username'),
+        email=data.get('email')
+    )
+    db.session.add(user)
+    db.session.commit()
+    return {"message": "User created", "user_id": user.id}, 201
+
+#################USER ENDPOINTS END#####################
+
+
+
+#################CONTRACT ENDPOINTS START#####################
 @app.route('/createContract', methods=['POST'])
 def createContract():
     '''
     Create a new contract and save in DB
     '''
     if not request.is_json:
-        return {"error": "Invalid input, JSON expected"}, 400
+        return {"error": "Invalid input, send contract details in JSON format"}, 400
     
     # Extract data from json request
     data = request.get_json()
@@ -58,9 +86,9 @@ def getContractByClient():
     Get existing contract from DB using Client ID
     '''
     pass
+#################CONTRACT ENDPOINTS END#####################
 
-
-#################DATABASE MODELS#####################
+#################DATABASE MODELS START#####################
 class User(db.Model):
     """
     Client.who sign contracts for APIs with the company
@@ -111,7 +139,7 @@ class Product(db.Model):
     def __repr__(self):
         return f'<Product {self.api_id} ({self.name},{self.version})>'
 
-##################DATABASE MODELS#####################
+##################DATABASE MODELS END#####################
 
 if __name__ == '__main__':
     app.run(debug=True)
