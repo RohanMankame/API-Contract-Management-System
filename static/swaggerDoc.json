@@ -3,7 +3,7 @@
   "info": {
     "title": "API Contract Manager",
     "version": "1.1.0",
-    "description": "Updated Swagger documentation for API Contract Manager endpoints"
+    "description": "API Contract Manager"
   },
   "host": "127.0.0.1:5000/",
   "basePath": "/",

@@ -152,12 +152,30 @@ def getAllContracts():
     except Exception as e:
         return {"error": str(e)}, 400
 
-@app.route('/getContract', methods=['GET'])
+@app.route('/getContract/<contractID>', methods=['GET'])
 def getContractByID():
     '''
     Get existing contract from DB using contract ID
     '''
-    pass 
+    try:
+        contract = Contract.query.get(contractID)
+        if contract:
+            return {
+                "contract_id": contract.contract_id,
+                "client_id": contract.client_id,
+                "api_id": contract.api_id,
+                "contract_type": contract.contract_type,
+                "pricing_type": contract.pricing_type,
+                "start_date": contract.start_date.strftime('%Y-%m-%d'),
+                "end_date": contract.end_date.strftime('%Y-%m-%d'),
+                "contract_status": contract.contract_status,
+                "value": contract.value
+            }, 200
+        else:
+            return {"error": "Contract not found"}, 404
+    except Exception as e:
+        return {"error": str(e)}, 400
+     
 
 @app.route('/getContractByUser/<userID>', methods=['GET'])
 def getContractByUserID(userID):
