@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = ''
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -18,7 +18,26 @@ def createContract():
     '''
     Create a new contract and save in DB
     '''
-    pass 
+    if not request.is_json:
+        return {"error": "Invalid input, JSON expected"}, 400
+    
+    # Extract data from json request
+    data = request.get_json()
+
+    contract = Contract(
+        contract_id=data.get('contract_id'),
+        client_id=data.get('client_id'),
+        api_id=data.get('api_id'),
+        contract_type=data.get('contract_type'),
+        pricing_type=data.get('pricing_type'),
+        start_date=datetime.strptime(data.get('start_date'), '%Y-%m-%d'),
+        end_date=datetime.strptime(data.get('end_date'), '%Y-%m-%d'),
+        contract_status=data.get('contract_status', 'Draft'),
+        value=float(data.get('value', 0.0))
+    )
+    db.session.add(contract)
+    db.session.commit()
+    return {"message": "Contract created", "contract_id": contract.contract_id}, 201 
 
 @app.route('/deleteContract', methods=['DELETE'])
 def deleteContractByID():
