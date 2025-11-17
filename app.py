@@ -16,29 +16,10 @@ db = SQLAlchemy(app)
 #######################|DATABASE CONNECTION END|##########################
 
 
-
 #***********************|SWAGGER DOC START|*********************#
-
-SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
-API_URL = '/static/swaggerDoc.json'  # Our API url (can of course be a local resource)
-
-# Call factory function to create our blueprint
-swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
-    API_URL,
-    config={  # Swagger UI config overrides
-        'app_name': "Test application"
-    },
-    # oauth_config={  # OAuth config. See https://github.com/swagger-api/swagger-ui#oauth2-configuration .
-    #    'clientId': "your-client-id",
-    #    'clientSecret': "your-client-secret-if-required",
-    #    'realm': "your-realms",
-    #    'appName': "your-app-name",
-    #    'scopeSeparator': " ",
-    #    'additionalQueryStringParams': {'test': "hello"}
-    # }
-)
-
+SWAGGER_URL = '/api/docs'
+API_URL = '/static/swaggerDoc.json'  
+swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Test application"},)
 app.register_blueprint(swaggerui_blueprint)
 
 #######################|SWAGGER DOC END|##########################
@@ -198,7 +179,7 @@ def createProduct():
             pricing_type=data.get('pricing_type'),
             price=float(data.get('price', 0.0)),
             calls_per_month=int(data.get('calls_per_month', 0)),
-            call_limit_type=data.get('call_limit_type')
+            call_limit_type=int(data.get('call_limit_type'))
         )
         db.session.add(product)
         db.session.commit()
@@ -207,9 +188,28 @@ def createProduct():
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
-    
 
 
+@app.route('/getProducts', methods=['GET'])
+def getProducts():
+    '''
+    Get all API products from DB
+    '''
+    try:
+        products = Product.query.all()
+        products_list = [{
+            "id": product.id,
+            "name": product.name,
+            "version": product.version,
+            "pricing_type": product.pricing_type,
+            "price": product.price,
+            "calls_per_month": product.calls_per_month,
+            "call_limit_type": product.call_limit_type
+        } for product in products]
+        return {"products": products_list}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 400
 
 
 #########################|PRODUCTS(APIs) END|#####################
@@ -261,7 +261,7 @@ class Product(db.Model):
     pricing_type = db.Column(db.String(50), nullable=False)
     price = db.Column(db.Float, default=0.0)
     calls_per_month = db.Column(db.Integer, default=0)
-    call_limit_type = db.Column(db.String(50), nullable=False)
+    call_limit_type = db.Column(db.Integer, nullable=False)
 
 
     def __repr__(self):
