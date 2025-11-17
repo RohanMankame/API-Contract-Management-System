@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "title": "API Contract Manager",
-    "version": "1.0.0",
-    "description": "Swagger documentation for API Contract Manager endpoints"
+    "version": "1.1.0",
+    "description": "Updated Swagger documentation for API Contract Manager endpoints"
   },
-  "host": "127.0.0.1:5000",
+  "host": "127.0.0.1:5000/",
   "basePath": "/",
   "schemes": ["http"],
   "paths": {
@@ -36,12 +36,30 @@
         }
       }
     },
-    "/getAccounts": {
+    "/getUsers": {
       "get": {
-        "summary": "Get all user accounts",
+        "summary": "Get all users",
         "produces": ["application/json"],
         "responses": {
           "200": { "description": "List of users" }
+        }
+      }
+    },
+    "/getUser/{id}": {
+      "get": {
+        "summary": "Get user by ID",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": { "description": "User details" },
+          "404": { "description": "User not found" }
         }
       }
     },
@@ -76,6 +94,33 @@
         "responses": {
           "201": { "description": "Contract created" },
           "400": { "description": "Error creating contract" }
+        }
+      }
+    },
+    "/getContracts": {
+      "get": {
+        "summary": "Get all contracts",
+        "produces": ["application/json"],
+        "responses": {
+          "200": { "description": "List of contracts" }
+        }
+      }
+    },
+    "/getContractByUserID/{user_id}": {
+      "get": {
+        "summary": "Get contracts by user ID",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Contracts for user" },
+          "404": { "description": "No contracts found for user" }
         }
       }
     },
