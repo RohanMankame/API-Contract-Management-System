@@ -71,8 +71,8 @@ def createUser():
         return {"error": str(e)}, 400
         
 
-@app.route('/getAccounts', methods=['GET'])
-def getAccounts():
+@app.route('/getUsers', methods=['GET'])
+def getUsers():
     '''
     Get all users from DB
     '''
@@ -82,6 +82,22 @@ def getAccounts():
         return {"users": users_list}, 200
     except Exception as e:
         return {"error": str(e)}, 400
+
+
+@app.route('/getUser', methods=['GET'])
+def getUserByID():
+    '''
+    Get existing user from DB using user ID
+    '''
+    """ 
+    try:
+    
+
+    except Exception as e:
+        return {"error": str(e)}, 400 
+    """
+
+
 
 #################|USER/Clients ENDPOINTS END|#####################
 
@@ -147,7 +163,7 @@ def getAllContracts():
             "value": contract.value
         } for contract in contracts]
         return {"contracts": contracts_list}, 200
-        
+
     except Exception as e:
         return {"error": str(e)}, 400
 
@@ -164,6 +180,41 @@ def getContractByClient():
     '''
     pass
 #################|CONTRACT ENDPOINTS END|#####################
+
+#***********************|PRODUCTS(APIs) START|*********************#
+
+@app.route('/createProduct', methods=['POST'])
+def createProduct():
+    '''
+    create a new API product and add to DB
+    '''
+    if not request.is_json:
+        return {"error": "Invalid input, send product details in JSON format"}, 400
+    data = request.get_json()
+    try:
+        product = Product(
+            name=data.get('name'),
+            version=data.get('version'),
+            pricing_type=data.get('pricing_type'),
+            price=float(data.get('price', 0.0)),
+            calls_per_month=int(data.get('calls_per_month', 0)),
+            call_limit_type=data.get('call_limit_type')
+        )
+        db.session.add(product)
+        db.session.commit()
+        return {"message": "Product created", "product_id": product.id}, 201
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+    
+
+
+
+
+#########################|PRODUCTS(APIs) END|#####################
+
+
 
 #***********************|DATABASE MODELS START|*********************#
 class User(db.Model):
@@ -217,6 +268,8 @@ class Product(db.Model):
         return f'<Product {self.api_id} ({self.name},{self.version})>'
 
 ##################|DATABASE MODELS END|#####################
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
