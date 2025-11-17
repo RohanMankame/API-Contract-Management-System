@@ -65,18 +65,22 @@ def getUsers():
         return {"error": str(e)}, 400
 
 
-@app.route('/getUser', methods=['GET'])
-def getUserByID():
+@app.route('/getUser/<id>', methods=['GET'])
+def getUserByID(id):
     '''
     Get existing user from DB using user ID
     '''
-    """ 
     try:
-    
-
+        user = User.query.get(id)
+        if user:
+            return {"id": user.id, "username": user.username, "email": user.email}, 200
+        else:
+            return {"error": "User not found"}, 404
     except Exception as e:
-        return {"error": str(e)}, 400 
-    """
+        return {"error": str(e)}, 400
+
+
+
 
 
 
@@ -155,11 +159,30 @@ def getContractByID():
     '''
     pass 
 
-def getContractByClient():
+@app.route('/getContractByUser/<userID>', methods=['GET'])
+def getContractByUserID(userID):
     '''
     Get existing contract from DB using Client ID
     '''
-    pass
+    try:
+        contracts = Contract.query.filter_by(client_id=userID).all()
+        contracts_list = [{
+            "contract_id": contract.contract_id,
+            "client_id": contract.client_id,
+            "api_id": contract.api_id,
+            "contract_type": contract.contract_type,
+            "pricing_type": contract.pricing_type,
+            "start_date": contract.start_date.strftime('%Y-%m-%d'),
+            "end_date": contract.end_date.strftime('%Y-%m-%d'),
+            "contract_status": contract.contract_status,
+            "value": contract.value
+        } for contract in contracts]
+        return {"contracts": contracts_list}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
 #################|CONTRACT ENDPOINTS END|#####################
 
 #***********************|PRODUCTS(APIs) START|*********************#
@@ -211,6 +234,26 @@ def getProducts():
     except Exception as e:
         return {"error": str(e)}, 400
 
+@app.route('/getProduct',methods=['GET'])
+def getProductByID():
+    '''
+    Get existing API product from DB using product ID
+    '''
+    pass
+
+@app.route('/updateProduct', methods=['PUT'])
+def updateProductByID():
+    '''
+    Update existing API product in DB using product ID
+    '''
+    pass
+
+@app.route('/deleteProduct', methods=['DELETE'])
+def deleteProductByID():
+    '''
+    Delete existing API product from DB using product ID
+    '''
+    pass
 
 #########################|PRODUCTS(APIs) END|#####################
 
