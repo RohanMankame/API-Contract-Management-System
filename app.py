@@ -3,21 +3,52 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
 
+
+#***********************|DATABASE CONNECTION START|*********************#
 load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
+#######################|DATABASE CONNECTION END|##########################
+
+
+
+#***********************|SWAGGER DOC START|*********************#
+
+SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
+API_URL = 'http://petstore.swagger.io/v2/swagger.json'  # Our API url (can of course be a local resource)
+
+# Call factory function to create our blueprint
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    API_URL,
+    config={  # Swagger UI config overrides
+        'app_name': "Test application"
+    },
+    # oauth_config={  # OAuth config. See https://github.com/swagger-api/swagger-ui#oauth2-configuration .
+    #    'clientId': "your-client-id",
+    #    'clientSecret': "your-client-secret-if-required",
+    #    'realm': "your-realms",
+    #    'appName': "your-app-name",
+    #    'scopeSeparator': " ",
+    #    'additionalQueryStringParams': {'test': "hello"}
+    # }
+)
+
+app.register_blueprint(swaggerui_blueprint)
+
+#######################|SWAGGER DOC END|##########################
 
 @app.route('/')
 def index():
     return "index page"
 
 
-#################USER ENDPOINTS START#####################
+#***********************|USER/Clients ENDPOINTS START|*********************#
 @app.route('/createUser', methods=['POST'])
 def createUser():
     '''
@@ -27,20 +58,33 @@ def createUser():
         return {"error": "Invalid input, send user details in JSON format"}, 400
     
     data = request.get_json()
+    try:
+        user = User(
+            username=data.get('username'),
+            email=data.get('email')
+        )
+        db.session.add(user)
+        db.session.commit()
+        return {"message": "User created", "user_id": user.id}, 201
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+        
 
-    user = User(
-        username=data.get('username'),
-        email=data.get('email')
-    )
-    db.session.add(user)
-    db.session.commit()
-    return {"message": "User created", "user_id": user.id}, 201
+@app.route('/getAccounts', methods=['GET'])
+def getAccounts():
+    '''
+    Get all users from DB
+    '''
+    users = User.query.all()
+    users_list = [{"id": user.id, "username": user.username, "email": user.email} for user in users]
+    return {"users": users_list}, 200
 
-#################USER ENDPOINTS END#####################
+#################|USER/Clients ENDPOINTS END|#####################
 
 
 
-#################CONTRACT ENDPOINTS START#####################
+#***********************|CONTRACT ENDPOINTS START|*********************#
 @app.route('/createContract', methods=['POST'])
 def createContract():
     '''
@@ -67,8 +111,8 @@ def createContract():
     db.session.commit()
     return {"message": "Contract created", "contract_id": contract.contract_id}, 201 
 
-@app.route('/deleteContract', methods=['DELETE'])
-def deleteContractByID():
+@app.route('/archiveContract', methods=['DELETE'])
+def archiveContractByID():
     '''
     Delete existing contract from DB using contract ID
     '''
@@ -86,9 +130,9 @@ def getContractByClient():
     Get existing contract from DB using Client ID
     '''
     pass
-#################CONTRACT ENDPOINTS END#####################
+#################|CONTRACT ENDPOINTS END|#####################
 
-#################DATABASE MODELS START#####################
+#***********************|DATABASE MODELS START|*********************#
 class User(db.Model):
     """
     Client.who sign contracts for APIs with the company
@@ -139,7 +183,7 @@ class Product(db.Model):
     def __repr__(self):
         return f'<Product {self.api_id} ({self.name},{self.version})>'
 
-##################DATABASE MODELS END#####################
+##################|DATABASE MODELS END|#####################
 
 if __name__ == '__main__':
     app.run(debug=True)
