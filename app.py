@@ -6,6 +6,21 @@ app = Flask(__name__)
 def index():
     return "index page"
 
+@app.route('/createContract', methods=['POST'])
+def createContract():
+    pass 
+
+@app.route('/deleteContract', methods=['DELETE'])
+def deleteContractByID():
+    pass 
+
+@app.route('/getContract', methods=['GET'])
+def getContractByID():
+    pass 
+
+def getContractByClient():
+    pass
+
 
 
 if __name__ == '__main__':
