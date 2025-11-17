@@ -1,0 +1,100 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API Contract Manager",
+    "version": "1.0.0",
+    "description": "Swagger documentation for API Contract Manager endpoints"
+  },
+  "host": "127.0.0.1:5000",
+  "basePath": "/",
+  "schemes": ["https"],
+  "paths": {
+    "/createUser": {
+      "post": {
+        "summary": "Create a new user",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User object",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "string" },
+                "email": { "type": "string" }
+              },
+              "required": ["username", "email"]
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "User created" },
+          "400": { "description": "Error creating user" }
+        }
+      }
+    },
+    "/getAccounts": {
+      "get": {
+        "summary": "Get all user accounts",
+        "produces": ["application/json"],
+        "responses": {
+          "200": { "description": "List of users" }
+        }
+      }
+    },
+    "/createContract": {
+      "post": {
+        "summary": "Create a new contract",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Contract object",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "contract_id": { "type": "string" },
+                "client_id": { "type": "integer" },
+                "api_id": { "type": "string" },
+                "contract_type": { "type": "string" },
+                "pricing_type": { "type": "string" },
+                "start_date": { "type": "string", "format": "date" },
+                "end_date": { "type": "string", "format": "date" },
+                "contract_status": { "type": "string" },
+                "value": { "type": "number" }
+              },
+              "required": ["contract_id", "client_id", "api_id", "contract_type", "pricing_type", "start_date", "end_date", "value"]
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Contract created" },
+          "400": { "description": "Error creating contract" }
+        }
+      }
+    },
+    "/archiveContract": {
+      "delete": {
+        "summary": "Archive a contract",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Contract archived" },
+          "400": { "description": "Error archiving contract" }
+        }
+      }
+    }
+  }
+}

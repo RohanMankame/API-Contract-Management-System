@@ -20,7 +20,7 @@ db = SQLAlchemy(app)
 #***********************|SWAGGER DOC START|*********************#
 
 SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
-API_URL = 'http://petstore.swagger.io/v2/swagger.json'  # Our API url (can of course be a local resource)
+API_URL = '/static/swaggerDoc.json'  # Our API url (can of course be a local resource)
 
 # Call factory function to create our blueprint
 swaggerui_blueprint = get_swaggerui_blueprint(
@@ -76,9 +76,12 @@ def getAccounts():
     '''
     Get all users from DB
     '''
-    users = User.query.all()
-    users_list = [{"id": user.id, "username": user.username, "email": user.email} for user in users]
-    return {"users": users_list}, 200
+    try:
+        users = User.query.all()
+        users_list = [{"id": user.id, "username": user.username, "email": user.email} for user in users]
+        return {"users": users_list}, 200
+    except Exception as e:
+        return {"error": str(e)}, 400
 
 #################|USER/Clients ENDPOINTS END|#####################
 
@@ -112,11 +115,41 @@ def createContract():
     return {"message": "Contract created", "contract_id": contract.contract_id}, 201 
 
 @app.route('/archiveContract', methods=['DELETE'])
-def archiveContractByID():
+def deleteContractByID():
     '''
     Delete existing contract from DB using contract ID
     '''
     pass 
+
+@app.route('/updateContract', methods=['PUT'])
+def updateContractByID():
+    '''
+    Update existing contract in DB using contract ID
+    '''
+    pass
+
+@app.route('/getContracts', methods=['GET'])
+def getAllContracts():
+    '''
+    Get all existing contracts from DB
+    '''
+    try:
+        contracts = Contract.query.all()
+        contracts_list = [{
+            "contract_id": contract.contract_id,
+            "client_id": contract.client_id,
+            "api_id": contract.api_id,
+            "contract_type": contract.contract_type,
+            "pricing_type": contract.pricing_type,
+            "start_date": contract.start_date.strftime('%Y-%m-%d'),
+            "end_date": contract.end_date.strftime('%Y-%m-%d'),
+            "contract_status": contract.contract_status,
+            "value": contract.value
+        } for contract in contracts]
+        return {"contracts": contracts_list}, 200
+        
+    except Exception as e:
+        return {"error": str(e)}, 400
 
 @app.route('/getContract', methods=['GET'])
 def getContractByID():
