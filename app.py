@@ -4,16 +4,24 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 
 app = Flask(__name__)
-
-
 #***********************|DATABASE CONNECTION START|*********************#
 load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 #######################|DATABASE CONNECTION END|##########################
+
+
+#***********************|JWT MANAGER START|*********************#
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'your-secret-key')
+jwt = JWTManager(app)
+#######################|JWT MANAGER END|##########################
 
 
 #***********************|SWAGGER DOC START|*********************#
@@ -28,6 +36,23 @@ app.register_blueprint(swaggerui_blueprint)
 def index():
     return "index page"
 
+
+#***********************|LOGIN START|*********************#
+
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return {"error": "Missing JSON in request"}, 400
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    user = User.query.filter_by(username=username).first()
+    if not user or not user.check_password(password):
+        return {"error": "Invalid credentials"}, 401
+    access_token = create_access_token(identity=user.id)
+    return {"access_token": access_token}, 200
+
+#######################|LOGIN END|##########################
 
 #***********************|USER/Clients ENDPOINTS START|*********************#
 @app.route('/createUser', methods=['POST'])
@@ -44,6 +69,7 @@ def createUser():
             username=data.get('username'),
             email=data.get('email')
         )
+        user.set_password(data.get('password'))
         db.session.add(user)
         db.session.commit()
         return {"message": "User created", "user_id": user.id}, 201
@@ -285,8 +311,15 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
 
     contracts = db.relationship('Contract', backref='client', lazy=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -331,6 +364,7 @@ class Product(db.Model):
 ##################|DATABASE MODELS END|#####################
 
 
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
