@@ -17,9 +17,7 @@ db = SQLAlchemy(app)
 
 
 #***********************|JWT MANAGER START|*********************#
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-
-app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'your-secret-key')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 #######################|JWT MANAGER END|##########################
 
@@ -34,9 +32,7 @@ app.register_blueprint(swaggerui_blueprint)
 
 @app.route('/')
 def index():
-    return "index page"
-
-
+    return "Idnex page"
 #***********************|LOGIN START|*********************#
 
 @app.route('/login', methods=['POST'])
@@ -48,7 +44,8 @@ def login():
     password = data.get('password')
     user = User.query.filter_by(username=username).first()
     if not user or not user.check_password(password):
-        return {"error": "Invalid credentials"}, 401
+        return {"error": "Wrong Password or Username"}, 401
+
     access_token = create_access_token(identity=user.id)
     return {"access_token": access_token}, 200
 
@@ -311,7 +308,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
 
     contracts = db.relationship('Contract', backref='client', lazy=True)
 
