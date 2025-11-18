@@ -66,7 +66,7 @@ def protected():
 
 #######################|LOGIN END|##########################
 
-#***********************|USER/Clients ENDPOINTS START|*********************#
+#***********************|USER ENDPOINTS START|*********************#
 @app.route('/createUser', methods=['POST'])
 def createUser():
     '''
@@ -118,12 +118,13 @@ def getUserByID(id):
         return {"error": str(e)}, 400
 
 
+#################|USER ENDPOINTS END|#####################
+
+#***********************|USER ENDPOINTS START|*********************#
 
 
 
-
-#################|USER/Clients ENDPOINTS END|#####################
-
+#################|USER ENDPOINTS END|#####################
 
 
 #***********************|CONTRACT ENDPOINTS START|*********************#
@@ -338,16 +339,28 @@ def deleteProductByID():
 
 
 #***********************|DATABASE MODELS START|*********************#
-class User(db.Model):
+class Client(db.Model):
     """
     Client.who sign contracts for APIs with the company
+    """
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(60), unique=True, nullable=False)
+
+    contracts = db.relationship('Contract', backref='client', lazy=True)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+
+
+class User(db.Model):
+    """
+    Employees who input contracts into the system
     """
     id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-
-    contracts = db.relationship('Contract', backref='client', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -365,7 +378,7 @@ class Contract(db.Model):
     Contract between clients and the company.
     """
     contract_id = db.Column(db.Integer, primary_key=True, unique=True) 
-    client_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
     api_id = db.Column(db.Integer,db.ForeignKey('product.id') ,nullable=False)
     contract_type = db.Column(db.String(50))
     pricing_type = db.Column(db.String(50))
@@ -387,7 +400,7 @@ class Product(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     version = db.Column(db.String(5), nullable=False)
     pricing_type = db.Column(db.String(50), nullable=False)
-    price = db.Column(db.Float, default=0.0)
+    price_per_month = db.Column(db.Float, default=0.0)
     calls_per_month = db.Column(db.Integer, default=0)
     call_limit_type = db.Column(db.Integer, nullable=False)
 
