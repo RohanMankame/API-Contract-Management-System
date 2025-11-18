@@ -160,12 +160,34 @@ def deleteContractByID():
     '''
     pass 
 
-@app.route('/updateContract', methods=['PUT'])
-def updateContractByID():
+@app.route('/updateContract/{contractID}', methods=['PUT'])
+def updateContractByID(contractID):
     '''
     Update existing contract in DB using contract ID
     '''
-    pass
+    try:
+        contract = Contract.query.get(contractID)
+        if not contract:
+            return {"error": "Contract not found"}, 404
+        if not request.is_json:
+            return {"error": "Invalid input, send contract details in JSON format"}, 400
+        data = request.get_json()
+        contract.client_id = data.get('client_id', contract.client_id)
+        contract.api_id = data.get('api_id', contract.api_id)
+        contract.contract_type = data.get('contract_type', contract.contract_type)
+        contract.pricing_type = data.get('pricing_type', contract.pricing_type)
+        contract.start_date = datetime.strptime(data.get('start_date'), '%Y-%m-%d') if data.get('start_date') else contract.start_date
+        contract.end_date = datetime.strptime(data.get('end_date'), '%Y-%m-%d') if data.get('end_date') else contract.end_date
+        contract.contract_status = data.get('contract_status', contract.contract_status)
+        contract.value = float(data.get('value', contract.value))
+        db.session.commit()
+        return {"message": "Contract updated", "contract_id": contract.contract_id}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+
+
+    
 
 @app.route('/getContracts', methods=['GET'])
 def getAllContracts():
@@ -320,7 +342,7 @@ class User(db.Model):
     """
     Client.who sign contracts for APIs with the company
     """
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
@@ -342,9 +364,9 @@ class Contract(db.Model):
     """
     Contract between clients and the company.
     """
-    contract_id = db.Column(db.String(50), primary_key=True, unique=True) 
+    contract_id = db.Column(db.Integer, primary_key=True, unique=True) 
     client_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    api_id = db.Column(db.String(100), nullable=False)
+    api_id = db.Column(db.Integer,db.ForeignKey('product.id') ,nullable=False)
     contract_type = db.Column(db.String(50))
     pricing_type = db.Column(db.String(50))
     start_date = db.Column(db.Date, nullable=False)
@@ -361,7 +383,7 @@ class Product(db.Model):
     """
     API products from company
     """
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     version = db.Column(db.String(5), nullable=False)
     pricing_type = db.Column(db.String(50), nullable=False)
