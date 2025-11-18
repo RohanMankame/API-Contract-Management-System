@@ -142,7 +142,7 @@ def createClient():
         )
         db.session.add(client)
         db.session.commit()
-        return {"message": "Client created", "client_id": user.id}, 201
+        return {"message": "Client created", "client_id": client.id}, 201
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
@@ -168,16 +168,17 @@ def getClientByID(id):
     '''
     try:
         client = Client.query.get(id)
-        if user:
+        if client:
             return {"id": client.id, "username": client.username, "email": client.email}, 200
         else:
-            return {"error": "User not found"}, 404
+            return {"error": "Client not found"}, 404
     except Exception as e:
         return {"error": str(e)}, 400
 
 
 
 #***********************|CONTRACT ENDPOINTS START|*********************#
+
 @app.route('/createContract', methods=['POST'])
 def createContract():
     '''
@@ -190,7 +191,7 @@ def createContract():
     data = request.get_json()
 
     contract = Contract(
-        contract_id=data.get('contract_id'),
+        #contract_id=data.get('contract_id'),
         client_id=data.get('client_id'),
         api_id=data.get('api_id'),
         contract_type=data.get('contract_type'),
@@ -264,7 +265,7 @@ def getAllContracts():
         return {"error": str(e)}, 400
 
 @app.route('/getContract/<contractID>', methods=['GET'])
-def getContractByID():
+def getContractByID(contractID):
     '''
     Get existing contract from DB using contract ID
     '''
@@ -288,7 +289,7 @@ def getContractByID():
         return {"error": str(e)}, 400
      
 
-@app.route('/getContractByUser/<userID>', methods=['GET'])
+@app.route('/getContractsByUser/<userID>', methods=['GET'])
 def getContractByUserID(userID):
     '''
     Get existing contract from DB using Client ID
@@ -329,7 +330,7 @@ def createProduct():
             name=data.get('name'),
             version=data.get('version'),
             pricing_type=data.get('pricing_type'),
-            price=float(data.get('price', 0.0)),
+            price_per_month=float(data.get('price', 0.0)),
             calls_per_month=int(data.get('calls_per_month', 0)),
             call_limit_type=int(data.get('call_limit_type'))
         )
@@ -354,7 +355,7 @@ def getProducts():
             "name": product.name,
             "version": product.version,
             "pricing_type": product.pricing_type,
-            "price": product.price,
+            "price_per_month": product.price_per_month,
             "calls_per_month": product.calls_per_month,
             "call_limit_type": product.call_limit_type
         } for product in products]
