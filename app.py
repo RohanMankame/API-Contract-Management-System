@@ -312,6 +312,29 @@ def getContractByUserID(userID):
     except Exception as e:
         return {"error": str(e)}, 400
 
+@app.route('/getContractsByProduct/<productID>', methods=['GET'])
+def getContractsByProductID(productID):
+    '''
+    Get existing contract from DB using Client ID
+    '''
+    try:
+        contracts = Contract.query.filter_by(api_id=productID).all()
+        contracts_list = [{
+            "contract_id": contract.contract_id,
+            "client_id": contract.client_id,
+            "api_id": contract.api_id,
+            "contract_type": contract.contract_type,
+            "pricing_type": contract.pricing_type,
+            "start_date": contract.start_date.strftime('%Y-%m-%d'),
+            "end_date": contract.end_date.strftime('%Y-%m-%d'),
+            "contract_status": contract.contract_status,
+            "value": contract.value
+        } for contract in contracts]
+        return {"contracts": contracts_list}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 400
+
 
 #################|CONTRACT ENDPOINTS END|#####################
 
