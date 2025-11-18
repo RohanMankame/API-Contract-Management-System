@@ -24,15 +24,15 @@ jwt = JWTManager(app)
 
 #***********************|SWAGGER DOC START|*********************#
 SWAGGER_URL = '/api/docs'
-API_URL = '/static/swaggerDoc1.2.json'  
+API_URL = '/static/swaggerDoc1.3.json'  
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Test application"},)
 app.register_blueprint(swaggerui_blueprint)
 
 #######################|SWAGGER DOC END|##########################
 
 @app.route('/')
-def index():
-    return "Idnex page"
+def Home():
+    return "Home page"
 #***********************|LOGIN START|*********************#
 
 @app.route('/login', methods=['POST'])
@@ -462,6 +462,8 @@ class Contract(db.Model):
     value = db.Column(db.Float, default=0.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 
     def __repr__(self):
         return f'<Contract {self.contract_id}>'
