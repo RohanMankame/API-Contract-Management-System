@@ -1,0 +1,652 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Management System",
+    "description": "API for managing users (clients), contracts, and API products.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter the JWT token obtained from the /login endpoint."
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "Contract": {
+        "type": "object",
+        "properties": {
+          "contract_id": {
+            "type": "string"
+          },
+          "client_id": {
+            "type": "integer",
+            "description": "Foreign key to User ID."
+          },
+          "api_id": {
+            "type": "string"
+          },
+          "contract_type": {
+            "type": "string"
+          },
+          "pricing_type": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-01-01"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-12-31"
+          },
+          "contract_status": {
+            "type": "string",
+            "default": "Draft"
+          },
+          "value": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "required": [
+          "client_id",
+          "api_id",
+          "contract_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "pricing_type": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "float"
+          },
+          "calls_per_month": {
+            "type": "integer"
+          },
+          "call_limit_type": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "pricing_type",
+          "call_limit_type"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "User Login",
+        "description": "Authenticates a user and returns a JWT access token.",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login, returns JWT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Wrong Password or Username."
+          }
+        }
+      }
+    },
+    "/protected": {
+      "get": {
+        "summary": "Protected Endpoint",
+        "description": "Requires a valid JWT in the Authorization header.",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access granted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logged_in_as": {
+                      "type": "string",
+                      "description": "The identity (username) of the logged-in user."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (Missing or invalid token)."
+          }
+        }
+      }
+    },
+    "/createUser": {
+      "post": {
+        "summary": "Create User",
+        "description": "Creates a new client user.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                },
+                "required": [
+                  "username",
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully created."
+          },
+          "400": {
+            "description": "Invalid input or database error (e.g., duplicate username/email)."
+          }
+        }
+      }
+    },
+    "/getUsers": {
+      "get": {
+        "summary": "Get All Users",
+        "description": "Retrieves a list of all client users.",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getUser/{id}": {
+      "get": {
+        "summary": "Get User by ID",
+        "description": "Retrieves a single user by their database ID.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        }
+      }
+    },
+    "/createContract": {
+      "post": {
+        "summary": "Create Contract",
+        "description": "Creates a new contract between a client and an API product.",
+        "tags": [
+          "Contracts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contract_id": {
+                    "type": "string",
+                    "example": "CNTRCT-001"
+                  },
+                  "client_id": {
+                    "type": "integer"
+                  },
+                  "api_id": {
+                    "type": "string",
+                    "description": "Identifier for the API product."
+                  },
+                  "contract_type": {
+                    "type": "string",
+                    "example": "Annual"
+                  },
+                  "pricing_type": {
+                    "type": "string",
+                    "example": "Subscription"
+                  },
+                  "start_date": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-01-01"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-12-31"
+                  },
+                  "contract_status": {
+                    "type": "string",
+                    "default": "Draft"
+                  },
+                  "value": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "required": [
+                  "contract_id",
+                  "client_id",
+                  "api_id",
+                  "start_date",
+                  "end_date"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contract created successfully."
+          },
+          "400": {
+            "description": "Invalid input or database error."
+          }
+        }
+      }
+    },
+    "/archiveContract": {
+      "delete": {
+        "summary": "Archive Contract (Placeholder)",
+        "description": "Deletes an existing contract by ID (implementation missing in code).",
+        "tags": [
+          "Contracts"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented."
+          }
+        }
+      }
+    },
+    "/updateContract": {
+      "put": {
+        "summary": "Update Contract (Placeholder)",
+        "description": "Updates an existing contract by ID (implementation missing in code).",
+        "tags": [
+          "Contracts"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented."
+          }
+        }
+      }
+    },
+    "/getContracts": {
+      "get": {
+        "summary": "Get All Contracts",
+        "description": "Retrieves a list of all existing contracts.",
+        "tags": [
+          "Contracts"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of contracts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contracts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Contract"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getContract/{contractID}": {
+      "get": {
+        "summary": "Get Contract by ID",
+        "description": "Retrieves a single contract by its ID.",
+        "tags": [
+          "Contracts"
+        ],
+        "parameters": [
+          {
+            "name": "contractID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contract details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contract"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contract not found."
+          }
+        }
+      }
+    },
+    "/getContractByUser/{userID}": {
+      "get": {
+        "summary": "Get Contracts by Client ID",
+        "description": "Retrieves all contracts associated with a specific client (User ID).",
+        "tags": [
+          "Contracts"
+        ],
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of contracts for the user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contracts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Contract"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/createProduct": {
+      "post": {
+        "summary": "Create API Product",
+        "description": "Creates a new API product/service offering.",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string",
+                    "example": "v1.0"
+                  },
+                  "pricing_type": {
+                    "type": "string",
+                    "example": "Tiered"
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "calls_per_month": {
+                    "type": "integer"
+                  },
+                  "call_limit_type": {
+                    "type": "integer",
+                    "description": "Type of call limit (e.g., 1 for Hard, 2 for Soft)."
+                  }
+                },
+                "required": [
+                  "name",
+                  "version",
+                  "pricing_type",
+                  "call_limit_type"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully."
+          },
+          "400": {
+            "description": "Invalid input or database error."
+          }
+        }
+      }
+    },
+    "/getProducts": {
+      "get": {
+        "summary": "Get All Products",
+        "description": "Retrieves a list of all API products.",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getProduct": {
+      "get": {
+        "summary": "Get Product by ID (Placeholder)",
+        "description": "Retrieves an API product by ID (implementation missing in code).",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented."
+          }
+        }
+      }
+    },
+    "/updateProduct": {
+      "put": {
+        "summary": "Update Product (Placeholder)",
+        "description": "Updates an existing API product by ID (implementation missing in code).",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented."
+          }
+        }
+      }
+    },
+    "/deleteProduct": {
+      "delete": {
+        "summary": "Delete Product (Placeholder)",
+        "description": "Deletes an existing API product by ID (implementation missing in code).",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented."
+          }
+        }
+      }
+    }
+  }
+}

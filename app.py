@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -24,7 +24,7 @@ jwt = JWTManager(app)
 
 #***********************|SWAGGER DOC START|*********************#
 SWAGGER_URL = '/api/docs'
-API_URL = '/static/swaggerDoc.json'  
+API_URL = '/static/swaggerDoc1.2.json'  
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Test application"},)
 app.register_blueprint(swaggerui_blueprint)
 
@@ -37,6 +37,9 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
+    '''
+    User Login using JWT authentication
+    '''
     if not request.is_json:
         return {"error": "Missing JSON in request"}, 400
     data = request.get_json()
@@ -46,8 +49,20 @@ def login():
     if not user or not user.check_password(password):
         return {"error": "Wrong Password or Username"}, 401
 
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=user.username)
     return {"access_token": access_token}, 200
+
+@app.route('/protected', methods=['GET'])
+@jwt_required()
+def protected():
+    '''
+    A protected endpoint that requires a valid JWT to access
+    '''
+    current_user = get_jwt_identity() 
+    if not current_user:
+        return {"error": "User not found"}, 404
+
+    return jsonify(logged_in_as=current_user), 200
 
 #######################|LOGIN END|##########################
 
