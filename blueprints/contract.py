@@ -3,8 +3,10 @@ from app import db
 from models import Contract
 
 
+contract_bp = Blueprint('contract', __name__)
 
-@app.route('/createContract', methods=['POST'])
+
+@contract_bp.route('/createContract', methods=['POST'])
 def createContract():
     '''
     Create a new contract and save in DB
@@ -30,14 +32,14 @@ def createContract():
     db.session.commit()
     return {"message": "Contract created", "contract_id": contract.contract_id}, 201 
 
-@app.route('/archiveContract', methods=['DELETE'])
+@contract_bp.route('/archiveContract', methods=['DELETE'])
 def deleteContractByID():
     '''
     Delete existing contract from DB using contract ID
     '''
     pass 
 
-@app.route('/updateContract/{contractID}', methods=['PUT'])
+@contract_bp.route('/updateContract/{contractID}', methods=['PUT'])
 def updateContractByID(contractID):
     '''
     Update existing contract in DB using contract ID
@@ -66,7 +68,7 @@ def updateContractByID(contractID):
 
     
 
-@app.route('/getContracts', methods=['GET'])
+@contract_bp.route('/getContracts', methods=['GET'])
 def getAllContracts():
     '''
     Get all existing contracts from DB
@@ -89,7 +91,7 @@ def getAllContracts():
     except Exception as e:
         return {"error": str(e)}, 400
 
-@app.route('/getContract/<contractID>', methods=['GET'])
+@contract_bp.route('/getContract/<contractID>', methods=['GET'])
 def getContractByID(contractID):
     '''
     Get existing contract from DB using contract ID
@@ -114,7 +116,7 @@ def getContractByID(contractID):
         return {"error": str(e)}, 400
      
 
-@app.route('/getContractsByUser/<userID>', methods=['GET'])
+@contract_bp.route('/getContractsByUser/<userID>', methods=['GET'])
 def getContractByUserID(userID):
     '''
     Get existing contract from DB using Client ID
@@ -137,7 +139,7 @@ def getContractByUserID(userID):
     except Exception as e:
         return {"error": str(e)}, 400
 
-@app.route('/getContractsByProduct/<productID>', methods=['GET'])
+@contract_bp.route('/getContractsByProduct/<productID>', methods=['GET'])
 def getContractsByProductID(productID):
     '''
     Get existing contract from DB using Client ID

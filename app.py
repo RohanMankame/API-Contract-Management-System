@@ -1,14 +1,11 @@
-from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-import os
 from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
+from flask_jwt_extended import JWTManager
+import os
 
-
-
+# Initialize DB
 db = SQLAlchemy()
 
 # Application Factory
@@ -16,7 +13,10 @@ def create_app():
 
     # Flask app setup
     app = Flask(__name__)
+
+    # Load in environment variables
     load_dotenv()
+
     # Database setup
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -33,11 +33,21 @@ def create_app():
     app.register_blueprint(swaggerui_blueprint)
 
     # Register Blueprints
-    from blueprints.product import product_bp
-    app.register_blueprint(product_bp, url_prefix='')
-
+    # authentication
+    from blueprints.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='')
+    # user 
+    from blueprints.user import user_bp
+    app.register_blueprint(user_bp, url_prefix='')
+    # client
     from blueprints.client import client_bp
     app.register_blueprint(client_bp, url_prefix='')
+    # product
+    from blueprints.product import product_bp
+    app.register_blueprint(product_bp, url_prefix='')
+    # contract
+    from blueprints.contract import contract_bp
+    app.register_blueprint(contract_bp, url_prefix='')
 
     # Create database tables if not exist
     with app.app_context():
