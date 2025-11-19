@@ -2,20 +2,21 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Product
 
-
+# Initialize product Blueprint
 product_bp = Blueprint('product', __name__)
 
-
+# Product Endpoints
 
 @product_bp.route('/createProduct', methods=['POST'])
 def createProduct():
     '''
     create a new API product and add to DB
     '''
-
     if not request.is_json:
         return {"error": "Invalid input, send product details in JSON format"}, 400
+
     data = request.get_json()
+
     try:
         product = Product(
             name=data.get('name'),
@@ -25,6 +26,7 @@ def createProduct():
             calls_per_month=int(data.get('calls_per_month', 0)),
             call_limit_type=int(data.get('call_limit_type'))
         )
+
         db.session.add(product)
         db.session.commit()
         return {"message": "Product created", "product_id": product.id}, 201
@@ -34,13 +36,14 @@ def createProduct():
         return {"error": str(e)}, 400
 
 
+
+
 @product_bp.route('/getProducts', methods=['GET'])
 def getProducts():
     '''
     Get all API products from DB
     '''
     try:
-        
         products = Product.query.all()
         products_list = [{
             "id": product.id,
@@ -56,23 +59,82 @@ def getProducts():
     except Exception as e:
         return {"error getProds": str(e)}, 400
 
-@product_bp.route('/getProduct',methods=['GET'])
-def getProductByID():
+
+
+
+
+@product_bp.route('/getProduct/<productID>',methods=['GET'])
+def getProductByID(productID):
     '''
     Get existing API product from DB using product ID
     '''
-    pass
+    try:
+        product = Product.query.get(productID)
+        if product:
+            return {
+                "id": product.id,
+                "name": product.name,
+                "version": product.version,
+                "pricing_type": product.pricing_type,
+                "price_per_month": product.price_per_month,
+                "calls_per_month": product.calls_per_month,
+                "call_limit_type": product.call_limit_type
+            }, 200
+        else:
+            return {"error": "Product not found"}, 404
 
-@product_bp.route('/updateProduct', methods=['PUT'])
-def updateProductByID():
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
+
+
+
+@product_bp.route('/updateProduct/<proudctID>', methods=['PUT'])
+def updateProductByID(proudctID):
     '''
     Update existing API product in DB using product ID
     '''
-    pass
+    try:
+        product = Product.query.get(proudctID)
+        if not product:
+            return {"error": "Product not found"}, 404
 
-@product_bp.route('/deleteProduct', methods=['DELETE'])
-def deleteProductByID():
+        if not request.is_json:
+            return {"error": "Invalid input, send product details in JSON format"}, 400
+
+        data = request.get_json()
+
+        product.name = data.get('name', product.name)
+        product.version = data.get('version', product.version)
+        product.pricing_type = data.get('pricing_type', product.pricing_type)
+        product.price_per_month = float(data.get('price_per_month', product.price_per_month))
+        product.calls_per_month = int(data.get('calls_per_month', product.calls_per_month))
+        product.call_limit_type = int(data.get('call_limit_type', product.call_limit_type))
+
+        db.session.commit()
+        return {"message": "Product updated"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+
+
+
+
+@product_bp.route('/deleteProduct/<productID>', methods=['DELETE'])
+def deleteProductByID(productID):
     '''
     Delete existing API product from DB using product ID
     '''
-    pass
+    try:
+        product = Product.query.get(productID)
+        if not product:
+            return {"error": "Product not found"}, 404
+
+        db.session.delete(product)
+        db.session.commit()
+        return {"message": "Product deleted"}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
