@@ -3,7 +3,7 @@ from app import db
 from models import User
 import validators
 
-# Initialize Blueprint
+# Initialize user Blueprint
 user_bp = Blueprint('user', __name__)
 
 # User Endpoints
@@ -14,7 +14,7 @@ def createUser():
     Create a new user and save in DB (Represents employees of the business)
     '''
     if not request.is_json:
-        return {"error": "Invalid input, send details in JSON format"}, 400
+        return {"error": "Invalid input, send user details in JSON format"}, 400
     
     data = request.get_json()
     
@@ -26,7 +26,7 @@ def createUser():
         user = User(
             username=data.get('username'),
             email=data.get('email')
-            )
+        )
         user.set_password(data.get('password')) # set_password hashes the password
         db.session.add(user)
         db.session.commit()
