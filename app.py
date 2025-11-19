@@ -55,13 +55,3 @@ def create_app():
     
     return app
 
-
-
-
-'''
-
-@app.route('/')
-def Home():
-    return "Home page"
-
-'''
