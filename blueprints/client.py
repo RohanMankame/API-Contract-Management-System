@@ -1,0 +1,120 @@
+from flask import Blueprint, request, jsonify
+from app import db
+from models import Client
+import validators
+from flask_jwt_extended import jwt_required
+
+# Initialize client Blueprint
+client_bp = Blueprint('client', __name__)
+
+# Client Endpoints
+
+@client_bp.route('/createClient', methods=['POST'])
+@jwt_required()
+def createClient():
+    '''
+    Create a new Client and save in DB
+    '''
+    if not request.is_json:
+        return {"error": "Invalid input, send client details in JSON format"}, 400
+    
+    data = request.get_json()
+
+    # Validate email format and username length
+    if not validators.email(data.get('email')) or len(data.get('username')) < 5:
+        return {"error": "Invalid email format or Username is too short"}, 400
+    
+    try:
+        client = Client(
+            username=data.get('username'),
+            email=data.get('email')
+        )
+        db.session.add(client)
+        db.session.commit()
+        return {"message": "Client created", "client_id": client.id}, 201
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+        
+
+
+
+@client_bp.route('/getClients', methods=['GET'])
+@jwt_required()
+def getClients():
+    '''
+    Get all Clients from DB
+    '''
+    try:
+        clients = Client.query.all()
+        clients_list = [{"id": client.id, "username": client.username, "email": client.email} for client in clients]
+        return {"client": clients_list}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
+
+
+@client_bp.route('/getClient/<id>', methods=['GET'])
+@jwt_required()
+def getClientByID(id):
+    '''
+    Get existing client from DB using user ID
+    '''
+    try:
+        client = Client.query.get(id)
+        if client:
+            return {"id": client.id, "username": client.username, "email": client.email}, 200
+        else:
+            return {"error": "Client not found"}, 404
+            
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
+
+@client_bp.route('/updateClient/<id>', methods=['PUT'])
+@jwt_required()
+def updateClientByID(id):
+    '''
+    Update client in DB using ID
+    '''
+    try:
+        client = Client.query.get(id)
+        if not client:
+            return {"error": "Client not found"}, 404
+
+        data = request.get_json()
+
+        client.username = data.get('username', client.username)
+        client.email = data.get('email', client.email)
+        db.session.commit()
+        return {"message": "Client updated"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+
+
+
+
+@client_bp.route('/deleteClient/<clientID>', methods=['DELETE'])
+@jwt_required()
+def deleteClientByID(clientID):
+    '''
+    Delete existing client from DB using client ID
+    '''
+    try:
+        client = Client.query.get(clientID)
+        if client:
+            db.session.delete(client)
+            db.session.commit()
+            return {"message": "Client deleted"}, 200
+        else:
+            return {"error": "Client not found"}, 404
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
