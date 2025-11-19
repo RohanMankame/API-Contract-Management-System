@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models import Contract
+from datetime import datetime
 
-
+# Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
 
+# Contract Endpoints
 
 @contract_bp.route('/createContract', methods=['POST'])
 def createContract():
@@ -14,56 +16,26 @@ def createContract():
     if not request.is_json:
         return {"error": "Invalid input, send contract details in JSON format"}, 400
     
-    # Extract data from json request
     data = request.get_json()
-
-    contract = Contract(
-        #contract_id=data.get('contract_id'),
-        client_id=data.get('client_id'),
-        api_id=data.get('api_id'),
-        contract_type=data.get('contract_type'),
-        pricing_type=data.get('pricing_type'),
-        start_date=datetime.strptime(data.get('start_date'), '%Y-%m-%d'),
-        end_date=datetime.strptime(data.get('end_date'), '%Y-%m-%d'),
-        contract_status=data.get('contract_status', 'Draft'),
-        value=float(data.get('value', 0.0))
-    )
-    db.session.add(contract)
-    db.session.commit()
-    return {"message": "Contract created", "contract_id": contract.contract_id}, 201 
-
-@contract_bp.route('/archiveContract', methods=['DELETE'])
-def deleteContractByID():
-    '''
-    Delete existing contract from DB using contract ID
-    '''
-    pass 
-
-@contract_bp.route('/updateContract/{contractID}', methods=['PUT'])
-def updateContractByID(contractID):
-    '''
-    Update existing contract in DB using contract ID
-    '''
     try:
-        contract = Contract.query.get(contractID)
-        if not contract:
-            return {"error": "Contract not found"}, 404
-        if not request.is_json:
-            return {"error": "Invalid input, send contract details in JSON format"}, 400
-        data = request.get_json()
-        contract.client_id = data.get('client_id', contract.client_id)
-        contract.api_id = data.get('api_id', contract.api_id)
-        contract.contract_type = data.get('contract_type', contract.contract_type)
-        contract.pricing_type = data.get('pricing_type', contract.pricing_type)
-        contract.start_date = datetime.strptime(data.get('start_date'), '%Y-%m-%d') if data.get('start_date') else contract.start_date
-        contract.end_date = datetime.strptime(data.get('end_date'), '%Y-%m-%d') if data.get('end_date') else contract.end_date
-        contract.contract_status = data.get('contract_status', contract.contract_status)
-        contract.value = float(data.get('value', contract.value))
+        contract = Contract(
+            #contract_id=data.get('contract_id'),
+            client_id=data.get('client_id'),
+            api_id=data.get('api_id'),
+            contract_type=data.get('contract_type'),
+            pricing_type=data.get('pricing_type'),
+            start_date=datetime.strptime(data.get('start_date'), '%Y-%m-%d'),
+            end_date=datetime.strptime(data.get('end_date'), '%Y-%m-%d'),
+            contract_status=data.get('contract_status', 'Draft'),
+            value=float(data.get('value', 0.0))
+        )
+        db.session.add(contract)
         db.session.commit()
-        return {"message": "Contract updated", "contract_id": contract.contract_id}, 200
+        return {"message": "Contract created", "contract_id": contract.contract_id}, 201 
+
     except Exception as e:
         db.session.rollback()
-        return {"error": str(e)}, 400
+        return {"error": str(e)}, 400 
 
 
     
@@ -161,3 +133,58 @@ def getContractsByProductID(productID):
 
     except Exception as e:
         return {"error": str(e)}, 400
+
+
+
+@contract_bp.route('/updateContract/{contractID}', methods=['PUT'])
+def updateContractByID(contractID):
+    '''
+    Update existing contract in DB using contract ID
+    '''
+    if not request.is_json:
+            return {"error": "Invalid input, send contract details in JSON format"}, 400
+
+    data = request.get_json()
+    
+    try:
+        contract = Contract.query.get(contractID)
+
+        if not contract:
+            return {"error": "Contract not found"}, 404
+
+        contract.client_id = data.get('client_id', contract.client_id)
+        contract.api_id = data.get('api_id', contract.api_id)
+        contract.contract_type = data.get('contract_type', contract.contract_type)
+        contract.pricing_type = data.get('pricing_type', contract.pricing_type)
+        contract.start_date = datetime.strptime(data.get('start_date'), '%Y-%m-%d') if data.get('start_date') else contract.start_date
+        contract.end_date = datetime.strptime(data.get('end_date'), '%Y-%m-%d') if data.get('end_date') else contract.end_date
+        contract.contract_status = data.get('contract_status', contract.contract_status)
+        contract.value = float(data.get('value', contract.value))
+
+        db.session.commit()
+        return {"message": "Contract updated", "contract_id": contract.contract_id}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+
+
+
+@contract_bp.route('/deleteContract/<contractID>', methods=['DELETE'])
+def deleteContractByID(contractID):
+    '''
+    Delete existing contract from DB using contract ID
+    '''
+    try:
+        contract = Contract.query.get(contractID)
+        if not contract:
+            return {"error": "Contract not found"}, 404
+        db.session.delete(contract)
+        db.session.commit()
+        return {"message": "Contract deleted"}, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+    
+      
