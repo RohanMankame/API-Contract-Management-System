@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Client
 import validators
+from flask_jwt_extended import jwt_required
 
 # Initialize client Blueprint
 client_bp = Blueprint('client', __name__)

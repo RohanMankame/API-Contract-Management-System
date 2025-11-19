@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_jwt_extended import JWTManager
 import os
+from flask_cors import CORS
 
 # Initialize DB
 db = SQLAlchemy()
@@ -14,8 +15,9 @@ def create_app():
     # Flask app setup
     app = Flask(__name__)
 
-    # Load in environment variables
+    # Load in environment variables and enable CORS
     load_dotenv()
+    CORS(app)
 
     # Database setup
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
@@ -28,8 +30,8 @@ def create_app():
 
     # Swagger UI setup
     SWAGGER_URL = '/api/docs'
-    API_URL = '/static/swaggerDoc1.3.json'  
-    swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Test application"},)
+    API_URL = '/static/swaggerDoc1.4.json'  
+    swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "API Contract Management System Project"},)
     app.register_blueprint(swaggerui_blueprint)
 
     # Register Blueprints

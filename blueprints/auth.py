@@ -28,7 +28,7 @@ def login():
 @jwt_required()
 def protected():
     '''
-    A protected endpoint that requires a valid JWT to access
+    A test protected endpoint that requires a valid JWT to access
     '''
     current_user = get_jwt_identity() 
     if not current_user:

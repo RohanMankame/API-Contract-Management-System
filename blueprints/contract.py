@@ -40,6 +40,7 @@ def createContract():
         return {"error": str(e)}, 400 
 
 
+
     
 
 @contract_bp.route('/getContracts', methods=['GET'])
@@ -65,6 +66,10 @@ def getContracts():
 
     except Exception as e:
         return {"error": str(e)}, 400
+
+
+
+
 
 @contract_bp.route('/getContract/<contractID>', methods=['GET'])
 @jwt_required()
@@ -92,6 +97,8 @@ def getContractByID(contractID):
         return {"error": str(e)}, 400
      
 
+
+
 @contract_bp.route('/getContractsByUser/<userID>', methods=['GET'])
 @jwt_required()
 def getContractByUserID(userID):
@@ -115,6 +122,11 @@ def getContractByUserID(userID):
 
     except Exception as e:
         return {"error": str(e)}, 400
+
+
+
+
+
 
 @contract_bp.route('/getContractsByProduct/<productID>', methods=['GET'])
 @jwt_required()
@@ -142,7 +154,10 @@ def getContractsByProductID(productID):
 
 
 
-@contract_bp.route('/updateContract/{contractID}', methods=['PUT'])
+
+
+
+@contract_bp.route('/updateContract/<contractID>', methods=['PUT'])
 @jwt_required()
 def updateContractByID(contractID):
     '''
@@ -174,6 +189,9 @@ def updateContractByID(contractID):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+
+
+
 
 
 

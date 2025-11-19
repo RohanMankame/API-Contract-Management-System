@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models import Product
+from flask_jwt_extended import jwt_required
 
 # Initialize product Blueprint
 product_bp = Blueprint('product', __name__)
@@ -93,14 +94,14 @@ def getProductByID(productID):
 
 
 
-@product_bp.route('/updateProduct/<proudctID>', methods=['PUT'])
+@product_bp.route('/updateProduct/<productID>', methods=['PUT'])
 @jwt_required()
-def updateProductByID(proudctID):
+def updateProductByID(productID):
     '''
     Update existing API product in DB using product ID
     '''
     try:
-        product = Product.query.get(proudctID)
+        product = Product.query.get(productID)
         if not product:
             return {"error": "Product not found"}, 404
 
