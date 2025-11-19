@@ -73,3 +73,48 @@ def getClientByID(id):
     except Exception as e:
         return {"error": str(e)}, 400
 
+
+
+@client_bp.route('/updateClient/<id>', methods=['PUT'])
+@jwt_required()
+def updateClientByID(id):
+    '''
+    Update client in DB using ID
+    '''
+    try:
+        client = Client.query.get(id)
+        if not client:
+            return {"error": "Client not found"}, 404
+
+        data = request.get_json()
+
+        client.username = data.get('username', client.username)
+        client.email = data.get('email', client.email)
+        db.session.commit()
+        return {"message": "Client updated"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+
+
+
+
+@client_bp.route('/deleteClient/<clientID>', methods=['DELETE'])
+@jwt_required()
+def deleteClientByID(clientID):
+    '''
+    Delete existing client from DB using client ID
+    '''
+    try:
+        client = Client.query.get(clientID)
+        if client:
+            db.session.delete(client)
+            db.session.commit()
+            return {"message": "Client deleted"}, 200
+        else:
+            return {"error": "Client not found"}, 404
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
