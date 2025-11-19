@@ -39,6 +39,8 @@ class User(db.Model):
         return f'<User {self.username}>'
 
 
+
+
 class Contract(db.Model):
     """
     Contract between clients and the company.

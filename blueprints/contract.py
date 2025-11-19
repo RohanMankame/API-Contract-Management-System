@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Contract
 from datetime import datetime
+from flask_jwt_extended import jwt_required
 
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
@@ -9,6 +10,7 @@ contract_bp = Blueprint('contract', __name__)
 # Contract Endpoints
 
 @contract_bp.route('/createContract', methods=['POST'])
+@jwt_required()
 def createContract():
     '''
     Create a new contract and save in DB
@@ -41,7 +43,8 @@ def createContract():
     
 
 @contract_bp.route('/getContracts', methods=['GET'])
-def getAllContracts():
+@jwt_required()
+def getContracts():
     '''
     Get all existing contracts from DB
     '''
@@ -64,6 +67,7 @@ def getAllContracts():
         return {"error": str(e)}, 400
 
 @contract_bp.route('/getContract/<contractID>', methods=['GET'])
+@jwt_required()
 def getContractByID(contractID):
     '''
     Get existing contract from DB using contract ID
@@ -89,6 +93,7 @@ def getContractByID(contractID):
      
 
 @contract_bp.route('/getContractsByUser/<userID>', methods=['GET'])
+@jwt_required()
 def getContractByUserID(userID):
     '''
     Get existing contract from DB using Client ID
@@ -112,6 +117,7 @@ def getContractByUserID(userID):
         return {"error": str(e)}, 400
 
 @contract_bp.route('/getContractsByProduct/<productID>', methods=['GET'])
+@jwt_required()
 def getContractsByProductID(productID):
     '''
     Get existing contract from DB using Client ID
@@ -137,6 +143,7 @@ def getContractsByProductID(productID):
 
 
 @contract_bp.route('/updateContract/{contractID}', methods=['PUT'])
+@jwt_required()
 def updateContractByID(contractID):
     '''
     Update existing contract in DB using contract ID
@@ -171,6 +178,7 @@ def updateContractByID(contractID):
 
 
 @contract_bp.route('/deleteContract/<contractID>', methods=['DELETE'])
+@jwt_required()
 def deleteContractByID(contractID):
     '''
     Delete existing contract from DB using contract ID
@@ -178,10 +186,11 @@ def deleteContractByID(contractID):
     try:
         contract = Contract.query.get(contractID)
         if not contract:
-            return {"error": "Contract not found"}, 404
+            return {"error": "Contract not found, no contract was deleted"}, 404
+        
         db.session.delete(contract)
         db.session.commit()
-        return {"message": "Contract deleted"}, 200
+        return {"message": f"Contract with id:{contractID} has been deleted"}, 200
         
     except Exception as e:
         db.session.rollback()

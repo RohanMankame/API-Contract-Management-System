@@ -8,6 +8,7 @@ product_bp = Blueprint('product', __name__)
 # Product Endpoints
 
 @product_bp.route('/createProduct', methods=['POST'])
+@jwt_required()
 def createProduct():
     '''
     create a new API product and add to DB
@@ -39,6 +40,7 @@ def createProduct():
 
 
 @product_bp.route('/getProducts', methods=['GET'])
+@jwt_required()
 def getProducts():
     '''
     Get all API products from DB
@@ -64,6 +66,7 @@ def getProducts():
 
 
 @product_bp.route('/getProduct/<productID>',methods=['GET'])
+@jwt_required()
 def getProductByID(productID):
     '''
     Get existing API product from DB using product ID
@@ -91,6 +94,7 @@ def getProductByID(productID):
 
 
 @product_bp.route('/updateProduct/<proudctID>', methods=['PUT'])
+@jwt_required()
 def updateProductByID(proudctID):
     '''
     Update existing API product in DB using product ID
@@ -123,6 +127,7 @@ def updateProductByID(proudctID):
 
 
 @product_bp.route('/deleteProduct/<productID>', methods=['DELETE'])
+@jwt_required()
 def deleteProductByID(productID):
     '''
     Delete existing API product from DB using product ID

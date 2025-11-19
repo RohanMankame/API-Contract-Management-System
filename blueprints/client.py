@@ -9,6 +9,7 @@ client_bp = Blueprint('client', __name__)
 # Client Endpoints
 
 @client_bp.route('/createClient', methods=['POST'])
+@jwt_required()
 def createClient():
     '''
     Create a new Client and save in DB
@@ -39,6 +40,7 @@ def createClient():
 
 
 @client_bp.route('/getClients', methods=['GET'])
+@jwt_required()
 def getClients():
     '''
     Get all Clients from DB
@@ -55,6 +57,7 @@ def getClients():
 
 
 @client_bp.route('/getClient/<id>', methods=['GET'])
+@jwt_required()
 def getClientByID(id):
     '''
     Get existing client from DB using user ID

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, make_response
 from app import db
 from models import User
 import validators
+from flask_jwt_extended import jwt_required
 
 # Initialize user Blueprint
 user_bp = Blueprint('user', __name__)
@@ -9,6 +10,7 @@ user_bp = Blueprint('user', __name__)
 # User Endpoints
 
 @user_bp.route('/createUser', methods=['POST'])
+@jwt_required()
 def createUser():
     '''
     Create a new user and save in DB (Represents employees of the business)
@@ -40,6 +42,7 @@ def createUser():
 
 
 @user_bp.route('/getUsers', methods=['GET'])
+@jwt_required()
 def getUsers():
     '''
     Get all users from DB
@@ -56,6 +59,7 @@ def getUsers():
 
 
 @user_bp.route('/getUser/<id>', methods=['GET'])
+@jwt_required()
 def getUserByID(id):
     '''
     Get existing user from DB using user ID
@@ -68,4 +72,27 @@ def getUserByID(id):
             return {"error": "User not found"}, 404
             
     except Exception as e:
+        return {"error": str(e)}, 400
+
+
+
+
+
+@user_bp.route('/deleteUser/<userID>', methods=['DELETE'])
+@jwt_required()
+def deleteUserByID(userID):
+    '''
+    Delete existing user from DB using user ID
+    '''
+    try:
+        user = User.query.get(userID)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return {"message": "User deleted"}, 200
+        else:
+            return {"error": "User not found"}, 404
+            
+    except Exception as e:
+        db.session.rollback()
         return {"error": str(e)}, 400
