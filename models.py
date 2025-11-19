@@ -2,12 +2,11 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
-
-
+# Models
 
 class Client(db.Model):
     """
-    Client.who sign contracts for APIs with the company
+    Clients of the company, who purchase API contracts
     """
     id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -19,9 +18,11 @@ class Client(db.Model):
         return f'<User {self.username}>'
 
 
+
+
 class User(db.Model):
     """
-    Employees who input contracts into the system
+    Employees of business who have access to the system, they can create contracts
     """
     id = db.Column(db.Integer, primary_key=True, unique=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -37,7 +38,6 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
 
-# ---
 
 class Contract(db.Model):
     """
@@ -55,14 +55,14 @@ class Contract(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-
-
     def __repr__(self):
         return f'<Contract {self.contract_id}>'
 
+
+
 class Product(db.Model):
     """
-    API products from company
+    API products from the company
     """
     id = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
