@@ -9,112 +9,77 @@ client_bp = Blueprint('client', __name__)
 
 # Client Endpoints
 
-@client_bp.route('/createClient', methods=['POST'])
-@jwt_required()
-def createClient():
+@client_bp.route('/Clients', methods=['POST','GET'])
+#@jwt_required()
+def Clients():
     '''
-    Create a new Client and save in DB
+    Post: Create a new client
+    Get: Get all clients from DB
     '''
-    if not request.is_json:
-        return {"error": "Invalid input, send client details in JSON format"}, 400
     
-    data = request.get_json()
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
 
-    # Validate email format and username length
-    if not validators.email(data.get('email')) or len(data.get('username')) < 5:
-        return {"error": "Invalid email format or Username is too short"}, 400
-    
-    try:
-        client = Client(
-            username=data.get('username'),
-            email=data.get('email')
-        )
-        db.session.add(client)
-        db.session.commit()
-        return {"message": "Client created", "client_id": client.id}, 201
+            # Validate input
+            if not data.get('username') or not data.get('email'):
+                return jsonify({'message': 'Missing required fields'}), 400
+            if not validators.email(data['email']):
+                return jsonify({'message': 'Invalid email format'}), 400
 
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 400
-        
+            # Check for existing client
+            if Client.query.filter_by(email=data['email']).first():
+                return jsonify({'message': 'Client with given email already exists'}), 409
 
+            # Create new client
+            new_client = Client(
+                username=data['username'],
+                email=data['email']
+            )
 
-
-@client_bp.route('/getClients', methods=['GET'])
-@jwt_required()
-def getClients():
-    '''
-    Get all Clients from DB
-    '''
-    try:
-        clients = Client.query.all()
-        clients_list = [{"id": client.id, "username": client.username, "email": client.email} for client in clients]
-        return {"client": clients_list}, 200
-
-    except Exception as e:
-        return {"error": str(e)}, 400
-
-
-
-
-@client_bp.route('/getClient/<id>', methods=['GET'])
-@jwt_required()
-def getClientByID(id):
-    '''
-    Get existing client from DB using user ID
-    '''
-    try:
-        client = Client.query.get(id)
-        if client:
-            return {"id": client.id, "username": client.username, "email": client.email}, 200
-        else:
-            return {"error": "Client not found"}, 404
-            
-    except Exception as e:
-        return {"error": str(e)}, 400
-
-
-
-@client_bp.route('/updateClient/<id>', methods=['PUT'])
-@jwt_required()
-def updateClientByID(id):
-    '''
-    Update client in DB using ID
-    '''
-    try:
-        client = Client.query.get(id)
-        if not client:
-            return {"error": "Client not found"}, 404
-
-        data = request.get_json()
-
-        client.username = data.get('username', client.username)
-        client.email = data.get('email', client.email)
-        db.session.commit()
-        return {"message": "Client updated"}, 200
-
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 400
-
-
-
-
-@client_bp.route('/deleteClient/<clientID>', methods=['DELETE'])
-@jwt_required()
-def deleteClientByID(clientID):
-    '''
-    Delete existing client from DB using client ID
-    '''
-    try:
-        client = Client.query.get(clientID)
-        if client:
-            db.session.delete(client)
+            db.session.add(new_client)
             db.session.commit()
-            return {"message": "Client deleted"}, 200
-        else:
-            return {"error": "Client not found"}, 404
 
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 400
+            return jsonify({'message': 'Client created successfully', 'client_id': new_client.id}), 201
+    
+        except Exception as e:
+            return jsonify({'message': 'Error creating client', 'error': str(e)}), 500
+
+    elif request.method == 'GET':
+        try:
+            clients = Client.query.all()
+            clients_list = [{'id': client.id, 'username': client.username, 'email': client.email} for client in clients]
+            return jsonify(clients_list), 200
+        except Exception as e:
+            return jsonify({'message': 'Error fetching clients', 'error': str(e)}), 500
+
+
+@client_bp.route('/Clients/<id>', methods=['GET', 'PUT', 'DELETE'])
+@jwt_required()
+def Client_id(id):
+    '''
+    GET: Get existing client from DB using client ID
+    PUT: Update existing client in DB using client ID
+    DELETE: Delete existing client from DB using client ID
+    '''
+    if request.method == 'GET':
+        pass
+
+    elif request.method == 'PUT':
+        pass
+
+    elif request.method == 'DELETE':
+        pass
+
+
+
+
+@client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
+@jwt_required()
+def Client_Contracts_id(id):
+    '''
+    Get: Get all contracts associated with a specific client
+    '''
+    if request.method == 'GET':
+        pass
+

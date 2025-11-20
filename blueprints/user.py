@@ -9,90 +9,143 @@ user_bp = Blueprint('user', __name__)
 
 # User Endpoints
 
-@user_bp.route('/createUser', methods=['POST'])
-@jwt_required()
-def createUser():
+@user_bp.route('/Users', methods=['POST','GET'])
+#@jwt_required()
+def Users():
     '''
-    Create a new user and save in DB (Represents employees of the business)
+    Post: Create a new user
+    Get: Get all users from DB
     '''
-    if not request.is_json:
-        return {"error": "Invalid input, send user details in JSON format"}, 400
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+
+            # Validate input
+            if not data.get('username') or not data.get('email') or not data.get('password'):
+                return make_response(jsonify({'message': 'Missing required fields'}), 400)
+            if not validators.email(data['email']):
+                return make_response(jsonify({'message': 'Invalid email format'}), 400)
+
+            # Check for existing user
+            if User.query.filter_by(username=data['username']).first() or User.query.filter_by(email=data['email']).first():
+                return make_response(jsonify({'message': 'User with given username or email already exists'}), 409)
+
+            # Create new user
+            new_user = User(
+                username=data['username'],
+                email=data['email']
+            )
+            new_user.set_password(data['password'])
+
+            db.session.add(new_user)
+            db.session.commit()
+
+            return make_response(jsonify({'message': 'User created successfully', 'user_id': new_user.id}), 201)
+
+        except Exception as e:
+            return make_response(jsonify({'message': 'Error creating user', 'error': str(e)}), 500)
+
+
+
+    elif request.method == 'GET':
+        try:
+            users = User.query.all()
+            users_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
+            return make_response(jsonify(users_list), 200)
+
+        except Exception as e:
+            return make_response(jsonify({'message': 'Error fetching users', 'error': str(e)}), 500)
+
+
+
+
+@user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'DELETE'])
+#@jwt_required()
+def User_id(id):
+    '''
+    GET: Get existing user from DB using user ID
+    PUT: Update existing user in DB using user ID
+    DELETE: Delete existing user from DB using user ID
+    '''
+    if request.method == 'GET':
+        try:
+            user = User.query.get(id)
+            if not user:
+                return make_response(jsonify({'message': 'User not found'}), 404)
+
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+            return make_response(jsonify(user_data), 200)
+
+        except Exception as e:
+            return make_response(jsonify({'message': 'Error fetching user', 'error': str(e)}), 500)
+
+
+    elif request.method == 'PUT':
+        try:
+            data = request.get_json()
+            user = User.query.get(id)
+            if not user:
+                return make_response(jsonify({'message': 'User not found'}), 404)
+
+            # Update fields if provided
+            if data.get('username'):
+                user.username = data['username']
+            if data.get('email'):
+                if not validators.email(data['email']):
+                    return make_response(jsonify({'message': 'Invalid email format'}), 400)
+                user.email = data['email']
+            if data.get('password'):
+                user.set_password(data['password'])
+
+            db.session.commit()
+            return make_response(jsonify({'message': 'User updated successfully'}), 200)
+
+        except Exception as e:
+            return make_response(jsonify({'message': 'Error updating user', 'error': str(e)}), 500)
     
-    data = request.get_json()
+
+    elif request.method == 'DELETE':
+        try:
+            user = User.query.get(id)
+            if not user:
+                return make_response(jsonify({'message': 'User not found'}), 404)
+
+            db.session.delete(user)
+            db.session.commit()
+            return make_response(jsonify({'message': 'User deleted successfully'}), 200)
+
+        except Exception as e:
+            return make_response(jsonify({'message': 'Error deleting user', 'error': str(e)}), 500)
     
-    # Validate email format and username/password length
-    if not validators.email(data.get('email')) or len(data.get('username')) < 5 or len(data.get('password')) < 5:
-        return {"error": "Invalid email format or Username/Password is too short"}, 400
-
-    try:
-        user = User(
-            username=data.get('username'),
-            email=data.get('email')
-        )
-        user.set_password(data.get('password')) # set_password hashes the password
-        db.session.add(user)
-        db.session.commit()
-        return {"message": "User created", "user_id": user.id}, 201
-
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 400
-        
 
 
 
-@user_bp.route('/getUsers', methods=['GET'])
+@user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
-def getUsers():
+def User_Contracts_id(id):
     '''
-    Get all users from DB
-    '''
-    try:
-        users = User.query.all()
-        users_list = [{"id": user.id, "username": user.username, "email": user.email, "hashed_password":user.password_hash} for user in users]
-        return {"users": users_list}, 200
-
-    except Exception as e:
-        return {"error": str(e)}, 400
-
-
-
-
-@user_bp.route('/getUser/<id>', methods=['GET'])
-@jwt_required()
-def getUserByID(id):
-    '''
-    Get existing user from DB using user ID
+    Get: Get all contracts associated with a specific user
     '''
     try:
         user = User.query.get(id)
-        if user:
-            return {"id": user.id, "username": user.username, "email": user.email, "hashed_password":user.password_hash}, 200
-        else:
-            return {"error": "User not found"}, 404
-            
+        if not user:
+            return make_response(jsonify({'message': 'User not found'}), 404)
+
+        contracts = []  # Assuming a relationship exists to fetch contracts
+        for contract in user.contracts:
+            contracts.append({
+                'contract_id': contract.contract_id,
+                'client_id': contract.client_id,
+                'product_id': contract.product_id,
+                'start_date': contract.start_date,
+                'end_date': contract.end_date
+            })
+
+        return make_response(jsonify(contracts), 200)
+
     except Exception as e:
-        return {"error": str(e)}, 400
-
-
-
-
-
-@user_bp.route('/deleteUser/<userID>', methods=['DELETE'])
-@jwt_required()
-def deleteUserByID(userID):
-    '''
-    Delete existing user from DB using user ID
-    '''
-    try:
-        user = User.query.get(userID)
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            return {"message": "User deleted"}, 200
-        else:
-            return {"error": "User not found"}, 404
-            
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 400
+        return make_response(jsonify({'message': 'Error fetching contracts', 'error': str(e)}), 500)
