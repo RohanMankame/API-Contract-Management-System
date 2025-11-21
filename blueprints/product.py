@@ -111,6 +111,9 @@ def Product_id(id):
             db.session.delete(product)
             db.session.commit()
             return jsonify({'message': 'Product deleted successfully'}), 200
+        
+        except Exception as e:
+            return jsonify({'message': 'Error deleting product', 'error': str(e)}), 500
 
     return jsonify({'message': 'Method not allowed'}), 405
 
