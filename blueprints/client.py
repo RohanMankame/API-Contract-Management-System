@@ -16,12 +16,44 @@ def Clients():
     Post: Create a new client
     Get: Get all clients from DB
     '''
-    
     if request.method == 'POST':
-        pass
+        try:
+            data = request.get_json()
+            company_name = data['company_name']
+            email = data['email']
+            phone_number = data['phone_number']
+            address = data['address']
+            created_at = data['created_at']
+            updated_at = data['updated_at']
         
+        except Exception as e:
+            return jsonify({'message': 'Error creating client', 'error': str(e)}), 500
+
+
     elif request.method == 'GET':
-        pass
+        try:
+            clients = Client.query.all()
+            clients_list = []
+
+            for client in clients:
+                clients_list.append({
+                    'id': client.id,
+                    'company_name': client.company_name,
+                    'email': client.email,
+                    'phone_number': client.phone_number,
+                    'address': client.address,
+                    'created_at': client.created_at,
+                    'updated_at': client.updated_at
+                })
+
+            return jsonify({'clients': clients_list}), 200
+        
+        except Exception as e:
+            return jsonify({'message': 'Error getting clients', 'error': str(e)}), 500
+
+    return jsonify({'message': 'Method not allowed'}), 405
+
+
 
 @client_bp.route('/Clients/<id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
@@ -32,15 +64,55 @@ def Client_id(id):
     DELETE: Delete existing client from DB using client ID
     '''
     if request.method == 'GET':
-        pass
+        try:
+            client = Client.query.get(id)
+            if not client:
+                return jsonify({'message': 'Client not found'}), 404
+
+            client = {
+                'id': client.id,
+                'company_name': client.company_name,
+                'email': client.email,
+                'phone_number': client.phone_number,
+                'address': client.address,
+                'created_at': client.created_at,
+                'updated_at': client.updated_at
+            }
+
+            return jsonify({'client': client}), 200
+
+        except Exception as e:
+            return jsonify({'message': 'Error getting client', 'error': str(e)}), 500
 
     elif request.method == 'PUT':
-        pass
+        try:
+            data = request.get_json()
+            client = Client.query.get(id)
+            if not client:
+                return jsonify({'message': 'Client not found'}), 404
+            client.company_name = data['company_name']
+            client.email = data['email']
+            client.phone_number = data['phone_number']
+            client.address = data['address']
+            db.session.commit()
+
+
+        except Exception as e:
+            return jsonify({'message': 'Error updating client', 'error': str(e)}), 500
 
     elif request.method == 'DELETE':
-        pass
+        try:
+            client = Client.query.get(id)
+            if not client:
+                return jsonify({'message': 'Client not found'}), 404
+            db.session.delete(client)
+            db.session.commit()
+            return jsonify({'message': 'Client deleted successfully'}), 200
 
+        except Exception as e:
+            return jsonify({'message': 'Error deleting client', 'error': str(e)}), 500
 
+    return jsonify({'message': 'Method not allowed'}), 405
 
 
 @client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
@@ -50,5 +122,27 @@ def Client_Contracts_id(id):
     Get: Get all contracts associated with a specific client
     '''
     if request.method == 'GET':
-        pass
+        try:
+            client = Client.query.get(id)
+            if not client:
+                return jsonify({'message': 'Client not found'}), 404
+
+            contracts = client.contracts
+            contracts_list = []
+
+            for contract in contracts:
+                contracts_list.append({
+                    'id': contract.id,
+                    'contract_name': contract.contract_name,
+                    'start_date': contract.start_date,
+                    'end_date': contract.end_date,
+                    'status': contract.status,
+                    'created_at': contract.created_at,
+                    'updated_at': contract.updated_at
+                })
+
+            return jsonify({'contracts': contracts_list}), 200
+
+        except Exception as e:
+            return jsonify({'message': 'Error getting contracts for client', 'error': str(e)}), 500
 

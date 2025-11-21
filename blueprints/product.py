@@ -15,17 +15,34 @@ def Products():
     Post: Create a new API product
     Get: Get all API products from DB
     '''
-    pass
+    if request.method == 'POST':
+        # Logic to create a new product
+        pass
+    elif request.method == 'GET':
+        # Logic to get all products
+        pass
+
+
 
 @product_bp.route('/Products/<id>', methods=['GET','PUT','DELETE'])
 @jwt_required()
-def Product_id():
+def Product_id(id):
     ''' 
     Get: Get details of spefic Product(API)
     Put: Update details of product with given ID
     Delete: Delete product with given ID
     '''
-    pass
+    if request.method == 'GET':
+        # Logic to get product details by ID
+        pass
+
+    elif request.method == 'PUT':
+        # Logic to update product details by ID
+        pass
+
+    elif request.method == 'DELETE':
+        # Logic to delete product by ID
+        pass
 
 
 
@@ -36,4 +53,6 @@ def Product_Contracts_id(id):
     '''
     Get: Get all contracts associated with a specific product
     '''
-    pass
+    if request.method == 'GET':
+        # Logic to get all contracts for a specific product
+        pass
