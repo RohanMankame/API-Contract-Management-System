@@ -10,18 +10,27 @@ def login():
     '''
     User Login using JWT authentication
     '''
-    if not request.is_json:
-        return {"error": "Missing JSON in request"}, 400
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    user = User.query.filter_by(username=username).first()
-    if not user or not user.check_password(password):
-        return {"error": "Wrong Password or Username"}, 401
+    if request.method == 'POST':
+        try:
+            if not request.is_json:
+                return {"error": "Missing JSON in request"}, 400
 
-    access_token = create_access_token(identity=user.username)
-    return {"access_token": access_token}, 200
+            data = request.get_json()
 
+            username = data.get('username')
+            password = data.get('password')
+
+            user = User.query.filter_by(username=username).first()
+            if not user or not user.check_password(password):
+                return {"error": "Wrong Password or Username"}, 401
+
+            access_token = create_access_token(identity=user.username)
+            return {"access_token": access_token}, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    return {"error": "Invalid request method"}, 405
 
 
 @auth_bp.route('/protected', methods=['GET'])

@@ -32,11 +32,16 @@ class User(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    contracts_created = db.relationship('Contract',foreign_keys='Contract.created_by_user_id',backref='created_by_user',lazy=True)
+
+    contracts_updated = db.relationship('Contract',foreign_keys='Contract.updated_by_user_id',backref='updated_by_user',lazy=True)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -53,6 +58,8 @@ class Product(db.Model):
     is_archived = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    subscriptions = db.relationship('Subscription',backref='product',lazy=True)
 
     def __repr__(self):
         return f'<Product {self.id} ({self.api_name})>'
@@ -73,6 +80,8 @@ class Contract(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_archived = db.Column(db.Boolean, default=False)
 
+    subscriptions = db.relationship('Subscription',backref='contract',lazy=True)
+
     def __repr__(self):
         return f'<Contract {self.id}>'
 
@@ -89,6 +98,8 @@ class Subscription(db.Model):
     pricing_type = db.Column(db.String(50), nullable=False)  
     varible_strategy = db.Column(db.String(100))  
     base_price = db.Column(db.Float, nullable=False)
+
+    tiers = db.relationship('Subscription_tier',backref='subscription',lazy=True)
 
     def __repr__(self):
         return f'<Subscription {self.id} ({self.contract_id}, {self.product_id})>'
