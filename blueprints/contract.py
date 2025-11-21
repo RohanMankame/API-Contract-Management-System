@@ -22,7 +22,6 @@ def Contracts():
     elif request.method == 'GET':
         pass
 
-
 @contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 def Contract_id(id):

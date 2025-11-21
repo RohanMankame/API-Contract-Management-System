@@ -15,41 +15,7 @@ def Products():
     Post: Create a new API product
     Get: Get all API products from DB
     '''
-    if request.method == 'POST':
-        try:
-            data = request.get_json()
-
-            # Validate input
-            if not data.get('name') or not data.get('version'):
-                return jsonify({'message': 'Missing required fields'}), 400
-
-            # Check for existing product
-            if Product.query.filter_by(name=data['name']).first():
-                return jsonify({'message': 'Product with given name already exists'}), 409
-
-            # Create new product
-            new_product = Product(
-                name=data['name'],
-                version=data['version']
-            )
-
-            db.session.add(new_product)
-            db.session.commit()
-
-            return jsonify({'message': 'Product created successfully', 'product_id': new_product.id}), 201
-
-        except Exception as e:
-            return jsonify({'message': 'Error creating product', 'error': str(e)}), 500
-
-    elif request.method == 'GET':
-        try:
-            products = Product.query.all()
-            products_list = [{'id': product.id, 'name': product.name, 'version': product.version} for product in products]
-            return jsonify(products_list), 200
-
-        except Exception as e:
-            return jsonify({'message': 'Error fetching products', 'error': str(e)}), 500
-
+    pass
 
 @product_bp.route('/Products/<id>', methods=['GET','PUT','DELETE'])
 @jwt_required()

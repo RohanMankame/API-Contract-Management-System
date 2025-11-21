@@ -51,8 +51,11 @@ def create_app():
     from blueprints.contract import contract_bp
     app.register_blueprint(contract_bp, url_prefix='')
 
-    from blueprints.contract_product import contract_product_bp
-    app.register_blueprint(contract_product_bp, url_prefix='')
+    from blueprints.Subscription import Subscription_bp
+    app.register_blueprint(Subscription_bp, url_prefix='')
+
+    from blueprints/Subscription_tier import Subscription_tier_bp
+    app.register_blueprint(Subscription_tier_bp, url_prefix='')
 
     # Create database tables if not exist
     with app.app_context():
