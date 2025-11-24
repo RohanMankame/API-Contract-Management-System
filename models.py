@@ -1,7 +1,7 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
+from sqlalchemy import Enum
 
 class Client(db.Model):
     """
@@ -44,7 +44,7 @@ class User(db.Model):
     contracts_updated = db.relationship('Contract',foreign_keys='Contract.updated_by_user_id',backref='updated_by_user',lazy=True)
 
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.email}>'
 
 
 
@@ -95,7 +95,7 @@ class Subscription(db.Model):
     is_archived = db.Column(db.Boolean, default=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
-    pricing_type = db.Column(db.String(50), nullable=False)  
+    pricing_type = db.Column(Enum("Fixed", "Variable", name="pricing_type_enum"),nullable=False) 
     varible_strategy = db.Column(db.String(100))  
     base_price = db.Column(db.Float, nullable=False)
 

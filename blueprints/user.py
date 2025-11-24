@@ -29,6 +29,8 @@ def Users():
             db.session.add(new_user)
             db.session.commit()
 
+            return jsonify({'message': 'User created successfully', 'user_id': new_user.id}), 201
+
         except Exception as e:
             return jsonify({'message': 'Error creating user', 'error': str(e)}), 500
 

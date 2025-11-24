@@ -17,10 +17,14 @@ def login():
 
             data = request.get_json()
 
-            email = data.get('email')
-            password = data.get('password')
+            email = data['email']
+            password = data['password']
+
+            print("Request email:", email)
+            print("DB emails:", [u.email for u in User.query.all()])
 
             user = User.query.filter_by(email=email).first()
+            print(user)
             if not user or not user.check_password(password):
                 return {"error": "Wrong Password or Username"}, 401
 

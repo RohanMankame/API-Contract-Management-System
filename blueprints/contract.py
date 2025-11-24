@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Contract
 from datetime import datetime
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
@@ -18,19 +18,19 @@ def Contracts():
     '''
     if request.method == 'POST':
         try:
+
             data = request.get_json()
+            user_id = get_jwt_identity()
             client_id = data['client_id']
             contract_type = data['contract_type']
-            created_by_user_id = data['created_by_user_id']
-            updated_by_user_id = data['updated_by_user_id']
             contract_name = data['contract_name']
             is_archived = data.get('is_archived', False)
 
             new_contract = Contract(
                 client_id=client_id,
                 contract_type=contract_type,
-                created_by_user_id=created_by_user_id,
-                updated_by_user_id=updated_by_user_id,
+                created_by_user_id=user_id,
+                updated_by_user_id=user_id,
                 contract_name=contract_name,
                 is_archived=is_archived
             )
@@ -71,7 +71,7 @@ def Contracts():
 
 
 @contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT', 'DELETE'])
-@jwt_required()
+#@jwt_required()
 def Contract_id(id):
     '''
     GET: Get existing contract from DB using contract ID
@@ -135,7 +135,7 @@ def Contract_id(id):
 
 
 @contract_bp.route('/Contracts/<id>/Product', methods=['POST','GET'])
-@jwt_required()
+#@jwt_required()
 def Contract_Product_id(id):
     '''
     Post: new contract for a spefic product
