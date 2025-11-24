@@ -37,25 +37,25 @@ def create_app():
     # Register Blueprints
     # authentication
     from blueprints.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(auth_bp, url_prefix='/')
     # user 
     from blueprints.user import user_bp
-    app.register_blueprint(user_bp, url_prefix='/user')
+    app.register_blueprint(user_bp, url_prefix='/')
     # client
     from blueprints.client import client_bp
-    app.register_blueprint(client_bp, url_prefix='/client')
+    app.register_blueprint(client_bp, url_prefix='/')
     # product
     from blueprints.product import product_bp
-    app.register_blueprint(product_bp, url_prefix='/product')
+    app.register_blueprint(product_bp, url_prefix='/')
     # contract
     from blueprints.contract import contract_bp
-    app.register_blueprint(contract_bp, url_prefix='/contract')
+    app.register_blueprint(contract_bp, url_prefix='/')
     
     from blueprints.Subscription import Subscription_bp
-    app.register_blueprint(Subscription_bp, url_prefix='/sub')
+    app.register_blueprint(Subscription_bp, url_prefix='/')
 
     from blueprints.Subscription_tier import Subscription_tier_bp
-    app.register_blueprint(Subscription_tier_bp, url_prefix='/tier')
+    app.register_blueprint(Subscription_tier_bp, url_prefix='/')
 
     # Create database tables if not exist
     with app.app_context():

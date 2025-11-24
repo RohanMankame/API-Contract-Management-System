@@ -16,16 +16,29 @@ def Clients():
     Post: Create a new client
     Get: Get all clients from DB
     '''
+    # need to still add validation for email and phone number
     if request.method == 'POST':
         try:
             data = request.get_json()
+
             company_name = data['company_name']
             email = data['email']
             phone_number = data['phone_number']
             address = data['address']
-            created_at = data['created_at']
-            updated_at = data['updated_at']
-        
+            
+
+            new_client = Client(
+                company_name = company_name,
+                email = email,
+                phone_number = phone_number,
+                address = address
+                
+            )
+            db.session.add(new_client)
+            db.session.commit()
+
+            return jsonify({'message': 'Client created successfully'}), 201
+
         except Exception as e:
             return jsonify({'message': 'Error creating client', 'error': str(e)}), 500
 
@@ -56,7 +69,7 @@ def Clients():
 
 
 @client_bp.route('/Clients/<id>', methods=['GET', 'PUT', 'DELETE'])
-@jwt_required()
+#@jwt_required()
 def Client_id(id):
     '''
     GET: Get existing client from DB using client ID
@@ -84,12 +97,15 @@ def Client_id(id):
         except Exception as e:
             return jsonify({'message': 'Error getting client', 'error': str(e)}), 500
 
+
     elif request.method == 'PUT':
         try:
             data = request.get_json()
             client = Client.query.get(id)
+
             if not client:
                 return jsonify({'message': 'Client not found'}), 404
+
             client.company_name = data['company_name']
             client.email = data['email']
             client.phone_number = data['phone_number']
@@ -100,6 +116,7 @@ def Client_id(id):
         except Exception as e:
             return jsonify({'message': 'Error updating client', 'error': str(e)}), 500
 
+    '''
     elif request.method == 'DELETE':
         try:
             client = Client.query.get(id)
@@ -111,12 +128,13 @@ def Client_id(id):
 
         except Exception as e:
             return jsonify({'message': 'Error deleting client', 'error': str(e)}), 500
-
+    '''
+    
     return jsonify({'message': 'Method not allowed'}), 405
 
 
 @client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def Client_Contracts_id(id):
     '''
     Get: Get all contracts associated with a specific client
