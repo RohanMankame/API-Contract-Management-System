@@ -14,18 +14,18 @@ def Subscription_tiers():
             data = request.get_json()
             subscription_id = data['subscription_id']
             tier_name = data['tier_name']
-            threshold_min = data['threshold_min']
-            threshold_max = data['threshold_max']
-            price_per_unit = data['price_per_unit']
-            is_archived = data.get('is_archived', False)
+            min_calls = data['min_calls']
+            max_calls = data['max_calls']
+            price_per_tier = data['price_per_tier']
+            
 
             new_tier = Subscription_tier(
                 subscription_id=subscription_id,
                 tier_name=tier_name,
-                threshold_min=threshold_min,
-                threshold_max=threshold_max,
-                price_per_unit=price_per_unit,
-                is_archived=is_archived
+                min_calls=min_calls,
+                max_calls=max_calls,
+                price_per_tier=price_per_tier,
+                
             )
 
             db.session.add(new_tier)

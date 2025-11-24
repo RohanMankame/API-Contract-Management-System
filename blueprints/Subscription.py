@@ -133,13 +133,13 @@ def Subscription_id(id):
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
-            db.session.delete(subscription)
+            subscription.is_archived = True
             db.session.commit()
 
-            return jsonify({'message': 'Subscription deleted successfully'}), 200
+            return jsonify({'message': 'Subscription has been archived successfully'}), 200
 
         except Exception as e:
-            return jsonify({'message': 'Error deleting subscription', 'error': str(e)}), 500
+            return jsonify({'message': 'Error archiving subscription', 'error': str(e)}), 500
 
     return jsonify({'message': 'Method not allowed'}), 405
 

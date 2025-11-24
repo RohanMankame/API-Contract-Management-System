@@ -92,6 +92,7 @@ def Product_id(id):
             product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
+
             product.api_name = data['api_name']
             product.description = data['description']
             product.is_archived = data.get('is_archived', product.is_archived)
@@ -108,12 +109,14 @@ def Product_id(id):
             product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
-            db.session.delete(product)
+            
+            product.is_archived = True
+
             db.session.commit()
-            return jsonify({'message': 'Product deleted successfully'}), 200
+            return jsonify({'message': 'Product has been archived successfully'}), 200
         
         except Exception as e:
-            return jsonify({'message': 'Error deleting product', 'error': str(e)}), 500
+            return jsonify({'message': 'Error archiving product', 'error': str(e)}), 500
 
     return jsonify({'message': 'Method not allowed'}), 405
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import Contract
+from models import Contract, User
 from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -20,11 +20,15 @@ def Contracts():
         try:
 
             data = request.get_json()
-            user_id = get_jwt_identity()
             client_id = data['client_id']
             contract_type = data['contract_type']
             contract_name = data['contract_name']
             is_archived = data.get('is_archived', False)
+
+            user_email = get_jwt_identity()
+            user = User.query.filter_by(email=user_email).first()
+            user_id = user.id
+            
 
             new_contract = Contract(
                 client_id=client_id,
@@ -108,6 +112,7 @@ def Contract_id(id):
             contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
+            
             contract.client_id = data['client_id']
             contract.contract_type = data['contract_type']
             contract.updated_by_user_id = data['updated_by_user_id']
@@ -124,9 +129,9 @@ def Contract_id(id):
             contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
-            db.session.delete(contract)
+            contract.is_archived = True
             db.session.commit()
-            return jsonify({'message': 'Contract deleted successfully'}), 200
+            return jsonify({'message': 'Contract has been archived successfully'}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error deleting contract', 'error': str(e)}), 500
