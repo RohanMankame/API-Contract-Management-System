@@ -92,7 +92,7 @@ def Client_id(id):
                 'updated_at': client.updated_at
             }
 
-            return jsonify({'client': client}), 200
+            return jsonify({'message': f'Client with id:{id} retrieved successfully','client': client}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting client', 'error': str(e)}), 500
@@ -112,6 +112,10 @@ def Client_id(id):
             client.address = data['address']
             db.session.commit()
 
+            client = Client.query.get(id)
+
+            return jsonify({'message': f'Client with id:{id} updated successfully'}), 200
+
 
         except Exception as e:
             return jsonify({'message': 'Error updating client', 'error': str(e)}), 500
@@ -129,7 +133,7 @@ def Client_id(id):
         except Exception as e:
             return jsonify({'message': 'Error deleting client', 'error': str(e)}), 500
     '''
-    
+
     return jsonify({'message': 'Method not allowed'}), 405
 
 

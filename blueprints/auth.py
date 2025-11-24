@@ -17,14 +17,14 @@ def login():
 
             data = request.get_json()
 
-            username = data.get('username')
+            email = data.get('email')
             password = data.get('password')
 
-            user = User.query.filter_by(username=username).first()
+            user = User.query.filter_by(email=email).first()
             if not user or not user.check_password(password):
                 return {"error": "Wrong Password or Username"}, 401
 
-            access_token = create_access_token(identity=user.username)
+            access_token = create_access_token(identity=user.email)
             return {"access_token": access_token}, 200
 
         except Exception as e:
