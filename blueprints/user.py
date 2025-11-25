@@ -178,7 +178,7 @@ def User_id(id):
     return jsonify({'message': 'Method not allowed'}), 405
         
     
-##### Check
+
 @user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def User_Contracts_id(id):
@@ -188,10 +188,12 @@ def User_Contracts_id(id):
     if request.method == 'GET':
         try:
             user = User.query.get(id)
+            
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
             contracts = []
+
             for contract in user.contracts_created:
                 contracts.append({
                     'id': contract.id,

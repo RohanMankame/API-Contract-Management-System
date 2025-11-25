@@ -24,6 +24,8 @@ class Client(db.Model):
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
     
 
+    contracts = db.relationship('Contract', backref='client', lazy=True)
+
     def __repr__(self):
         return f'Company_ID:{self.id}, Company: {self.company_name}, Email: {self.email}'
 
@@ -53,6 +55,8 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    contracts_created = db.relationship('Contract', backref='creator', lazy=True, foreign_keys='Contract.created_by')
+    contracts_updated = db.relationship('Contract', backref='updater', lazy=True, foreign_keys='Contract.updated_by')
     
     def __repr__(self):
         return f'User_Id:{self.id}, User: {self.full_name}, Email: {self.email}'
@@ -76,6 +80,7 @@ class Product(db.Model):
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)#added recently
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)#added recently
     
+    subscriptions = db.relationship('Subscription', backref='product', lazy=True)
 
     def __repr__(self):
         return f'Product_Id: {self.id}, API:{self.api_name}'
@@ -99,6 +104,7 @@ class Contract(db.Model):
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     
+    subscriptions = db.relationship('Subscription', backref='contract', lazy=True)
 
     def __repr__(self):
         return f'Contract_ID: {self.id}, contract_name: {self.contract_name}'
@@ -123,6 +129,7 @@ class Subscription(db.Model):
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
 
+    tiers = db.relationship('Subscription_tier', backref='subscription', lazy=True)
 
     def __repr__(self):
         return f'Subscription_ID: {self.id}, Contract_ID: {self.contract_id}, Product_ID: {self.product_id}'
