@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models import Subscription_tier
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 Subscription_tier_bp = Blueprint('subscription_tier', __name__)
 

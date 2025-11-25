@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models import Product
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity   
 
 # Initialize product Blueprint
 product_bp = Blueprint('product', __name__)

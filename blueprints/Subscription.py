@@ -156,14 +156,15 @@ def Subscription_Tiers_id(id):
                 return jsonify({'message': 'Subscription not found'}), 404
 
             tiers_list = []
-            for tier in subscription.subscription_tiers:
+            for tier in subscription.tiers:
                 tiers_list.append({
                     'id': tier.id,
                     'subscription_id': tier.subscription_id,
-                    'tier_name': tier.tier_name,
                     'min_calls': tier.min_calls,
                     'max_calls': tier.max_calls,
+                    'base_price': tier.base_price,
                     'price_per_tier': tier.price_per_tier,
+                    'is_archived': tier.is_archived,
                 })
 
             return jsonify(tiers_list), 200
