@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import User
 import validators
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 # Initialize user Blueprint
 user_bp = Blueprint('user', __name__)
@@ -10,7 +10,7 @@ user_bp = Blueprint('user', __name__)
 # User Endpoints
 
 @user_bp.route('/Users', methods=['POST','GET'])
-#@jwt_required()
+@jwt_required()
 def Users():
     '''
     Post: Create a new user
@@ -19,12 +19,22 @@ def Users():
     if request.method == 'POST':
         try:
             data = request.get_json()
+            curr_user = get_jwt_identity()
+            
+            curr_user_id = curr_user.id
+
+            user_id = curr_user_id['id']
 
             email = data['email']
             password = data['password']
             full_name = data['full_name']
 
-            new_user = User(email=email, full_name=full_name)
+            new_user = User(email=email,
+                full_name=full_name,
+                created_by_id=curr_user_id,
+                updated_by_id=curr_user_id
+             )
+
             new_user.set_password(password)
             db.session.add(new_user)
             db.session.commit()
@@ -96,6 +106,8 @@ def User_id(id):
             if 'password' in data:
                 user.set_password(data['password'])
             db.session.commit()
+
+            return jsonify({'message': 'User updated successfully'}), 200
         
         except Exception as e:
             return jsonify({'message': 'Error updating user', 'error': str(e)}), 500

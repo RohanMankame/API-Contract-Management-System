@@ -14,6 +14,9 @@ class Client(db.Model):
     address = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    updated_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)#added recently
+    created_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)#added recently
     
     contracts = db.relationship('Contract', backref='client', lazy=True)
 
@@ -32,6 +35,10 @@ class User(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    updated_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)#added recently
+    created_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)#added recently
+
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -59,6 +66,9 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    created_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)#added recently
+    updated_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)#added recently
+
     subscriptions = db.relationship('Subscription',backref='product',lazy=True)
 
     def __repr__(self):
@@ -80,6 +90,9 @@ class Contract(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_archived = db.Column(db.Boolean, default=False)
 
+    created_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)#added recently
+    updated_by_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)#added recently
+
     subscriptions = db.relationship('Subscription',backref='contract',lazy=True)
 
     def __repr__(self):
@@ -96,10 +109,11 @@ class Subscription(db.Model):
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     pricing_type = db.Column(Enum("Fixed", "Variable", name="pricing_type_enum"),nullable=False) 
-    varible_strategy = db.Column(db.String(100))  
+    varible_strategy = db.Column(Enum("pick a tier", "fill a tier", "flat rate", "fixed rate", name="varible_strategy_enum"),nullable=True)
     base_price = db.Column(db.Float, nullable=False)
 
     tiers = db.relationship('Subscription_tier',backref='subscription',lazy=True)
+
 
     def __repr__(self):
         return f'<Subscription {self.id} ({self.contract_id}, {self.product_id})>'
