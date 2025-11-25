@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Client
 import validators
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 # Initialize client Blueprint
 client_bp = Blueprint('client', __name__)
@@ -25,13 +25,17 @@ def Clients():
             email = data['email']
             phone_number = data['phone_number']
             address = data['address']
+            is_archived = data['is_archived'] if 'is_archived' in data else False
+
             
 
             new_client = Client(
                 company_name = company_name,
                 email = email,
                 phone_number = phone_number,
-                address = address
+                address = address,
+                is_archived = is_archived
+                
                 
             )
             db.session.add(new_client)

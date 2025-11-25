@@ -149,6 +149,6 @@ class Subscription_tier(db.Model):
 
 
     def __repr__(self):
-        return f'<Tier {self.id} ({self.subscription_id}, {self.tier_name})>'
+        return f'Tier_id: {self.id}, sub_id:{self.subscription_id}, calls:{self.min_calls}-{self.max_calls}'
 
     

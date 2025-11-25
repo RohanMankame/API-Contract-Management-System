@@ -12,23 +12,19 @@ def login():
     '''
     if request.method == 'POST':
         try:
-            if not request.is_json:
-                return {"error": "Missing JSON in request"}, 400
-
             data = request.get_json()
 
             email = data['email']
             password = data['password']
 
-            print("Request email:", email)
-            print("DB emails:", [u.email for u in User.query.all()])
-
             user = User.query.filter_by(email=email).first()
-            print(user)
+
             if not user or not user.check_password(password):
                 return {"error": "Wrong Password or Username"}, 401
 
-            access_token = create_access_token(identity=user.email)
+            # identity is user.id
+            access_token = create_access_token(identity=user.id)
+
             return {"access_token": access_token}, 200
 
         except Exception as e:
@@ -43,8 +39,9 @@ def protected():
     '''
     A test protected endpoint that requires a valid JWT to access
     '''
-    current_user = get_jwt_identity() 
+    current_user_id = get_jwt_identity() 
+    current_user = User.query.get(current_user_id)
     if not current_user:
         return {"error": "User not found"}, 404
 
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify(logged_in_as=current_user.email), 200
