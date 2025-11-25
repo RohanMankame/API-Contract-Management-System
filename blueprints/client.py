@@ -101,7 +101,7 @@ def Client_id(id):
             return jsonify({'message': 'Error getting client', 'error': str(e)}), 500
 
 
-    elif request.method == 'PUT':
+    elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             curr_user_id = get_jwt_identity()
             data = request.get_json()
