@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models import Product
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity   
 
 # Initialize product Blueprint
 product_bp = Blueprint('product', __name__)
@@ -9,7 +9,7 @@ product_bp = Blueprint('product', __name__)
 # Product Endpoints
 
 @product_bp.route('/Products', methods=['POST', 'GET'])
-#@jwt_required()
+@jwt_required()
 def Products():
     '''
     Post: Create a new API product
@@ -17,15 +17,16 @@ def Products():
     '''
     if request.method == 'POST':
         try:
+            curr_user_id = get_jwt_identity()
             data = request.get_json()
-            api_name = data['api_name']
-            description = data['description']
-            is_archived = data.get('is_archived', False)
 
             new_product = Product(
-                api_name=api_name,
-                description=description,
-                is_archived=is_archived)
+                api_name=data['api_name'],
+                description=data['description'],
+                is_archived=data.get('is_archived', False),
+                created_by=curr_user_id,
+                updated_by=curr_user_id
+                )
 
             db.session.add(new_product)
             db.session.commit()
@@ -76,7 +77,9 @@ def Product_id(id):
                 'description': product.description,
                 'is_archived': product.is_archived,
                 'created_at': product.created_at,
-                'updated_at': product.updated_at
+                'updated_at': product.updated_at,
+                'created_by': product.created_by,
+                'updated_by': product.updated_by
             }
 
             return jsonify({'product': product_data}), 200
@@ -89,21 +92,27 @@ def Product_id(id):
     elif request.method == 'PUT':
         try:
             data = request.get_json()
+
             product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
-            product.api_name = data['api_name']
-            product.description = data['description']
-            product.is_archived = data.get('is_archived', product.is_archived)
+            if 'api_name' in data:
+                product.api_name = data['api_name']
+            if 'description' in data:
+                product.description = data['description']
+            if 'is_archived' in data:
+                product.is_archived = data['is_archived']
+            product.updated_by = get_jwt_identity()
             db.session.commit()
+
             return jsonify({'message': 'Product updated successfully'}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error updating product', 'error': str(e)}), 500
 
 
-
+    # no delete, just archive allowed
     elif request.method == 'DELETE':
         try:
             product = Product.query.get(id)
@@ -111,6 +120,7 @@ def Product_id(id):
                 return jsonify({'message': 'Product not found'}), 404
             
             product.is_archived = True
+            product.updated_by = get_jwt_identity()
 
             db.session.commit()
             return jsonify({'message': 'Product has been archived successfully'}), 200
@@ -123,7 +133,7 @@ def Product_id(id):
 
 
 
-
+# TODO fix
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
@@ -139,6 +149,7 @@ def Product_Contracts_id(id):
             contracts_list = []
             for subscription in product.subscriptions:
                 contract = subscription.contract
+                
                 contracts_list.append({
                     'contract_id': contract.id,
                     'client_id': contract.client_id,

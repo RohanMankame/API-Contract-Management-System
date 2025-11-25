@@ -23,11 +23,14 @@
       "User": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
+          "id": { "type": "string", "format": "uuid" },
           "email": { "type": "string", "format": "email" },
           "full_name": { "type": "string" },
+          "is_archived": { "type": "boolean" },
           "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid", "nullable": true },
+          "updated_by": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "UserInput": {
@@ -36,19 +39,23 @@
         "properties": {
           "email": { "type": "string", "format": "email" },
           "password": { "type": "string" },
-          "full_name": { "type": "string" }
+          "full_name": { "type": "string" },
+          "is_archived": { "type": "boolean", "default": false }
         }
       },
       "Client": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
+          "id": { "type": "string", "format": "uuid" },
           "company_name": { "type": "string" },
           "email": { "type": "string", "format": "email" },
           "phone_number": { "type": "string" },
           "address": { "type": "string" },
+          "is_archived": { "type": "boolean" },
           "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid" },
+          "updated_by": { "type": "string", "format": "uuid" }
         }
       },
       "ClientInput": {
@@ -58,31 +65,28 @@
           "company_name": { "type": "string" },
           "email": { "type": "string", "format": "email" },
           "phone_number": { "type": "string" },
-          "address": { "type": "string" }
+          "address": { "type": "string" },
+          "is_archived": { "type": "boolean", "default": false }
         }
       },
       "Contract": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "client_id": { "type": "integer" },
-          "contract_type": { "type": "string" },
-          "created_by_user_id": { "type": "integer" },
-          "updated_by_user_id": { "type": "integer" },
+          "id": { "type": "string", "format": "uuid" },
+          "client_id": { "type": "string", "format": "uuid" },
           "contract_name": { "type": "string" },
           "is_archived": { "type": "boolean" },
           "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid", "nullable": true },
+          "updated_by": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "ContractInput": {
         "type": "object",
-        "required": ["client_id", "contract_type", "created_by_user_id", "updated_by_user_id", "contract_name"],
+        "required": ["client_id", "contract_name"],
         "properties": {
-          "client_id": { "type": "integer" },
-          "contract_type": { "type": "string" },
-          "created_by_user_id": { "type": "integer" },
-          "updated_by_user_id": { "type": "integer" },
+          "client_id": { "type": "string", "format": "uuid" },
           "contract_name": { "type": "string" },
           "is_archived": { "type": "boolean", "default": false }
         }
@@ -90,12 +94,14 @@
       "Product": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
+          "id": { "type": "string", "format": "uuid" },
           "api_name": { "type": "string" },
           "description": { "type": "string" },
           "is_archived": { "type": "boolean" },
           "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid" },
+          "updated_by": { "type": "string", "format": "uuid" }
         }
       },
       "ProductInput": {
@@ -110,59 +116,74 @@
       "Subscription": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "contract_id": { "type": "integer" },
-          "product_id": { "type": "integer" },
-          "start_date": { "type": "string", "format": "date" },
-          "end_date": { "type": "string", "format": "date" },
-          "pricing_type": { "type": "string" },
-          "varible_strategy": { "type": "string", "nullable": true },
-          "base_price": { "type": "number" },
-          "is_archived": { "type": "boolean" }
+          "id": { "type": "string", "format": "uuid" },
+          "contract_id": { "type": "string", "format": "uuid" },
+          "product_id": { "type": "string", "format": "uuid" },
+          "pricing_type": { 
+            "type": "string",
+            "enum": ["Fixed", "Variable"]
+          },
+          "strategy": { 
+            "type": "string",
+            "enum": ["Pick", "Fill", "Flat", "Fixed"]
+          },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid", "nullable": true },
+          "updated_by": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "SubscriptionInput": {
         "type": "object",
-        "required": ["contract_id", "product_id", "start_date", "end_date", "pricing_type", "base_price"],
+        "required": ["contract_id", "product_id", "pricing_type", "strategy"],
         "properties": {
-          "contract_id": { "type": "integer" },
-          "product_id": { "type": "integer" },
-          "start_date": { "type": "string", "format": "date" },
-          "end_date": { "type": "string", "format": "date" },
-          "pricing_type": { "type": "string" },
-          "varible_strategy": { "type": "string", "nullable": true },
-          "base_price": { "type": "number" },
+          "contract_id": { "type": "string", "format": "uuid" },
+          "product_id": { "type": "string", "format": "uuid" },
+          "pricing_type": { 
+            "type": "string",
+            "enum": ["Fixed", "Variable"]
+          },
+          "strategy": { 
+            "type": "string",
+            "enum": ["Pick", "Fill", "Flat", "Fixed"]
+          },
           "is_archived": { "type": "boolean", "default": false }
         }
       },
       "SubscriptionTier": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "subscription_id": { "type": "integer" },
-          "tier_name": { "type": "string" },
+          "id": { "type": "string", "format": "uuid" },
+          "subscription_id": { "type": "string", "format": "uuid" },
           "min_calls": { "type": "integer" },
           "max_calls": { "type": "integer" },
-          "price_per_tier": { "type": "number" }
+          "base_price": { "type": "number", "nullable": true },
+          "price_per_tier": { "type": "number", "nullable": true },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid", "nullable": true },
+          "updated_by": { "type": "string", "format": "uuid", "nullable": true }
         }
       },
       "SubscriptionTierInput": {
         "type": "object",
-        "required": ["subscription_id", "tier_name", "threshold_min", "threshold_max", "price_per_unit"],
+        "required": ["subscription_id", "min_calls", "max_calls", "base_price", "price_per_tier"],
         "properties": {
-          "subscription_id": { "type": "integer" },
-          "tier_name": { "type": "string" },
-          "threshold_min": { "type": "integer" },
-          "threshold_max": { "type": "integer" },
-          "price_per_unit": { "type": "number" },
+          "subscription_id": { "type": "string", "format": "uuid" },
+          "min_calls": { "type": "integer" },
+          "max_calls": { "type": "integer" },
+          "base_price": { "type": "number" },
+          "price_per_tier": { "type": "number" },
           "is_archived": { "type": "boolean", "default": false }
         }
       },
       "LoginRequest": {
         "type": "object",
-        "required": ["username", "password"],
+        "required": ["email", "password"],
         "properties": {
-          "username": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
           "password": { "type": "string" }
         }
       },
@@ -202,8 +223,8 @@
               }
             }
           },
-          "400": { "description": "Missing JSON in request" },
           "401": { "description": "Wrong password or username" },
+          "405": { "description": "Invalid request method" },
           "500": { "description": "Server error" }
         }
       }
@@ -231,10 +252,42 @@
         }
       }
     },
+    "/UsersFirst": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create the first user in the system (when DB is empty)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "First user created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "user_id": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Error creating first user" }
+        }
+      }
+    },
     "/Users": {
       "get": {
         "tags": ["Users"],
         "summary": "Get all users",
+        "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
             "description": "List of all users",
@@ -258,6 +311,7 @@
       "post": {
         "tags": ["Users"],
         "summary": "Create a new user",
+        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -267,7 +321,20 @@
           }
         },
         "responses": {
-          "201": { "description": "User created successfully" },
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "user_id": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
           "500": { "description": "Error creating user" }
         }
       }
@@ -276,12 +343,13 @@
       "get": {
         "tags": ["Users"],
         "summary": "Get user by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -292,6 +360,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "message": { "type": "string" },
                     "user": { "$ref": "#/components/schemas/User" }
                   }
                 }
@@ -305,12 +374,13 @@
       "put": {
         "tags": ["Users"],
         "summary": "Update user by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -319,11 +389,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "full_name"],
                 "properties": {
                   "email": { "type": "string", "format": "email" },
                   "full_name": { "type": "string" },
-                  "password": { "type": "string" }
+                  "password": { "type": "string" },
+                  "is_archived": { "type": "boolean" }
                 }
               }
             }
@@ -337,19 +407,20 @@
       },
       "delete": {
         "tags": ["Users"],
-        "summary": "Delete user by ID",
+        "summary": "Archive user by ID (soft delete)",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "200": { "description": "User deleted successfully" },
+          "200": { "description": "User archived successfully" },
           "404": { "description": "User not found" },
-          "500": { "description": "Error deleting user" }
+          "500": { "description": "Error archiving user" }
         }
       }
     },
@@ -363,7 +434,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -392,6 +463,7 @@
       "get": {
         "tags": ["Clients"],
         "summary": "Get all clients",
+        "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
             "description": "List of all clients",
@@ -415,6 +487,7 @@
       "post": {
         "tags": ["Clients"],
         "summary": "Create a new client",
+        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -424,7 +497,20 @@
           }
         },
         "responses": {
-          "201": { "description": "Client created successfully" },
+          "201": {
+            "description": "Client created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "client_id": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
           "500": { "description": "Error creating client" }
         }
       }
@@ -433,12 +519,13 @@
       "get": {
         "tags": ["Clients"],
         "summary": "Get client by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -449,6 +536,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "message": { "type": "string" },
                     "client": { "$ref": "#/components/schemas/Client" }
                   }
                 }
@@ -462,19 +550,29 @@
       "put": {
         "tags": ["Clients"],
         "summary": "Update client by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ClientInput" }
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "phone_number": { "type": "string" },
+                  "address": { "type": "string" },
+                  "is_archived": { "type": "boolean" }
+                }
+              }
             }
           }
         },
@@ -483,18 +581,37 @@
           "404": { "description": "Client not found" },
           "500": { "description": "Error updating client" }
         }
+      },
+      "delete": {
+        "tags": ["Clients"],
+        "summary": "Archive client by ID (soft delete)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Client deleted successfully" },
+          "404": { "description": "Client not found" },
+          "500": { "description": "Error deleting client" }
+        }
       }
     },
     "/Clients/{id}/Contracts": {
       "get": {
         "tags": ["Clients"],
         "summary": "Get all contracts for a client",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -565,7 +682,7 @@
                   "type": "object",
                   "properties": {
                     "message": { "type": "string" },
-                    "contract_id": { "type": "integer" }
+                    "contract_id": { "type": "string", "format": "uuid" }
                   }
                 }
               }
@@ -585,7 +702,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -615,14 +732,21 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ContractInput" }
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client_id": { "type": "string", "format": "uuid" },
+                  "contract_name": { "type": "string" },
+                  "is_archived": { "type": "boolean" }
+                }
+              }
             }
           }
         },
@@ -634,18 +758,18 @@
       },
       "delete": {
         "tags": ["Contracts"],
-        "summary": "Delete contract by ID",
+        "summary": "Archive contract by ID (soft delete)",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "200": { "description": "Contract deleted successfully" },
+          "200": { "description": "Contract has been archived successfully" },
           "404": { "description": "Contract not found" },
           "500": { "description": "Error deleting contract" }
         }
@@ -654,14 +778,14 @@
     "/Contracts/{id}/Product": {
       "get": {
         "tags": ["Contracts"],
-        "summary": "Get all products for a contract",
+        "summary": "Get all products associated with a contract",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -684,45 +808,13 @@
           "404": { "description": "Contract not found" },
           "500": { "description": "Error getting products" }
         }
-      },
-      "post": {
-        "tags": ["Contracts"],
-        "summary": "Add product to contract (create subscription)",
-        "security": [{ "BearerAuth": [] }],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "integer" }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["product_id"],
-                "properties": {
-                  "product_id": { "type": "integer" },
-                  "end_date": { "type": "string", "format": "date" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": { "description": "Subscription created successfully" },
-          "404": { "description": "Contract not found" },
-          "500": { "description": "Error creating subscription" }
-        }
       }
     },
     "/Products": {
       "get": {
         "tags": ["Products"],
         "summary": "Get all products",
+        "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
             "description": "List of all products",
@@ -746,6 +838,7 @@
       "post": {
         "tags": ["Products"],
         "summary": "Create a new product",
+        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -763,7 +856,7 @@
                   "type": "object",
                   "properties": {
                     "message": { "type": "string" },
-                    "product_id": { "type": "integer" }
+                    "product_id": { "type": "string", "format": "uuid" }
                   }
                 }
               }
@@ -783,7 +876,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -813,14 +906,21 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProductInput" }
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "api_name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "is_archived": { "type": "boolean" }
+                }
+              }
             }
           }
         },
@@ -832,20 +932,20 @@
       },
       "delete": {
         "tags": ["Products"],
-        "summary": "Delete product by ID",
+        "summary": "Archive product by ID (soft delete)",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "200": { "description": "Product deleted successfully" },
+          "200": { "description": "Product has been archived successfully" },
           "404": { "description": "Product not found" },
-          "500": { "description": "Error deleting product" }
+          "500": { "description": "Error archiving product" }
         }
       }
     },
@@ -859,7 +959,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -888,6 +988,7 @@
       "get": {
         "tags": ["Subscriptions"],
         "summary": "Get all subscriptions",
+        "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
             "description": "List of all subscriptions",
@@ -906,6 +1007,7 @@
       "post": {
         "tags": ["Subscriptions"],
         "summary": "Create a new subscription",
+        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -923,7 +1025,7 @@
                   "type": "object",
                   "properties": {
                     "message": { "type": "string" },
-                    "subscription_id": { "type": "integer" }
+                    "subscription_id": { "type": "string", "format": "uuid" }
                   }
                 }
               }
@@ -937,12 +1039,13 @@
       "get": {
         "tags": ["Subscriptions"],
         "summary": "Get subscription by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -961,12 +1064,13 @@
       "put": {
         "tags": ["Subscriptions"],
         "summary": "Update subscription by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -976,13 +1080,16 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "contract_id": { "type": "integer" },
-                  "product_id": { "type": "integer" },
-                  "start_date": { "type": "string", "format": "date" },
-                  "end_date": { "type": "string", "format": "date" },
-                  "pricing_type": { "type": "string" },
-                  "varible_strategy": { "type": "string" },
-                  "base_price": { "type": "number" },
+                  "contract_id": { "type": "string", "format": "uuid" },
+                  "product_id": { "type": "string", "format": "uuid" },
+                  "pricing_type": { 
+                    "type": "string",
+                    "enum": ["Fixed", "Variable"]
+                  },
+                  "strategy": { 
+                    "type": "string",
+                    "enum": ["Pick", "Fill", "Flat", "Fixed"]
+                  },
                   "is_archived": { "type": "boolean" }
                 }
               }
@@ -997,19 +1104,20 @@
       },
       "delete": {
         "tags": ["Subscriptions"],
-        "summary": "Delete subscription by ID",
+        "summary": "Archive subscription by ID (soft delete)",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "200": { "description": "Subscription deleted successfully" },
+          "200": { "description": "Subscription has been archived successfully" },
           "404": { "description": "Subscription not found" },
-          "500": { "description": "Error deleting subscription" }
+          "500": { "description": "Error archiving subscription" }
         }
       }
     },
@@ -1017,12 +1125,13 @@
       "get": {
         "tags": ["Subscriptions"],
         "summary": "Get all tiers for a subscription",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1046,6 +1155,7 @@
       "get": {
         "tags": ["Subscription Tiers"],
         "summary": "Get all subscription tiers",
+        "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
             "description": "List of all subscription tiers",
@@ -1064,6 +1174,7 @@
       "post": {
         "tags": ["Subscription Tiers"],
         "summary": "Create a new subscription tier",
+        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -1081,7 +1192,7 @@
                   "type": "object",
                   "properties": {
                     "message": { "type": "string" },
-                    "tier_id": { "type": "integer" }
+                    "tier_id": { "type": "string", "format": "uuid" }
                   }
                 }
               }
@@ -1095,12 +1206,13 @@
       "get": {
         "tags": ["Subscription Tiers"],
         "summary": "Get subscription tier by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1119,12 +1231,13 @@
       "put": {
         "tags": ["Subscription Tiers"],
         "summary": "Update subscription tier by ID",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
@@ -1151,19 +1264,49 @@
       },
       "delete": {
         "tags": ["Subscription Tiers"],
-        "summary": "Delete subscription tier by ID",
+        "summary": "Delete subscription tier by ID (hard delete)",
+        "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
           "200": { "description": "Subscription tier deleted successfully" },
           "404": { "description": "Subscription tier not found" },
           "500": { "description": "Error deleting subscription tier" }
+        }
+      }
+    },
+    "/Subscription_tiers/{id}/Subscriptions": {
+      "get": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Get all subscriptions for a tier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscriptions for tier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Subscription" }
+                }
+              }
+            }
+          },
+          "404": { "description": "Subscription tier not found" },
+          "500": { "description": "Error fetching subscriptions for tier" }
         }
       }
     }
