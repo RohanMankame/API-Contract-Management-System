@@ -126,5 +126,28 @@ def Subscription_tier_id(id):
 #@jwt_required()
 def Subscription_tier_Subscriptions_id(id):
     if request.method == 'GET':
-        pass
+        try:
+            tier = Subscription_tier.query.get(id)
+            if not tier:
+                return jsonify({'message': 'Subscription tier not found'}), 404
+
+            subscriptions = tier.subscriptions  # Assuming a relationship is defined in the model
+            subscriptions_list = []
+
+            for subscription in subscriptions:
+                subscriptions_list.append({
+                    'id': subscription.id,
+                    'client_id': subscription.client_id,
+                    'subscription_name': subscription.subscription_name,
+                    'is_archived': subscription.is_archived,
+                    'created_at': subscription.created_at,
+                    'updated_at': subscription.updated_at,
+                    'created_by': subscription.created_by,
+                    'updated_by': subscription.updated_by
+                })
+
+            return jsonify(subscriptions_list), 200
+            
+        except Exception as e:
+            return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
 

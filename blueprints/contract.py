@@ -145,6 +145,29 @@ def Contract_Product_id(id):
     '''
     Get: Get all products associated with a specific contract ID
     '''
-    pass
-    
+    try:
+        contract = Contract.query.get(id)
+        if not contract:
+            return jsonify({'message': 'Contract not found'}), 404
 
+        products = contract.products  
+        products_list = []
+
+        for product in products:
+            products_list.append({
+                'id': product.id,
+                'product_name': product.product_name,
+                'description': product.description,
+                'price': product.price,
+                'is_archived': product.is_archived,
+                'created_at': product.created_at,
+                'updated_at': product.updated_at,
+                'created_by': product.created_by,
+                'updated_by': product.updated_by
+            })
+
+        return jsonify({'products': products_list}), 200
+    
+    
+    except Exception as e:
+        return jsonify({'message': 'Error getting products', 'error': str(e)}), 500
