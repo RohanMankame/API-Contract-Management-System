@@ -10,38 +10,31 @@ client_bp = Blueprint('client', __name__)
 # Client Endpoints
 
 @client_bp.route('/Clients', methods=['POST','GET'])
-#@jwt_required()
+@jwt_required()
 def Clients():
     '''
     Post: Create a new client
     Get: Get all clients from DB
     '''
-    # need to still add validation for email and phone number
     if request.method == 'POST':
         try:
+            curr_user_id = get_jwt_identity()
             data = request.get_json()
 
-            company_name = data['company_name']
-            email = data['email']
-            phone_number = data['phone_number']
-            address = data['address']
-            is_archived = data['is_archived'] if 'is_archived' in data else False
-
-            
-
             new_client = Client(
-                company_name = company_name,
-                email = email,
-                phone_number = phone_number,
-                address = address,
-                is_archived = is_archived
-                
-                
+                company_name = data['company_name'],
+                email = data['email'],
+                phone_number = data['phone_number'],
+                address = data['address'],
+                is_archived = data.get('is_archived', False),
+                created_by = curr_user_id,
+                updated_by = curr_user_id
             )
+
             db.session.add(new_client)
             db.session.commit()
 
-            return jsonify({'message': 'Client created successfully'}), 201
+            return jsonify({'message': 'Client created successfully', 'client_id': new_client.id}), 201
 
         except Exception as e:
             return jsonify({'message': 'Error creating client', 'error': str(e)}), 500
@@ -59,8 +52,11 @@ def Clients():
                     'email': client.email,
                     'phone_number': client.phone_number,
                     'address': client.address,
+                    'is_archived': client.is_archived,
                     'created_at': client.created_at,
-                    'updated_at': client.updated_at
+                    'updated_at': client.updated_at,
+                    'created_by': client.created_by,
+                    'updated_by': client.updated_by
                 })
 
             return jsonify({'clients': clients_list}), 200
@@ -68,12 +64,12 @@ def Clients():
         except Exception as e:
             return jsonify({'message': 'Error getting clients', 'error': str(e)}), 500
 
-    return jsonify({'message': 'Method not allowed'}), 405
+    return jsonify({'message': 'Method not allowed, only POST and GET are allowed'}), 405
 
 
 
 @client_bp.route('/Clients/<id>', methods=['GET', 'PUT', 'DELETE'])
-#@jwt_required()
+@jwt_required()
 def Client_id(id):
     '''
     GET: Get existing client from DB using client ID
@@ -92,8 +88,11 @@ def Client_id(id):
                 'email': client.email,
                 'phone_number': client.phone_number,
                 'address': client.address,
+                'is_archived': client.is_archived,
                 'created_at': client.created_at,
-                'updated_at': client.updated_at
+                'updated_at': client.updated_at,
+                'created_by': client.created_by,
+                'updated_by': client.updated_by
             }
 
             return jsonify({'message': f'Client with id:{id} retrieved successfully','client': client}), 200
@@ -104,45 +103,57 @@ def Client_id(id):
 
     elif request.method == 'PUT':
         try:
+            curr_user_id = get_jwt_identity()
             data = request.get_json()
             client = Client.query.get(id)
 
             if not client:
                 return jsonify({'message': 'Client not found'}), 404
 
-            client.company_name = data['company_name']
-            client.email = data['email']
-            client.phone_number = data['phone_number']
-            client.address = data['address']
+            if 'company_name' in data:
+                client.company_name = data['company_name']
+            if 'email' in data:
+                client.email = data['email']
+            if 'phone_number' in data:
+                client.phone_number = data['phone_number']
+            if 'address' in data:
+                client.address = data['address']
+            if 'is_archived' in data:
+                client.is_archived = data['is_archived']
+            client.updated_by = curr_user_id
             db.session.commit()
 
-            client = Client.query.get(id)
-
             return jsonify({'message': f'Client with id:{id} updated successfully'}), 200
-
 
         except Exception as e:
             return jsonify({'message': 'Error updating client', 'error': str(e)}), 500
 
-    '''
+    
     elif request.method == 'DELETE':
         try:
+            curr_user_id = get_jwt_identity()
             client = Client.query.get(id)
+
             if not client:
                 return jsonify({'message': 'Client not found'}), 404
-            db.session.delete(client)
+
+            client.is_archived = True
+            client.updated_by = curr_user_id
+            
             db.session.commit()
             return jsonify({'message': 'Client deleted successfully'}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error deleting client', 'error': str(e)}), 500
-    '''
+    
 
     return jsonify({'message': 'Method not allowed'}), 405
 
 
+
+#TODO FIX
 @client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def Client_Contracts_id(id):
     '''
     Get: Get all contracts associated with a specific client

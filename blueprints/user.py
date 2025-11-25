@@ -56,20 +56,15 @@ def Users():
             curr_user_id = get_jwt_identity()
             data = request.get_json()
 
-            email = data['email']
-            password = data['password']
-            full_name = data['full_name']
-            is_archived = data['is_archived'] if 'is_archived' in data else False
-
             new_user = User(
-                email=email,
-                full_name=full_name,
-                is_archived=is_archived,
+                email=data['email'],
+                full_name=data['full_name'],
+                is_archived=data.get('is_archived', False),
                 created_by=curr_user_id,
                 updated_by=curr_user_id
              )
 
-            new_user.set_password(password)
+            new_user.set_password(data['password'])
 
             db.session.add(new_user)
             db.session.commit()
@@ -131,7 +126,7 @@ def User_id(id):
                 'updated_by': user.updated_by
             }
 
-            return jsonify({'user': user}), 200
+            return jsonify({'message': f'User with id:{id} retrieved successfully','user': user}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting user', 'error': str(e)}), 500
@@ -141,7 +136,6 @@ def User_id(id):
         try:
             curr_user_id = get_jwt_identity()
             data = request.get_json()
-
             user = User.query.get(id)
 
             if not user:
@@ -185,7 +179,7 @@ def User_id(id):
     return jsonify({'message': 'Method not allowed'}), 405
         
     
-
+##### Check
 @user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def User_Contracts_id(id):
