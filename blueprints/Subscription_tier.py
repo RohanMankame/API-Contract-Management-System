@@ -7,25 +7,21 @@ Subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
 
 @Subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
-#@jwt_required()
+@jwt_required()
 def Subscription_tiers():
     if request.method == 'POST':
         try:
-            data = request.get_json()
-            subscription_id = data['subscription_id']
-            tier_name = data['tier_name']
-            min_calls = data['min_calls']
-            max_calls = data['max_calls']
-            price_per_tier = data['price_per_tier']
-            
+            data = request.get_json()            
 
             new_tier = Subscription_tier(
-                subscription_id=subscription_id,
-                tier_name=tier_name,
-                min_calls=min_calls,
-                max_calls=max_calls,
-                price_per_tier=price_per_tier,
-                
+                subscription_id = data['subscription_id'],
+                min_calls = data['min_calls'],
+                max_calls = data['max_calls'],
+                base_price = data['base_price'],
+                price_per_tier = data['price_per_tier'],
+                is_archived = data.get('is_archived', False),
+                created_by = get_jwt_identity(),
+                updated_by = get_jwt_identity()
             )
 
             db.session.add(new_tier)
@@ -37,6 +33,7 @@ def Subscription_tiers():
             return jsonify({'message': 'Error creating subscription tier', 'error': str(e)}), 500
 
 
+
     elif request.method == 'GET':
         try:
             tiers = Subscription_tier.query.all()
@@ -46,10 +43,15 @@ def Subscription_tiers():
                 tiers_list.append({
                     'id': tier.id,
                     'subscription_id': tier.subscription_id,
-                    'tier_name': tier.tier_name,
                     'min_calls': tier.min_calls,
                     'max_calls': tier.max_calls,
+                    'base_price': tier.base_price,
                     'price_per_tier': tier.price_per_tier,
+                    'is_archived': tier.is_archived,
+                    'created_at': tier.created_at,
+                    'updated_at': tier.updated_at,
+                    'created_by': tier.created_by,
+                    'updated_by': tier.updated_by
                 })
 
             return jsonify(tiers_list), 200
@@ -61,7 +63,7 @@ def Subscription_tiers():
 
 
 @Subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','DELETE'])
-#@jwt_required()
+@jwt_required()
 def Subscription_tier_id(id):
     if request.method == 'GET':
         try:

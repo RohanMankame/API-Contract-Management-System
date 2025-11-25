@@ -1,13 +1,13 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from models import Subscription
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 Subscription_bp = Blueprint('subscription', __name__)
 
 @Subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
-#@jwt_required()
+@jwt_required()
 def Subscriptions():
     '''
     Post: Create a new subscription
@@ -16,24 +16,15 @@ def Subscriptions():
     if request.method == 'POST':
         try:
             data = request.get_json()
-            contract_id = data['contract_id']
-            product_id = data['product_id']
-            start_date = data['start_date']
-            end_date = data['end_date']
-            pricing_type = data['pricing_type']
-            varible_strategy = data.get('varible_strategy', None)
-            base_price = data['base_price']
-            is_archived = data.get('is_archived', False)
 
             new_subscription = Subscription(
-                contract_id=contract_id,
-                product_id=product_id,
-                start_date=start_date,
-                end_date=end_date,
-                pricing_type=pricing_type,
-                varible_strategy=varible_strategy,
-                base_price=base_price,
-                is_archived=is_archived
+                contract_id = data['contract_id'],
+                product_id = data['product_id'],
+                pricing_type = data['pricing_type'],
+                strategy = data['strategy'],
+                is_archived = data.get('is_archived', False),
+                created_by = get_jwt_identity(),
+                updated_by = get_jwt_identity()
             )
 
             db.session.add(new_subscription)
@@ -55,12 +46,13 @@ def Subscriptions():
                     'id': subscription.id,
                     'contract_id': subscription.contract_id,
                     'product_id': subscription.product_id,
-                    'start_date': subscription.start_date,
-                    'end_date': subscription.end_date,
-                    'pricing_type': subscription.pricing_type,
-                    'varible_strategy': subscription.varible_strategy,
-                    'base_price': subscription.base_price,
-                    'is_archived': subscription.is_archived
+                    'princing_type': subscription.pricing_type,
+                    'strategy': subscription.strategy,
+                    'is_archived': subscription.is_archived,
+                    'created_at': subscription.created_at,
+                    'updated_at': subscription.updated_at,
+                    'created_by': subscription.created_by,
+                    'updated_by': subscription.updated_by
                 })
 
             return jsonify(subscriptions_list), 200
@@ -72,7 +64,7 @@ def Subscriptions():
 
 
 @Subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','DELETE'])
-#@jwt_required()
+@jwt_required()
 def Subscription_id(id):
     ''' 
     Get: Get details of specific Subscription
@@ -82,19 +74,21 @@ def Subscription_id(id):
     if request.method == 'GET':
         try:
             subscription = Subscription.query.get(id)
+            
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
             subscription_data = {
-                'id': subscription.id,
-                'contract_id': subscription.contract_id,
-                'product_id': subscription.product_id,
-                'start_date': subscription.start_date,
-                'end_date': subscription.end_date,
-                'pricing_type': subscription.pricing_type,
-                'varible_strategy': subscription.varible_strategy,
-                'base_price': subscription.base_price,
-                'is_archived': subscription.is_archived
+                    'id': subscription.id,
+                    'contract_id': subscription.contract_id,
+                    'product_id': subscription.product_id,
+                    'princing_type': subscription.pricing_type,
+                    'strategy': subscription.strategy,
+                    'is_archived': subscription.is_archived,
+                    'created_at': subscription.created_at,
+                    'updated_at': subscription.updated_at,
+                    'created_by': subscription.created_by,
+                    'updated_by': subscription.updated_by
             }
 
             return jsonify(subscription_data), 200
@@ -105,20 +99,24 @@ def Subscription_id(id):
 
     elif request.method == 'PUT':
         try:
+            data = request.get_json()
             subscription = Subscription.query.get(id)
+
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
+            
+            if 'contract_id' in data:
+                subscription.contract_id = data['contract_id']
+            if 'product_id' in data:
+                subscription.product_id = data['product_id']
+            if 'pricing_type' in data:
+                subscription.pricing_type = data['pricing_type']
+            if 'strategy' in data:
+                subscription.strategy = data['strategy']
+            if 'is_archived' in data:
+                subscription.is_archived = data['is_archived']
 
-            data = request.get_json()
-            subscription.contract_id = data.get('contract_id', subscription.contract_id)
-            subscription.product_id = data.get('product_id', subscription.product_id)
-            subscription.start_date = data.get('start_date', subscription.start_date)
-            subscription.end_date = data.get('end_date', subscription.end_date)
-            subscription.pricing_type = data.get('pricing_type', subscription.pricing_type)
-            subscription.varible_strategy = data.get('varible_strategy', subscription.varible_strategy)
-            subscription.base_price = data.get('base_price', subscription.base_price)
-            subscription.is_archived = data.get('is_archived', subscription.is_archived)
-
+            subscription.updated_by = get_jwt_identity()
             db.session.commit()
 
             return jsonify({'message': 'Subscription updated successfully'}), 200
@@ -134,6 +132,7 @@ def Subscription_id(id):
                 return jsonify({'message': 'Subscription not found'}), 404
 
             subscription.is_archived = True
+            subscription.updated_by = get_jwt_identity()
             db.session.commit()
 
             return jsonify({'message': 'Subscription has been archived successfully'}), 200
@@ -145,7 +144,7 @@ def Subscription_id(id):
 
 
 @Subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def Subscription_Tiers_id(id):
     '''
     Get: Get all tiers associated with a specific subscription

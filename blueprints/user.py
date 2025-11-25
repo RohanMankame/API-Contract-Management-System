@@ -134,7 +134,7 @@ def User_id(id):
 
     elif request.method == 'PUT':
         try:
-            curr_user_id = get_jwt_identity()
+            
             data = request.get_json()
             user = User.query.get(id)
 
@@ -150,7 +150,7 @@ def User_id(id):
             if 'is_archived' in data:
                 user.is_archived = data['is_archived']
 
-            user.updated_by = curr_user_id 
+            user.updated_by = get_jwt_identity() 
 
             db.session.commit()
             return jsonify({'message': 'User updated successfully'}), 200
@@ -161,14 +161,13 @@ def User_id(id):
     # No deletion of user, only archiving is allowed
     elif request.method == 'DELETE':
         try:
-            curr_user_id = get_jwt_identity()
             user = User.query.get(id)
 
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
             user.is_archived = True # only archive the user
-            user.updated_by = curr_user_id 
+            user.updated_by = get_jwt_identity() 
 
             db.session.commit()
             return jsonify({'message': 'User archived successfully'}), 200
