@@ -18,13 +18,13 @@ def Contracts():
     '''
     if request.method == 'POST':
         try:
-
             data = request.get_json()
 
             new_contract = Contract(
                 client_id=data['client_id'],
                 contract_name=data['contract_name'],
                 is_archived=data.get('is_archived', False),
+                
                 created_by = get_jwt_identity(),
                 updated_by = get_jwt_identity()
             )
@@ -48,6 +48,7 @@ def Contracts():
                     'id': contract.id,
                     'client_id': contract.client_id,
                     'contract_name': contract.contract_name,
+                    
                     'is_archived': contract.is_archived,                
                     'created_at': contract.created_at,
                     'updated_at': contract.updated_at,
@@ -82,6 +83,7 @@ def Contract_id(id):
                     'id': contract.id,
                     'client_id': contract.client_id,
                     'contract_name': contract.contract_name,
+                   
                     'is_archived': contract.is_archived,                
                     'created_at': contract.created_at,
                     'updated_at': contract.updated_at,
@@ -108,6 +110,7 @@ def Contract_id(id):
                 contract.contract_name = data['contract_name']
             if 'is_archived' in data:
                 contract.is_archived = data['is_archived']
+            
             contract.updated_by = get_jwt_identity()
 
             db.session.commit()
@@ -124,8 +127,9 @@ def Contract_id(id):
                 return jsonify({'message': 'Contract not found'}), 404
 
             contract.is_archived = True
-            contract.updated_by = get_jwt_identity()
             
+            contract.updated_by = get_jwt_identity()
+
             db.session.commit()
             return jsonify({'message': 'Contract has been archived successfully'}), 200
 
@@ -136,60 +140,11 @@ def Contract_id(id):
 
 
 @contract_bp.route('/Contracts/<id>/Product', methods=['POST','GET'])
-#@jwt_required()
+@jwt_required()
 def Contract_Product_id(id):
     '''
-    Post: new contract for a spefic product
-    Get: get all contracts that use a specific product
+    Get: Get all products associated with a specific contract ID
     '''
-    if request.method == 'POST':
-        try:
-            data = request.get_json()
-            product_id = data['product_id']
-            contract = Contract.query.get(id)
-            if not contract:
-                return jsonify({'message': 'Contract not found'}), 404
-
-            new_subscription = Subscription(
-                product_id=product_id,
-                contract_id=contract.id,
-                start_date=datetime.utcnow(),
-                end_date=data.get('end_date')
-            )
-
-            db.session.add(new_subscription)
-            db.session.commit()
-
-            return jsonify({'message': 'Subscription created successfully', 'subscription_id': new_subscription.id}), 201
-
-        except Exception as e:
-            return jsonify({'message': 'Error creating subscription for contract', 'error': str(e)}), 500
-
-        
-    elif request.method == 'GET':
-        try:
-            contract = Contract.query.get(id)
-            if not contract:
-                return jsonify({'message': 'Contract not found'}), 404
-
-            subscriptions = contract.subscriptions
-            products_list = []
-
-            for subscription in subscriptions:
-                product = subscription.product
-                products_list.append({
-                    'id': product.id,
-                    'api_name': product.api_name,
-                    'description': product.description,
-                    'is_archived': product.is_archived,
-                    'created_at': product.created_at,
-                    'updated_at': product.updated_at
-                })
-
-            return jsonify({'products': products_list}), 200
-
-        except Exception as e:
-            return jsonify({'message': 'Error getting products for contract', 'error': str(e)}), 500
+    pass
     
-    return jsonify({'message': 'Method not allowed'}), 405
 

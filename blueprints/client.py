@@ -150,8 +150,6 @@ def Client_id(id):
     return jsonify({'message': 'Method not allowed'}), 405
 
 
-
-#TODO FIX
 @client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Client_Contracts_id(id):
@@ -169,13 +167,16 @@ def Client_Contracts_id(id):
 
             for contract in contracts:
                 contracts_list.append({
-                    'id': contract.id,
-                    'contract_name': contract.contract_name,
-                    'start_date': contract.start_date,
-                    'end_date': contract.end_date,
-                    'status': contract.status,
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at
+                    'id': client.id,
+                    'company_name': client.company_name,
+                    'email': client.email,
+                    'phone_number': client.phone_number,
+                    'address': client.address,
+                    'is_archived': client.is_archived,
+                    'created_at': client.created_at,
+                    'updated_at': client.updated_at,
+                    'created_by': client.created_by,
+                    'updated_by': client.updated_by
                 })
 
             return jsonify({'contracts': contracts_list}), 200

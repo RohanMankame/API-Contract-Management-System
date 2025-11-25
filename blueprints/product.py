@@ -149,6 +149,7 @@ def Product_Contracts_id(id):
             contracts_list = []
             for subscription in product.subscriptions:
                 contract = subscription.contract
+                
                 contracts_list.append({
                     'contract_id': contract.id,
                     'client_id': contract.client_id,

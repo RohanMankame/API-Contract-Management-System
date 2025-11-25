@@ -183,7 +183,7 @@ def User_id(id):
 @jwt_required()
 def User_Contracts_id(id):
     '''
-    Get: Get all contracts associated with a specific user
+    Get: Get all contracts created by a user
     '''
     if request.method == 'GET':
         try:
@@ -196,13 +196,14 @@ def User_Contracts_id(id):
 
             for contract in user.contracts_created:
                 contracts.append({
-                    'id': contract.id,
-                    'client_id': contract.client_id,
-                    'contract_type': contract.contract_type,
-                    'contract_name': contract.contract_name,
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at,
-                    'is_archived': contract.is_archived
+                    'id': user.id,
+                    'email': user.email,
+                    'full_name': user.full_name,
+                    'created_at': user.created_at,
+                    'updated_at': user.updated_at,
+                    'is_archived': user.is_archived,
+                    'created_by': user.created_by,
+                    'updated_by': user.updated_by
                 })
 
             return jsonify({'contracts': contracts}), 200

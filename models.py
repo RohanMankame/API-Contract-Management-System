@@ -94,6 +94,8 @@ class Contract(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     client_id = db.Column(UUID(as_uuid=True), db.ForeignKey('client.id'), nullable=False)
     contract_name = db.Column(db.String(100), nullable=False)
+
+   
     
     # archived
     is_archived = db.Column(db.Boolean, default=False)
