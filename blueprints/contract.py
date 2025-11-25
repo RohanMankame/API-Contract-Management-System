@@ -20,23 +20,13 @@ def Contracts():
         try:
 
             data = request.get_json()
-            client_id = data['client_id']
-            contract_type = data['contract_type']
-            contract_name = data['contract_name']
-            is_archived = data.get('is_archived', False)
-
-            user_email = get_jwt_identity()
-            user = User.query.filter_by(email=user_email).first()
-            user_id = user.id
-            
 
             new_contract = Contract(
-                client_id=client_id,
-                contract_type=contract_type,
-                created_by_user_id=user_id,
-                updated_by_user_id=user_id,
-                contract_name=contract_name,
-                is_archived=is_archived
+                client_id=data['client_id'],
+                contract_name=data['contract_name'],
+                is_archived=data.get('is_archived', False),
+                created_by = get_jwt_identity(),
+                updated_by = get_jwt_identity()
             )
 
             db.session.add(new_contract)
@@ -47,6 +37,7 @@ def Contracts():
         except Exception as e:
             return jsonify({'message': 'Error creating contract', 'error': str(e)}), 500
     
+
     elif request.method == 'GET':
         try:
             contracts = Contract.query.all()
@@ -56,13 +47,12 @@ def Contracts():
                 contracts_list.append({
                     'id': contract.id,
                     'client_id': contract.client_id,
-                    'contract_type': contract.contract_type,
-                    'created_by_user_id': contract.created_by_user_id,
-                    'updated_by_user_id': contract.updated_by_user_id,
                     'contract_name': contract.contract_name,
+                    'is_archived': contract.is_archived,                
                     'created_at': contract.created_at,
                     'updated_at': contract.updated_at,
-                    'is_archived': contract.is_archived
+                    'created_by': contract.created_by,
+                    'updated_by': contract.updated_by
                 })
 
             return jsonify({'contracts': contracts_list}), 200
@@ -75,7 +65,7 @@ def Contracts():
 
 
 @contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT', 'DELETE'])
-#@jwt_required()
+@jwt_required()
 def Contract_id(id):
     '''
     GET: Get existing contract from DB using contract ID
@@ -89,15 +79,14 @@ def Contract_id(id):
                 return jsonify({'message': 'Contract not found'}), 404
 
             contract_data = {
-                'id': contract.id,
-                'client_id': contract.client_id,
-                'contract_type': contract.contract_type,
-                'created_by_user_id': contract.created_by_user_id,
-                'updated_by_user_id': contract.updated_by_user_id,
-                'contract_name': contract.contract_name,
-                'created_at': contract.created_at,
-                'updated_at': contract.updated_at,
-                'is_archived': contract.is_archived
+                    'id': contract.id,
+                    'client_id': contract.client_id,
+                    'contract_name': contract.contract_name,
+                    'is_archived': contract.is_archived,                
+                    'created_at': contract.created_at,
+                    'updated_at': contract.updated_at,
+                    'created_by': contract.created_by,
+                    'updated_by': contract.updated_by
             }
 
             return jsonify({'contract': contract_data}), 200
@@ -113,23 +102,30 @@ def Contract_id(id):
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
             
-            contract.client_id = data['client_id']
-            contract.contract_type = data['contract_type']
-            contract.updated_by_user_id = data['updated_by_user_id']
-            contract.contract_name = data['contract_name']
-            contract.is_archived = data.get('is_archived', contract.is_archived)
+            if 'client_id' in data:
+                contract.client_id = data['client_id']
+            if 'contract_name' in data:
+                contract.contract_name = data['contract_name']
+            if 'is_archived' in data:
+                contract.is_archived = data['is_archived']
+            contract.updated_by = get_jwt_identity()
+
             db.session.commit()
             return jsonify({'message': 'Contract updated successfully'}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error updating contract', 'error': str(e)}), 500
 
+
     elif request.method == 'DELETE':
         try:
             contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
+
             contract.is_archived = True
+            contract.updated_by = get_jwt_identity()
+            
             db.session.commit()
             return jsonify({'message': 'Contract has been archived successfully'}), 200
 
