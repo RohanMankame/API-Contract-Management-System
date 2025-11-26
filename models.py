@@ -148,10 +148,17 @@ class Subscription_tier(db.Model):
     min_calls = db.Column(db.Integer, nullable=False)
     max_calls = db.Column(db.Integer, nullable=False)
     
+    #just added should change to not nullable later
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    
     base_price = db.Column(db.Float, nullable=True) # For Fixed and Flat strategies
     price_per_tier = db.Column(db.Float, nullable=True) # For Pick and Fill strategies
     # archived
     is_archived = db.Column(db.Boolean, default=False)
+    # timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     # Users
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
