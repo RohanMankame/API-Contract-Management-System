@@ -150,15 +150,13 @@ def Contract_Product_id(id):
         if not contract:
             return jsonify({'message': 'Contract not found'}), 404
 
-        products_list = []
-        
-        
+        unique_products = {}
+    
         for subscription in contract.subscriptions:
-            product = subscription.product 
-            
-            
-            if not any(p['id'] == str(product.id) for p in products_list):
-                products_list.append({
+
+            product = subscription.product
+            if product.id not in unique_products:
+                unique_products[product.id] = {
                     'id': str(product.id),
                     'api_name': product.api_name,  
                     'description': product.description,
@@ -167,9 +165,9 @@ def Contract_Product_id(id):
                     'updated_at': product.updated_at.isoformat() if product.updated_at else None,
                     'created_by': str(product.created_by) if product.created_by else None,
                     'updated_by': str(product.updated_by) if product.updated_by else None
-                })
+                }
 
-        return jsonify({'products': products_list}), 200
+        return jsonify({'products': list(unique_products.values())}), 200
     
     
     except Exception as e:
