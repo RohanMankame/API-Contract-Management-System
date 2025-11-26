@@ -137,7 +137,7 @@ def Subscription_tier_id(id):
 
 
 @Subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def Subscription_tier_Subscriptions_id(id):
     if request.method == 'GET':
         try:
