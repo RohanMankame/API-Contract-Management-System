@@ -145,22 +145,25 @@ def Subscription_tier_Subscriptions_id(id):
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
-            subscriptions = tier.subscriptions  # Assuming a relationship is defined in the model
-            subscriptions_list = []
+            subscription = tier.subscription  
+            
+            if not subscription:
+                return jsonify({'message': 'No subscription found for this tier'}), 404
 
-            for subscription in subscriptions:
-                subscriptions_list.append({
-                    'id': subscription.id,
-                    'client_id': subscription.client_id,
-                    'subscription_name': subscription.subscription_name,
-                    'is_archived': subscription.is_archived,
-                    'created_at': subscription.created_at,
-                    'updated_at': subscription.updated_at,
-                    'created_by': subscription.created_by,
-                    'updated_by': subscription.updated_by
-                })
+            subscription_data = {
+                'id': str(subscription.id),
+                'contract_id': str(subscription.contract_id),
+                'product_id': str(subscription.product_id),
+                'pricing_type': subscription.pricing_type,
+                'strategy': subscription.strategy,
+                'is_archived': subscription.is_archived,
+                'created_at': subscription.created_at.isoformat() if subscription.created_at else None,
+                'updated_at': subscription.updated_at.isoformat() if subscription.updated_at else None,
+                'created_by': str(subscription.created_by) if subscription.created_by else None,
+                'updated_by': str(subscription.updated_by) if subscription.updated_by else None
+            }
 
-            return jsonify(subscriptions_list), 200
+            return jsonify({'subscription': subscription_data}), 200
             
         except Exception as e:
             return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500

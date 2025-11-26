@@ -150,21 +150,24 @@ def Contract_Product_id(id):
         if not contract:
             return jsonify({'message': 'Contract not found'}), 404
 
-        products = contract.products  
         products_list = []
-
-        for product in products:
-            products_list.append({
-                'id': product.id,
-                'product_name': product.product_name,
-                'description': product.description,
-                'price': product.price,
-                'is_archived': product.is_archived,
-                'created_at': product.created_at,
-                'updated_at': product.updated_at,
-                'created_by': product.created_by,
-                'updated_by': product.updated_by
-            })
+        
+        # Get all subscriptions for this contract
+        for subscription in contract.subscriptions:
+            product = subscription.product  # Each subscription has a product
+            
+            # Check if product is already in the list to avoid duplicates
+            if not any(p['id'] == str(product.id) for p in products_list):
+                products_list.append({
+                    'id': str(product.id),
+                    'api_name': product.api_name,  # Note: your Product model uses 'api_name', not 'product_name'
+                    'description': product.description,
+                    'is_archived': product.is_archived,
+                    'created_at': product.created_at.isoformat() if product.created_at else None,
+                    'updated_at': product.updated_at.isoformat() if product.updated_at else None,
+                    'created_by': str(product.created_by) if product.created_by else None,
+                    'updated_by': str(product.updated_by) if product.updated_by else None
+                })
 
         return jsonify({'products': products_list}), 200
     
