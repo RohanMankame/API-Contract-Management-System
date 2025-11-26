@@ -196,14 +196,14 @@ def User_Contracts_id(id):
 
             for contract in user.contracts_created:
                 contracts.append({
-                    'id': user.id,
-                    'email': user.email,
-                    'full_name': user.full_name,
-                    'created_at': user.created_at,
-                    'updated_at': user.updated_at,
-                    'is_archived': user.is_archived,
-                    'created_by': user.created_by,
-                    'updated_by': user.updated_by
+                    'id': str(contract.id),
+                    'client_id': str(contract.client_id),
+                    'contract_name': contract.contract_name,
+                    'is_archived': contract.is_archived,
+                    'created_at': contract.created_at,
+                    'updated_at': contract.updated_at,
+                    'created_by': contract.created_by,
+                    'updated_by': contract.updated_by
                 })
 
             return jsonify({'contracts': contracts}), 200

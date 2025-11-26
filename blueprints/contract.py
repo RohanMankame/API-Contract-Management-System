@@ -152,15 +152,15 @@ def Contract_Product_id(id):
 
         products_list = []
         
-        # Get all subscriptions for this contract
+        
         for subscription in contract.subscriptions:
-            product = subscription.product  # Each subscription has a product
+            product = subscription.product 
             
-            # Check if product is already in the list to avoid duplicates
+            
             if not any(p['id'] == str(product.id) for p in products_list):
                 products_list.append({
                     'id': str(product.id),
-                    'api_name': product.api_name,  # Note: your Product model uses 'api_name', not 'product_name'
+                    'api_name': product.api_name,  
                     'description': product.description,
                     'is_archived': product.is_archived,
                     'created_at': product.created_at.isoformat() if product.created_at else None,
