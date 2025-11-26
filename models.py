@@ -156,6 +156,9 @@ class Subscription_tier(db.Model):
     price_per_tier = db.Column(db.Float, nullable=True) # For Pick and Fill strategies
     # archived
     is_archived = db.Column(db.Boolean, default=False)
+    # timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     # Users
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
