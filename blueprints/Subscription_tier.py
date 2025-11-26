@@ -17,6 +17,10 @@ def Subscription_tiers():
                 subscription_id = data['subscription_id'],
                 min_calls = data['min_calls'],
                 max_calls = data['max_calls'],
+                #just added
+                start_date = data.get('start_date'),
+                end_date = data.get('end_date'),
+
                 base_price = data['base_price'],
                 price_per_tier = data['price_per_tier'],
                 is_archived = data.get('is_archived', False),
@@ -45,6 +49,8 @@ def Subscription_tiers():
                     'subscription_id': tier.subscription_id,
                     'min_calls': tier.min_calls,
                     'max_calls': tier.max_calls,
+                    'start_date': tier.start_date,
+                    'end_date': tier.end_date,
                     'base_price': tier.base_price,
                     'price_per_tier': tier.price_per_tier,
                     'is_archived': tier.is_archived,
@@ -77,6 +83,8 @@ def Subscription_tier_id(id):
                 'tier_name': tier.tier_name,
                 'min_calls': tier.min_calls,
                 'max_calls': tier.max_calls,
+                'start_date': tier.start_date,
+                'end_date': tier.end_date,
                 'price_per_tier': tier.price_per_tier,
             }
 
@@ -96,6 +104,11 @@ def Subscription_tier_id(id):
             tier.tier_name = data.get('tier_name', tier.tier_name)
             tier.min_calls = data.get('min_calls', tier.min_calls)
             tier.max_calls = data.get('max_calls', tier.max_calls)
+            
+            tier.start_date = data.get('start_date', tier.start_date)
+            tier.end_date = data.get('end_date', tier.end_date)
+
+            tier.base_price = data.get('base_price', tier.base_price)
             tier.price_per_tier = data.get('price_per_tier', tier.price_per_tier)
 
             db.session.commit()
@@ -112,13 +125,14 @@ def Subscription_tier_id(id):
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
-            db.session.delete(tier)
+            tier.is_archived = True
+            tier.updated_by = get_jwt_identity()
             db.session.commit()
 
-            return jsonify({'message': 'Subscription tier deleted successfully'}), 200
+            return jsonify({'message': 'Subscription tier archived successfully'}), 200
 
         except Exception as e:
-            return jsonify({'message': 'Error deleting subscription tier', 'error': str(e)}), 500
+            return jsonify({'message': 'Error archiving subscription tier', 'error': str(e)}), 500
 
 
 
