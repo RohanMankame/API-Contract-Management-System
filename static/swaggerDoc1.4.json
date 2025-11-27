@@ -158,6 +158,8 @@
           "subscription_id": { "type": "string", "format": "uuid" },
           "min_calls": { "type": "integer" },
           "max_calls": { "type": "integer" },
+          "start_date": { "type": "string", "format": "date-time", "nullable": true },
+          "end_date": { "type": "string", "format": "date-time", "nullable": true },
           "base_price": { "type": "number", "nullable": true },
           "price_per_tier": { "type": "number", "nullable": true },
           "is_archived": { "type": "boolean" },
@@ -174,6 +176,8 @@
           "subscription_id": { "type": "string", "format": "uuid" },
           "min_calls": { "type": "integer" },
           "max_calls": { "type": "integer" },
+          "start_date": { "type": "string", "format": "date-time" },
+          "end_date": { "type": "string", "format": "date-time" },
           "base_price": { "type": "number" },
           "price_per_tier": { "type": "number" },
           "is_archived": { "type": "boolean", "default": false }
@@ -1250,6 +1254,9 @@
                   "tier_name": { "type": "string" },
                   "min_calls": { "type": "integer" },
                   "max_calls": { "type": "integer" },
+                  "start_date": { "type": "string", "format": "date-time" },
+                  "end_date": { "type": "string", "format": "date-time" },
+                  "base_price": { "type": "number" },
                   "price_per_tier": { "type": "number" }
                 }
               }
@@ -1264,7 +1271,7 @@
       },
       "delete": {
         "tags": ["Subscription Tiers"],
-        "summary": "Delete subscription tier by ID (hard delete)",
+        "summary": "Archive subscription tier by ID (soft delete)",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           {
@@ -1275,9 +1282,9 @@
           }
         ],
         "responses": {
-          "200": { "description": "Subscription tier deleted successfully" },
+          "200": { "description": "Subscription tier archived successfully" },
           "404": { "description": "Subscription tier not found" },
-          "500": { "description": "Error deleting subscription tier" }
+          "500": { "description": "Error archiving subscription tier" }
         }
       }
     },
