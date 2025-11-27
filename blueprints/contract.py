@@ -26,8 +26,9 @@ def Contracts():
             new_contract = Contract(
                 client_id=data['client_id'],
                 contract_name=data['contract_name'],
+                billing_type=data['billing_type'],
+                payment_type=data['payment_type'],
                 is_archived=data.get('is_archived', False),
-                
                 created_by = get_jwt_identity(),
                 updated_by = get_jwt_identity()
             )
