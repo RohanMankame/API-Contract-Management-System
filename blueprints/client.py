@@ -74,7 +74,7 @@ def Client_id(id):
     '''
     GET: Get existing client from DB using client ID
     PUT: Update existing client in DB using client ID
-    DELETE: Delete existing client from DB using client ID
+    DELETE: Archive existing client from DB using client ID
     '''
     if request.method == 'GET':
         try:

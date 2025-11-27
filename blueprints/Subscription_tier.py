@@ -17,10 +17,8 @@ def Subscription_tiers():
                 subscription_id = data['subscription_id'],
                 min_calls = data['min_calls'],
                 max_calls = data['max_calls'],
-                #just added
                 start_date = data.get('start_date'),
                 end_date = data.get('end_date'),
-
                 base_price = data['base_price'],
                 price_per_tier = data['price_per_tier'],
                 is_archived = data.get('is_archived', False),
@@ -104,10 +102,8 @@ def Subscription_tier_id(id):
             tier.tier_name = data.get('tier_name', tier.tier_name)
             tier.min_calls = data.get('min_calls', tier.min_calls)
             tier.max_calls = data.get('max_calls', tier.max_calls)
-            
             tier.start_date = data.get('start_date', tier.start_date)
             tier.end_date = data.get('end_date', tier.end_date)
-
             tier.base_price = data.get('base_price', tier.base_price)
             tier.price_per_tier = data.get('price_per_tier', tier.price_per_tier)
 
@@ -157,10 +153,10 @@ def Subscription_tier_Subscriptions_id(id):
                 'pricing_type': subscription.pricing_type,
                 'strategy': subscription.strategy,
                 'is_archived': subscription.is_archived,
-                'created_at': subscription.created_at.isoformat() if subscription.created_at else None,
-                'updated_at': subscription.updated_at.isoformat() if subscription.updated_at else None,
-                'created_by': str(subscription.created_by) if subscription.created_by else None,
-                'updated_by': str(subscription.updated_by) if subscription.updated_by else None
+                'created_at': subscription.created_at.isoformat(),
+                'updated_at': subscription.updated_at.isoformat(),
+                'created_by': str(subscription.created_by),
+                'updated_by': str(subscription.updated_by)
             }
 
             return jsonify({'subscription': subscription_data}), 200

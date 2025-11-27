@@ -24,7 +24,6 @@ def Contracts():
                 client_id=data['client_id'],
                 contract_name=data['contract_name'],
                 is_archived=data.get('is_archived', False),
-                
                 created_by = get_jwt_identity(),
                 updated_by = get_jwt_identity()
             )
@@ -71,7 +70,7 @@ def Contract_id(id):
     '''
     GET: Get existing contract from DB using contract ID
     PUT: Update existing contract in DB using contract ID
-    DELETE: Delete existing contract from DB using contract ID
+    DELETE: archive existing contract from DB using contract ID
     '''
     if request.method == 'GET':
         try:
@@ -83,7 +82,6 @@ def Contract_id(id):
                     'id': contract.id,
                     'client_id': contract.client_id,
                     'contract_name': contract.contract_name,
-                   
                     'is_archived': contract.is_archived,                
                     'created_at': contract.created_at,
                     'updated_at': contract.updated_at,
@@ -127,7 +125,6 @@ def Contract_id(id):
                 return jsonify({'message': 'Contract not found'}), 404
 
             contract.is_archived = True
-            
             contract.updated_by = get_jwt_identity()
 
             db.session.commit()
@@ -161,10 +158,10 @@ def Contract_Product_id(id):
                     'api_name': product.api_name,  
                     'description': product.description,
                     'is_archived': product.is_archived,
-                    'created_at': product.created_at.isoformat() if product.created_at else None,
-                    'updated_at': product.updated_at.isoformat() if product.updated_at else None,
-                    'created_by': str(product.created_by) if product.created_by else None,
-                    'updated_by': str(product.updated_by) if product.updated_by else None
+                    'created_at': product.created_at.isoformat(),
+                    'updated_at': product.updated_at.isoformat(),
+                    'created_by': str(product.created_by),
+                    'updated_by': str(product.updated_by)
                 }
 
         return jsonify({'products': list(unique_products.values())}), 200

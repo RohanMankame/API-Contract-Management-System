@@ -63,7 +63,7 @@ def Product_id(id):
     ''' 
     Get: Get details of spefic Product(API)
     Put: Update details of product with given ID
-    Delete: Delete product with given ID
+    Delete: Archive a product with given ID
     '''
     if request.method == 'GET':
         try:
@@ -111,8 +111,6 @@ def Product_id(id):
         except Exception as e:
             return jsonify({'message': 'Error updating product', 'error': str(e)}), 500
 
-
-    # no delete, just archive allowed
     elif request.method == 'DELETE':
         try:
             product = Product.query.get(id)
@@ -132,8 +130,6 @@ def Product_id(id):
 
 
 
-
-# TODO fix
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
@@ -147,12 +143,12 @@ def Product_Contracts_id(id):
                 return jsonify({'message': 'Product not found'}), 404
 
             contracts_list = []
-            seen_contracts = set()  # To avoid duplicates
+            seen_contracts = set()  
             
             for subscription in product.subscriptions:
                 contract = subscription.contract
                 
-                # Avoid duplicate contracts
+                # no duplicates
                 if contract.id not in seen_contracts:
                     seen_contracts.add(contract.id)
                     

@@ -69,7 +69,7 @@ def Subscription_id(id):
     ''' 
     Get: Get details of specific Subscription
     Put: Update details of subscription with given ID
-    Delete: Delete subscription with given ID
+    Delete: Archive a subscription with given ID
     '''
     if request.method == 'GET':
         try:
