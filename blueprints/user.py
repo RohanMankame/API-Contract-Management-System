@@ -3,6 +3,7 @@ from app import db
 from models import User
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from utils.util import iso
 
 # Initialize user Blueprint
 user_bp = Blueprint('user', __name__)
@@ -85,8 +86,8 @@ def Users():
                     'id': user.id,
                     'email': user.email,
                     'full_name': user.full_name,
-                    'created_at': user.created_at,
-                    'updated_at': user.updated_at,
+                    'created_at': iso(user.created_at),
+                    'updated_at': iso(user.updated_at),
                     'is_archived': user.is_archived,
                     'created_by': user.created_by,
                     'updated_by': user.updated_by

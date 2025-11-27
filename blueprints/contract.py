@@ -1,8 +1,11 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from app import db
 from models import Contract, User
 from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from utils.serilizer import serialize_contract
+import json
+
 
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
@@ -79,7 +82,7 @@ def Contract_id(id):
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
-            contract_data = {
+            """ contract_data = {
                     'id': contract.id,
                     'client_id': contract.client_id,
                     'contract_name': contract.contract_name,
@@ -89,9 +92,12 @@ def Contract_id(id):
                     'updated_at': contract.updated_at,
                     'created_by': contract.created_by,
                     'updated_by': contract.updated_by
-            }
+            } """
+            
+            
 
-            return jsonify({'contract': contract_data}), 200
+            payload = {'contract': serialize_contract(contract)}
+            return Response(json.dumps(payload, default=str, indent=5), mimetype='application/json'), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting contract', 'error': str(e)}), 500
@@ -150,23 +156,12 @@ def Contract_Product_id(id):
         if not contract:
             return jsonify({'message': 'Contract not found'}), 404
 
-        products = contract.products  
-        products_list = []
+        products = contract.products
 
-        for product in products:
-            products_list.append({
-                'id': product.id,
-                'product_name': product.product_name,
-                'description': product.description,
-                'price': product.price,
-                'is_archived': product.is_archived,
-                'created_at': product.created_at,
-                'updated_at': product.updated_at,
-                'created_by': product.created_by,
-                'updated_by': product.updated_by
-            })
+        products_list = [serialize_product(p) for p in products]
 
-        return jsonify({'products': products_list}), 200
+        payload = {'products': products_list}
+        return Response(json.dumps(payload, default=str, indent=5), mimetype='application/json'), 200
     
     
     except Exception as e:
