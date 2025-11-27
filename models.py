@@ -95,6 +95,9 @@ class Contract(db.Model):
     client_id = db.Column(UUID(as_uuid=True), db.ForeignKey('client.id'), nullable=False)
     contract_name = db.Column(db.String(100), nullable=False)
 
+    billing_type = db.Column(Enum("Monthly", "Quarterly", "Yearly", name="billing_type_enum"),nullable=False)
+    payment_type = db.Column(Enum("Prepaid", "Postpaid", name="payment_type_enum"),nullable=False)
+
    
     
     # archived
@@ -167,4 +170,24 @@ class Subscription_tier(db.Model):
     def __repr__(self):
         return f'Tier_id: {self.id}, sub_id:{self.subscription_id}, calls:{self.min_calls}-{self.max_calls}'
 
-    
+class Invoice(db.Model):
+    '''
+    Invoices charged from contracts 
+    '''
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    contract_id = db.Column(UUID(as_uuid=True), db.ForeignKey('contract.id'), nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
+    # archived
+    is_archived = db.Column(db.Boolean, default=False)
+    #period
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    # timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Users
+    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
+    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
+
+    def __repr__(self):
+        return f'Invoice_ID: {self.id}, Contract_ID: {self.contract_id}, Amount: {self.amount}'
