@@ -75,6 +75,14 @@
           "id": { "type": "string", "format": "uuid" },
           "client_id": { "type": "string", "format": "uuid" },
           "contract_name": { "type": "string" },
+          "billing_type": { 
+            "type": "string",
+            "enum": ["Monthly", "Quarterly", "Yearly"]
+          },
+          "payment_type": {
+            "type": "string",
+            "enum": ["Prepaid", "Postpaid"]
+          },
           "is_archived": { "type": "boolean" },
           "created_at": { "type": "string", "format": "date-time" },
           "updated_at": { "type": "string", "format": "date-time" },
@@ -84,10 +92,18 @@
       },
       "ContractInput": {
         "type": "object",
-        "required": ["client_id", "contract_name"],
+        "required": ["client_id", "contract_name", "billing_type", "payment_type"],
         "properties": {
           "client_id": { "type": "string", "format": "uuid" },
           "contract_name": { "type": "string" },
+          "billing_type": { 
+            "type": "string",
+            "enum": ["Monthly", "Quarterly", "Yearly"]
+          },
+          "payment_type": {
+            "type": "string",
+            "enum": ["Prepaid", "Postpaid"]
+          },
           "is_archived": { "type": "boolean", "default": false }
         }
       },
@@ -196,6 +212,33 @@
         "properties": {
           "message": { "type": "string" },
           "error": { "type": "string" }
+        }
+      }
+      ,
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "contract_id": { "type": "string", "format": "uuid" },
+          "total_amount": { "type": "number" },
+          "is_archived": { "type": "boolean" },
+          "start_date": { "type": "string", "format": "date-time" },
+          "end_date": { "type": "string", "format": "date-time" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string", "format": "uuid", "nullable": true },
+          "updated_by": { "type": "string", "format": "uuid", "nullable": true }
+        }
+      },
+      "InvoiceInput": {
+        "type": "object",
+        "required": ["contract_id", "total_amount", "start_date", "end_date"],
+        "properties": {
+          "contract_id": { "type": "string", "format": "uuid" },
+          "total_amount": { "type": "number" },
+          "start_date": { "type": "string", "format": "date-time" },
+          "end_date": { "type": "string", "format": "date-time" },
+          "is_archived": { "type": "boolean", "default": false }
         }
       }
     }
@@ -1314,6 +1357,137 @@
           },
           "404": { "description": "Subscription tier not found" },
           "500": { "description": "Error fetching subscriptions for tier" }
+        }
+      }
+    },
+    "/invoice": {
+      "post": {
+        "tags": ["Invoices"],
+        "summary": "Create a new invoice",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/InvoiceInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invoice created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "invoice_id": { "type": "string", "format": "uuid" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Error creating invoice" }
+        }
+      },
+      "get": {
+        "tags": ["Invoices"],
+        "summary": "Get all invoices",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of all invoices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Invoice" }
+                }
+              }
+            }
+          },
+          "500": { "description": "Error getting invoices" }
+        }
+      }
+    },
+    "/invoice/{id}": {
+      "get": {
+        "tags": ["Invoices"],
+        "summary": "Get invoice by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Invoice" }
+              }
+            }
+          },
+          "404": { "description": "Invoice not found" },
+          "500": { "description": "Error getting invoice" }
+        }
+      },
+      "put": {
+        "tags": ["Invoices"],
+        "summary": "Update invoice by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contract_id": { "type": "string", "format": "uuid" },
+                  "total_amount": { "type": "number" },
+                  "start_date": { "type": "string", "format": "date-time" },
+                  "end_date": { "type": "string", "format": "date-time" },
+                  "is_archived": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Invoice updated successfully" },
+          "404": { "description": "Invoice not found" },
+          "500": { "description": "Error updating invoice" }
+        }
+      },
+      "delete": {
+        "tags": ["Invoices"],
+        "summary": "Archive invoice by ID (soft delete)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Invoice archived successfully" },
+          "404": { "description": "Invoice not found" },
+          "500": { "description": "Error archiving invoice" }
         }
       }
     }
