@@ -57,6 +57,9 @@ def create_app():
     from blueprints.Subscription_tier import Subscription_tier_bp
     app.register_blueprint(Subscription_tier_bp, url_prefix='/')
 
+    from blueprints.invoice import invoice_bp
+    app.register_blueprint(invoice_bp, url_prefix='/')
+
     # Create database tables if not exist
     with app.app_context():
         

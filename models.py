@@ -110,6 +110,7 @@ class Contract(db.Model):
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     
     subscriptions = db.relationship('Subscription', backref='contract', lazy=True)
+    invoices = db.relationship('Invoice', backref='contract', lazy=True)
 
     def __repr__(self):
         return f'Contract_ID: {self.id}, contract_name: {self.contract_name}'
@@ -191,3 +192,4 @@ class Invoice(db.Model):
 
     def __repr__(self):
         return f'Invoice_ID: {self.id}, Contract_ID: {self.contract_id}, Amount: {self.amount}'
+

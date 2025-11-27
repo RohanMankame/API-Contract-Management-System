@@ -58,5 +58,21 @@ def serialize_contract(contract):
         'updated_at': contract.updated_at,
         'created_by': contract.created_by,
         'updated_by': contract.updated_by,
-        'subscriptions': [serialize_subscription(sub) for sub in contract.subscriptions]
+        'subscriptions': [serialize_subscription(sub) for sub in contract.subscriptions],
+        'invoices': [invoice.id for invoice in contract.invoices]
     }
+
+
+    def serialize_invoice(invoice):
+        return {
+            'id': invoice.id,
+            'contract_id': invoice.contract_id,
+            'total_amount': invoice.total_amount,
+            'start_date': invoice.start_date,
+            'end_date': invoice.end_date,
+            'is_archived': invoice.is_archived,
+            'created_at': invoice.created_at,
+            'updated_at': invoice.updated_at,
+            'created_by': invoice.created_by,
+            'updated_by': invoice.updated_by
+        }

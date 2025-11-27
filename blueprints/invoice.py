@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, Response
 from app import db
-from models import Contract
+from models import Invoice
 from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from utils.serilizer import serialize_contract
@@ -8,10 +8,10 @@ import json
 
 
 # Initialize contract Blueprint
-contract_bp = Blueprint('invoice', __name__)
+invoice_bp = Blueprint('invoice', __name__)
 
 
-@contract_bp.route('/invoice', methods=['POST', 'GET'])
+@invoice_bp.route('/invoice', methods=['POST', 'GET'])
 @jwt_required()
 def invoice():
     if request.method == 'POST':
@@ -66,7 +66,7 @@ def invoice():
 
 
 
-@contract_bp.route('/invoice/<id>', methods=['GET', 'PUT', 'DELETE'])
+@invoice_bp.route('/invoice/<id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 def get_invoice(id):
 
