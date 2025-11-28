@@ -7,8 +7,9 @@ import os
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 
-# Initialize DB
+# Initialize DB and Marshmallow
 db = SQLAlchemy()
+ma = Marshmallow()
 
 # Application Factory
 def create_app():
@@ -20,10 +21,11 @@ def create_app():
     load_dotenv()
     CORS(app)
 
-    # Database setup
+    # Database and Marshmallow initialization
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
+    ma.init_app(app)
 
     # JWT Manager setup
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
@@ -35,8 +37,6 @@ def create_app():
     swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "API Contract Management System Project"},)
     app.register_blueprint(swaggerui_blueprint)
 
-    # Marshmallow setup
-    ma = Marshmallow(app)
 
     # Register Blueprints
     # authentication
