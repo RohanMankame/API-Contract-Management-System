@@ -191,5 +191,4 @@ class Invoice(db.Model):
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
 
     def __repr__(self):
-        return f'Invoice_ID: {self.id}, Contract_ID: {self.contract_id}, Amount: {self.amount}'
-
+        return f'Invoice_ID: {self.id}, Contract_ID: {self.contract_id}, Amount: {self.total_amount}'
