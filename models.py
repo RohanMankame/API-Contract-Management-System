@@ -14,12 +14,9 @@ class Client(db.Model):
     email = db.Column(db.String(60), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(200), nullable=False)
-    # archived
     is_archived = db.Column(db.Boolean, default=False) 
-    # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
     
@@ -39,12 +36,9 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
-    # archived
     is_archived = db.Column(db.Boolean, default=False) 
-    # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
     created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     
@@ -70,15 +64,11 @@ class Product(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     api_name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(1000), nullable=False)
-    
-    # archived
     is_archived = db.Column(db.Boolean, default=False)
-    # timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
-    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)#added recently
-    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)#added recently
+    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
+    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
     
     subscriptions = db.relationship('Subscription', backref='product', lazy=True)
 
@@ -94,20 +84,15 @@ class Contract(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     client_id = db.Column(UUID(as_uuid=True), db.ForeignKey('client.id'), nullable=False)
     contract_name = db.Column(db.String(100), nullable=False)
-
     billing_type = db.Column(Enum("Monthly", "Quarterly", "Yearly", name="billing_type_enum"),nullable=False)
     payment_type = db.Column(Enum("Prepaid", "Postpaid", name="payment_type_enum"),nullable=False)
-
-   
-    
-    # archived
+    #billing_type = db.Column(Enum(1, 2, 3, name="billing_type_enum"),nullable=False)
+    #payment_type = db.Column(Enum(1, 2, name="payment_type_enum"),nullable=False)
     is_archived = db.Column(db.Boolean, default=False)
-    # timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
-    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
-    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
+    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False )
+    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
     
     subscriptions = db.relationship('Subscription', backref='contract', lazy=True)
     invoices = db.relationship('Invoice', backref='contract', lazy=True)
@@ -126,14 +111,14 @@ class Subscription(db.Model):
     product_id = db.Column(UUID(as_uuid=True), db.ForeignKey('product.id'), nullable=False)
     pricing_type = db.Column(Enum("Fixed", "Variable", name="pricing_type_enum"),nullable=False) 
     strategy = db.Column(Enum("Pick", "Fill", "Flat", "Fixed", name="strategy_enum"),nullable=False)
-    # archived
+    #pricing_type = db.Column(Enum(1, 2, name="pricing_type_enum"),nullable=False) 
+    #strategy = db.Column(Enum(1, 2, 3, 4, name="strategy_enum"),nullable=False)
+
     is_archived = db.Column(db.Boolean, default=False)
-    # timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
-    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
-    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
+    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
+    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
 
     tiers = db.relationship('Subscription_tier', backref='subscription', lazy=True)
 
@@ -152,20 +137,17 @@ class Subscription_tier(db.Model):
     min_calls = db.Column(db.Integer, nullable=False)
     max_calls = db.Column(db.Integer, nullable=False)
     
-    #just added should change to not nullable later
+
     start_date = db.Column(db.DateTime, nullable=True)
     end_date = db.Column(db.DateTime, nullable=True)
     
     base_price = db.Column(db.Float, nullable=True) # For Fixed and Flat strategies
     price_per_tier = db.Column(db.Float, nullable=True) # For Pick and Fill strategies
-    # archived
     is_archived = db.Column(db.Boolean, default=False)
-    # timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
-    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
-    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
+    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
+    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
 
 
     def __repr__(self):
@@ -178,17 +160,13 @@ class Invoice(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     contract_id = db.Column(UUID(as_uuid=True), db.ForeignKey('contract.id'), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
-    # archived
     is_archived = db.Column(db.Boolean, default=False)
-    #period
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
-    # timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    # Users
-    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
-    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
+    created_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
+    updated_by=db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f'Invoice_ID: {self.id}, Contract_ID: {self.contract_id}, Amount: {self.total_amount}'

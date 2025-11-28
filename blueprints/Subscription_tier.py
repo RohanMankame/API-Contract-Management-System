@@ -145,7 +145,7 @@ def Subscription_tier_Subscriptions_id(id):
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
-            subscriptions = tier.subscriptions  # Assuming a relationship is defined in the model
+            subscriptions = tier.subscriptions  
             subscriptions_list = []
 
             for subscription in subscriptions:

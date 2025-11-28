@@ -1,4 +1,3 @@
-#
 
 def serialize_tier(tier):
 
