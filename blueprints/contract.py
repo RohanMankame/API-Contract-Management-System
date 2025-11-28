@@ -47,7 +47,6 @@ def Contracts():
                     'id': contract.id,
                     'client_id': contract.client_id,
                     'contract_name': contract.contract_name,
-                    
                     'is_archived': contract.is_archived,                
                     'created_at': contract.created_at,
                     'updated_at': contract.updated_at,
