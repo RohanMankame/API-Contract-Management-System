@@ -3,12 +3,45 @@ from app import db
 from models import Client
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from schemas.client_schema import client_read_schema, clients_read_schema, client_write_schema
+from marshmallow import ValidationError
 
 # Initialize client Blueprint
 client_bp = Blueprint('client', __name__)
 
 # Client Endpoints
 
+@client_bp.route('/Clients', methods=['POST','GET'])
+@jwt_required()
+def Clients():    '''
+    Post: Create a new client
+    Get: Get all clients from DB
+    '''
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            validated = client_write_schema.load(data)
+            
+        except ValidationError as err:
+            return jsonify({'message': 'Validation error', 'errors': err.messages}), 400
+
+        curr_user_id = get_jwt_identity()
+        new_client = Client(**validated,
+                            created_by=curr_user_id,
+                            updated_by=curr_user_id)
+        db.session.add(new_client)
+        db.session.commit()
+
+        return jsonify(client=client_read_schema.dump(new_client)), 201
+    
+    elif request.method == 'GET':
+        clients = Client.query.all()
+        return jsonify(clients=clients_read_schema.dump(clients)), 200
+        
+
+
+
+"""
 @client_bp.route('/Clients', methods=['POST','GET'])
 @jwt_required()
 def Clients():
@@ -184,3 +217,4 @@ def Client_Contracts_id(id):
         except Exception as e:
             return jsonify({'message': 'Error getting contracts for client', 'error': str(e)}), 500
 
+"""

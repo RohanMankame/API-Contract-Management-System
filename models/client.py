@@ -1,5 +1,5 @@
 from app import db
-from models.mixins import IdMixin, AuditMixin, BlameMixin
+from models.mixins import IdMixin, AuditMixin, OperatorMixin
 
 class Client(IdMixin, AuditMixin, OperatorMixin, db.Model):
     company_name = db.Column(db.String(20), unique=True, nullable=False)

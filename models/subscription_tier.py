@@ -1,5 +1,6 @@
 from app import db
-from mixins import IdMixin, AuditMixin, BlameMixin
+from models.mixins import IdMixin, AuditMixin, OperatorMixin, DurationMixin
+from sqlalchemy.dialects.postgresql import UUID
 
 class Subscription_tier(IdMixin, AuditMixin, OperatorMixin, DurationMixin, db.Model):
     '''

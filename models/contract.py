@@ -1,5 +1,6 @@
 from app import db
-from models.mixins import IdMixin, AuditMixin, BlameMixin
+from models.mixins import IdMixin, AuditMixin, OperatorMixin
+from sqlalchemy.dialects.postgresql import UUID
 
 
 class Contract(IdMixin, AuditMixin, OperatorMixin, db.Model):

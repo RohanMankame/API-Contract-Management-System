@@ -1,5 +1,5 @@
 from app import db
-from models.mixins import IdMixin, AuditMixin, BlameMixin
+from models.mixins import IdMixin, AuditMixin, OperatorMixin
 
 class Product(IdMixin, AuditMixin, OperatorMixin, db.Model):
     api_name = db.Column(db.String(50), unique=True, nullable=False)
