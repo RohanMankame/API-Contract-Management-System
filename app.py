@@ -5,6 +5,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from flask_jwt_extended import JWTManager
 import os
 from flask_cors import CORS
+from flask_marshmallow import Marshmallow
 
 # Initialize DB
 db = SQLAlchemy()
@@ -33,6 +34,9 @@ def create_app():
     API_URL = '/static/swaggerDoc1.4.json'  
     swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "API Contract Management System Project"},)
     app.register_blueprint(swaggerui_blueprint)
+
+    # Marshmallow setup
+    ma = Marshmallow(app)
 
     # Register Blueprints
     # authentication
