@@ -63,7 +63,7 @@ def Product_id(id):
     ''' 
     Get: Get details of spefic Product(API)
     Put: Update details of product with given ID
-    Delete: Delete product with given ID
+    Delete: Archive a product with given ID
     '''
     if request.method == 'GET':
         try:
@@ -111,8 +111,6 @@ def Product_id(id):
         except Exception as e:
             return jsonify({'message': 'Error updating product', 'error': str(e)}), 500
 
-
-    # no delete, just archive allowed
     elif request.method == 'DELETE':
         try:
             product = Product.query.get(id)
@@ -132,8 +130,6 @@ def Product_id(id):
 
 
 
-
-# TODO fix
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
@@ -147,20 +143,25 @@ def Product_Contracts_id(id):
                 return jsonify({'message': 'Product not found'}), 404
 
             contracts_list = []
+            seen_contracts = set()  
+            
             for subscription in product.subscriptions:
                 contract = subscription.contract
                 
-                contracts_list.append({
-                    'contract_id': contract.id,
-                    'client_id': contract.client_id,
-                    'contract_type': contract.contract_type,
-                    'created_by_user_id': contract.created_by_user_id,
-                    'updated_by_user_id': contract.updated_by_user_id,
-                    'contract_name': contract.contract_name,
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at,
-                    'is_archived': contract.is_archived
-                })
+                # no duplicates
+                if contract.id not in seen_contracts:
+                    seen_contracts.add(contract.id)
+                    
+                    contracts_list.append({
+                        'contract_id': str(contract.id),  
+                        'client_id': str(contract.client_id), 
+                        'contract_name': contract.contract_name,
+                        'created_by': str(contract.created_by) if contract.created_by else None,  
+                        'updated_by': str(contract.updated_by) if contract.updated_by else None,  
+                        'created_at': contract.created_at.isoformat() if contract.created_at else None,
+                        'updated_at': contract.updated_at.isoformat() if contract.updated_at else None,
+                        'is_archived': contract.is_archived
+                    })
 
             return jsonify({'contracts': contracts_list}), 200
 

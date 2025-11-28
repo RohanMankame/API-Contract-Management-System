@@ -5,9 +5,11 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from flask_jwt_extended import JWTManager
 import os
 from flask_cors import CORS
+from flask_marshmallow import Marshmallow
 
-# Initialize DB
+# Initialize DB and Marshmallow
 db = SQLAlchemy()
+ma = Marshmallow()
 
 # Application Factory
 def create_app():
@@ -19,10 +21,11 @@ def create_app():
     load_dotenv()
     CORS(app)
 
-    # Database setup
+    # Database and Marshmallow initialization
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
+    ma.init_app(app)
 
     # JWT Manager setup
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
@@ -33,6 +36,7 @@ def create_app():
     API_URL = '/static/swaggerDoc1.4.json'  
     swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "API Contract Management System Project"},)
     app.register_blueprint(swaggerui_blueprint)
+
 
     # Register Blueprints
     # authentication
@@ -59,7 +63,7 @@ def create_app():
 
     # Create database tables if not exist
     with app.app_context():
-        
+        db.drop_all()
         db.create_all()
     
     return app
