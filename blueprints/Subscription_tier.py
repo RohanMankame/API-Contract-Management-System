@@ -78,7 +78,6 @@ def Subscription_tier_id(id):
             tier_data = {
                 'id': tier.id,
                 'subscription_id': tier.subscription_id,
-                'tier_name': tier.tier_name,
                 'min_calls': tier.min_calls,
                 'max_calls': tier.max_calls,
                 'start_date': tier.start_date,
@@ -99,7 +98,6 @@ def Subscription_tier_id(id):
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
             data = request.get_json()
-            tier.tier_name = data.get('tier_name', tier.tier_name)
             tier.min_calls = data.get('min_calls', tier.min_calls)
             tier.max_calls = data.get('max_calls', tier.max_calls)
             tier.start_date = data.get('start_date', tier.start_date)
