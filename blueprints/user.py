@@ -164,23 +164,12 @@ def User_Contracts_id(id):
     if request.method == 'GET':
         try:
             user = User.query.get(id)
-            
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
-            contracts = []
-
-            for contract in user.contracts_created:
-                contracts.append({
-                    'id': str(contract.id),
-                    'client_id': str(contract.client_id),
-                    'contract_name': contract.contract_name,
-                    'is_archived': contract.is_archived,
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at,
-                    'created_by': contract.created_by,
-                    'updated_by': contract.updated_by
-                })
+            
+            contracts_objs = Contract.query.filter_by(created_by=id).all()
+            contracts = contracts_read_schema.dump(contracts_objs)
 
             return jsonify({'contracts': contracts}), 200
         except Exception as e:

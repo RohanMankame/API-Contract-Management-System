@@ -114,7 +114,10 @@ def Product_id(id):
         except Exception as e:
             return jsonify({'message': 'Error archiving product', 'error': str(e)}), 500
 
-"""
+
+
+
+
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
@@ -127,7 +130,7 @@ def Product_Contracts_id(id):
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
-            # dedupe using a dict keyed by contract id
+           
             contracts_map = {}
             for sub in product.subscriptions:
                 c = sub.contract
@@ -140,50 +143,6 @@ def Product_Contracts_id(id):
         except Exception as e:
             return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
             
-"""
 
 
 
-
-
-@product_bp.route('/Products/<id>/Contracts', methods=['GET'])
-@jwt_required()
-def Product_Contracts_id(id):
-    '''
-    Get: Get all contracts associated with a specific product
-    '''
-    if request.method == 'GET':
-        try:
-            product = Product.query.get(id)
-            if not product:
-                return jsonify({'message': 'Product not found'}), 404
-
-            contracts_list = []
-            seen_contracts = set()  
-            
-            for subscription in product.subscriptions:
-                contract = subscription.contract
-                
-                # no duplicates
-                if contract.id not in seen_contracts:
-                    seen_contracts.add(contract.id)
-                    
-                    contracts_list.append({
-                        'contract_id': str(contract.id),  
-                        'client_id': str(contract.client_id), 
-                        'contract_name': contract.contract_name,
-                        'created_by': str(contract.created_by) if contract.created_by else None,  
-                        'updated_by': str(contract.updated_by) if contract.updated_by else None,  
-                        'created_at': contract.created_at.isoformat() if contract.created_at else None,
-                        'updated_at': contract.updated_at.isoformat() if contract.updated_at else None,
-                        'is_archived': contract.is_archived
-                    })
-
-            return jsonify({'contracts': contracts_list}), 200
-
-        except Exception as e:
-            return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
-
-    return jsonify({'message': 'Method not allowed'}), 405
-
-    

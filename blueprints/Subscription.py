@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import Subscription
+from models import Subscription, Subscription_tier
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_schema import subscription_read_schema, subscriptions_read_schema, subscription_write_schema
+
 from marshmallow import ValidationError
 
 # Initialize subscription Blueprint
@@ -113,7 +114,7 @@ def Subscription_id(id):
 
 
 
-
+"""
 @subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
@@ -126,22 +127,14 @@ def Subscription_Tiers_id(id):
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
-            tiers_list = []
-            for tier in subscription.tiers:
-                tiers_list.append({
-                    'id': tier.id,
-                    'subscription_id': tier.subscription_id,
-                    'min_calls': tier.min_calls,
-                    'max_calls': tier.max_calls,
-                    'base_price': tier.base_price,
-                    'price_per_tier': tier.price_per_tier,
-                    'is_archived': tier.is_archived,
-                })
+            tiers_objs = Subscription_tier.query.filter_by(subscription_id=id, is_archived=False).all()
+            tiers = tiers_read_schema.dump(tiers_objs)
 
-            return jsonify(tiers_list), 200
+            return jsonify({'tiers':tiers}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error fetching subscription tiers', 'error': str(e)}), 500
     
     return jsonify({'message': 'Method not allowed'}), 405
 
+"""
