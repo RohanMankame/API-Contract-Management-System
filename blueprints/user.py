@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import User
+from models import User, Contract
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.user_schema import user_read_schema, users_read_schema, user_write_schema
+from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
 
 # Initialize user Blueprint
@@ -153,23 +154,13 @@ def User_id(id):
 
 
 
-
-
-
-
-
-
-
-
-
-"""
-
 @user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def User_Contracts_id(id):
     '''
     Get: Get all contracts created by a user
     '''
+    curr_user_id = get_jwt_identity()
     if request.method == 'GET':
         try:
             user = User.query.get(id)
@@ -192,11 +183,8 @@ def User_Contracts_id(id):
                 })
 
             return jsonify({'contracts': contracts}), 200
-
         except Exception as e:
-            return jsonify({'message': 'Error getting user contracts', 'error': str(e)}), 500
+            return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
 
 
-    return jsonify({'message': 'Method not allowed'}), 405
 
-"""

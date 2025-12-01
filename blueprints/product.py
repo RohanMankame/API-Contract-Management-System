@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import Product
+from models import Product, Contract
 from flask_jwt_extended import jwt_required, get_jwt_identity   
 from schemas.product_schema import product_read_schema, products_read_schema, product_write_schema
+from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
 
 # Initialize product Blueprint
@@ -115,8 +116,36 @@ def Product_id(id):
 
 
 
+@product_bp.route('/Products/<id>/Contracts', methods=['GET'])
+@jwt_required()
+def Product_Contracts_id(id):
+    '''
+    Get: Get all contracts associated with a specific product
+    '''
+    if request.method == 'GET':
+        try:
+            product = Product.query.get(id)
+            if not product:
+                return jsonify({'message': 'Product not found'}), 404
 
-"""
+            # dedupe using a dict keyed by contract id
+            contracts_map = {}
+            for sub in product.subscriptions:
+                c = sub.contract
+                if c and c.id not in contracts_map:
+                    contracts_map[c.id] = c
+
+            contracts = list(contracts_map.values())
+            return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
+
+        except Exception as e:
+            return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
+            
+
+
+
+
+
 
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
@@ -158,4 +187,4 @@ def Product_Contracts_id(id):
 
     return jsonify({'message': 'Method not allowed'}), 405
 
-    """
+    

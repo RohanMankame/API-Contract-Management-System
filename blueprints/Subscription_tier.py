@@ -106,20 +106,12 @@ def Subscription_tier_id(id):
 
 
 
-
-
-
-
-
-
-
-
-
-"""
-
 @subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):
+    """
+    GET: Get subscriptions associated with a specific subscription tier using tier ID
+    """
     if request.method == 'GET':
         try:
             tier = Subscription_tier.query.get(id)
@@ -149,4 +141,6 @@ def Subscription_tier_Subscriptions_id(id):
         except Exception as e:
             return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
 
-"""
+
+
+

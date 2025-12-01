@@ -111,15 +111,15 @@ def Client_id(id):
 
         except Exception as e:
             return jsonify({"error": str(e)}), 400
-    
-"""
+
+
 @client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Client_Contracts_id(id):
     '''
     Get: Get all contracts associated with a specific client
     '''
-    current_user_id = get_jwt_identity()
+    curr_user_id = get_jwt_identity()
     if request.method == 'GET':
         try:
             client = Client.query.get(id)
@@ -132,4 +132,6 @@ def Client_Contracts_id(id):
 
         except Exception as e:
             return jsonify({"error": str(e)}), 400
-"""
+
+
+

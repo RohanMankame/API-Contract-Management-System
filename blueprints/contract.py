@@ -110,7 +110,7 @@ def Contract_id(id):
 
 
 
-"""
+
 @contract_bp.route('/Contracts/<id>/Product', methods=['POST','GET'])
 @jwt_required()
 def Contract_Product_id(id):
@@ -145,5 +145,3 @@ def Contract_Product_id(id):
     except Exception as e:
         return jsonify({'message': 'Error getting products', 'error': str(e)}), 500
 
-
-"""

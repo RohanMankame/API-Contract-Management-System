@@ -11,7 +11,7 @@ class ProductReadSchema(ma.SQLAlchemyAutoSchema):
 
 class ProductWriteSchema(ma.SQLAlchemySchema):
     
-    product_name = ma.auto_field(required=True)
+    api_name = ma.auto_field(required=True)
     description = ma.auto_field()
     is_archived = ma.auto_field()
     

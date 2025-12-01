@@ -10,7 +10,6 @@ subscription_bp = Blueprint('subscription', __name__)
 
 # Subscription Endpoints
 
-
 @subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
 @jwt_required()
 def Subscriptions():
@@ -115,11 +114,6 @@ def Subscription_id(id):
 
 
 
-
-
-
-
-"""
 @subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
@@ -151,4 +145,3 @@ def Subscription_Tiers_id(id):
     
     return jsonify({'message': 'Method not allowed'}), 405
 
-    """
