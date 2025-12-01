@@ -3,6 +3,9 @@ from models.contract import Contract
 
 
 class ContractReadSchema(ma.SQLAlchemyAutoSchema):
+
+    subscriptions = ma.Nested('SubscriptionReadSchema', many=True)
+
     class Meta:
         model = Contract
         load_instance = True

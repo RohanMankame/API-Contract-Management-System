@@ -5,7 +5,7 @@ from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.contract_schema import contract_read_schema, contracts_read_schema, contract_write_schema
 from marshmallow import ValidationError
-from utils.serializer import serialize_contract
+
 
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
