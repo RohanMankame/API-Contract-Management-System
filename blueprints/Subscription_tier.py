@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Subscription_tier
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from schemas.subscription_tier_schema import subscription_tier_read_schema, subscription_tiers_read_schema, subscription_tier_write_schema
+from marshmallow import ValidationError
 
 subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
@@ -9,108 +11,80 @@ subscription_tier_bp = Blueprint('subscription_tier', __name__)
 @subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
 @jwt_required()
 def Subscription_tiers():
+    curr_user_id = get_jwt_identity()
+
     if request.method == 'POST':
         try:
-            data = request.get_json()            
+            data = request.get_json()
+            validated = subscription_tier_write_schema.load(data)
 
-            new_tier = Subscription_tier(
-                subscription_id = data['subscription_id'],
-                min_calls = data['min_calls'],
-                max_calls = data['max_calls'],
-                start_date = data.get('start_date'),
-                end_date = data.get('end_date'),
-                base_price = data['base_price'],
-                price_per_tier = data['price_per_tier'],
-                is_archived = data.get('is_archived', False),
-                created_by = get_jwt_identity(),
-                updated_by = get_jwt_identity()
-            )
+            new_tier = Subscription_tier(**validated,created_by=curr_user_id,updated_by=curr_user_id)
 
             db.session.add(new_tier)
             db.session.commit()
 
-            return jsonify({'message': 'Subscription tier created successfully', 'tier_id': new_tier.id}), 201
-        
+            return jsonify(subscription_tier=subscription_tier_read_schema.dump(new_tier)), 201
+
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
+
         except Exception as e:
-            return jsonify({'message': 'Error creating subscription tier', 'error': str(e)}), 500
-
-
-
+            return jsonify({"error": str(e)}), 400
+    
+    
     elif request.method == 'GET':
         try:
             tiers = Subscription_tier.query.all()
-            tiers_list = []
-
-            for tier in tiers:
-                tiers_list.append({
-                    'id': tier.id,
-                    'subscription_id': tier.subscription_id,
-                    'min_calls': tier.min_calls,
-                    'max_calls': tier.max_calls,
-                    'start_date': tier.start_date,
-                    'end_date': tier.end_date,
-                    'base_price': tier.base_price,
-                    'price_per_tier': tier.price_per_tier,
-                    'is_archived': tier.is_archived,
-                    'created_at': tier.created_at,
-                    'updated_at': tier.updated_at,
-                    'created_by': tier.created_by,
-                    'updated_by': tier.updated_by
-                })
-
-            return jsonify(tiers_list), 200
+            return jsonify(subscription_tiers=subscription_tiers_read_schema.dump(tiers)), 200
 
         except Exception as e:
-            return jsonify({'message': 'Error fetching subscription tiers', 'error': str(e)}), 500
-
-    return jsonify({'message': 'Invalid request method'}), 400
+            return jsonify({"error": str(e)}), 400
 
 
-@subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','DELETE'])
+
+@subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @jwt_required()
 def Subscription_tier_id(id):
+    curr_user_id = get_jwt_identity()
+
     if request.method == 'GET':
         try:
             tier = Subscription_tier.query.get(id)
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
-            tier_data = {
-                'id': tier.id,
-                'subscription_id': tier.subscription_id,
-                'min_calls': tier.min_calls,
-                'max_calls': tier.max_calls,
-                'start_date': tier.start_date,
-                'end_date': tier.end_date,
-                'price_per_tier': tier.price_per_tier,
-            }
-
-            return jsonify(tier_data), 200
+            return jsonify(subscription_tier=subscription_tier_read_schema.dump(tier)), 200
         
         except Exception as e:
             return jsonify({'message': 'Error fetching subscription tier', 'error': str(e)}), 500
+    
 
 
-    elif request.method == 'PUT':
+
+    elif request.method == 'PUT' or request.method == 'PATCH':
         try:
+            data = request.get_json()
             tier = Subscription_tier.query.get(id)
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
-            data = request.get_json()
-            tier.min_calls = data.get('min_calls', tier.min_calls)
-            tier.max_calls = data.get('max_calls', tier.max_calls)
-            tier.start_date = data.get('start_date', tier.start_date)
-            tier.end_date = data.get('end_date', tier.end_date)
-            tier.base_price = data.get('base_price', tier.base_price)
-            tier.price_per_tier = data.get('price_per_tier', tier.price_per_tier)
+            validated = subscription_tier_write_schema.load(data, partial=True)
+
+            for key, value in validated.items():
+                setattr(tier, key, value)
+            tier.updated_by = curr_user_id
 
             db.session.commit()
 
             return jsonify({'message': 'Subscription tier updated successfully'}), 200
 
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
+
         except Exception as e:
             return jsonify({'message': 'Error updating subscription tier', 'error': str(e)}), 500
+
+
 
 
     elif request.method == 'DELETE':
@@ -120,15 +94,28 @@ def Subscription_tier_id(id):
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
             tier.is_archived = True
-            tier.updated_by = get_jwt_identity()
-            db.session.commit()
+            tier.updated_by = curr_user_id
 
+            db.session.commit()
             return jsonify({'message': 'Subscription tier archived successfully'}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error archiving subscription tier', 'error': str(e)}), 500
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 
 @subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
 @jwt_required()
@@ -162,3 +149,4 @@ def Subscription_tier_Subscriptions_id(id):
         except Exception as e:
             return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
 
+"""

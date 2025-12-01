@@ -3,15 +3,13 @@ from app import db
 from models import Contract, User
 from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from schemas.contract_schema import contract_read_schema, contracts_read_schema, contract_write_schema
+from marshmallow import ValidationError
 
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
 
 # Contract Endpoints
-
-
-
-"""
 @contract_bp.route('/Contracts', methods=['POST','GET'])
 @jwt_required()
 def Contracts():
@@ -19,60 +17,43 @@ def Contracts():
     Post: Create a new contract
     Get: Get all contracts from DB
     '''
+    curr_user_id = get_jwt_identity()
     if request.method == 'POST':
         try:
             data = request.get_json()
+            validated = contract_write_schema.load(data)
 
-            new_contract = Contract(
-                client_id=data['client_id'],
-                contract_name=data['contract_name'],
-                is_archived=data.get('is_archived', False),
-                created_by = get_jwt_identity(),
-                updated_by = get_jwt_identity()
-            )
+            new_contract = Contract(**validated,created_by=curr_user_id,updated_by=curr_user_id)
 
             db.session.add(new_contract)
             db.session.commit()
 
-            return jsonify({'message': 'Contract created successfully', 'contract_id': new_contract.id}), 201
+            return jsonify(contract=contract_read_schema.dump(new_contract)), 201
+
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
-            return jsonify({'message': 'Error creating contract', 'error': str(e)}), 500
-    
+            return jsonify({"error": str(e)}), 400
+
+
 
     elif request.method == 'GET':
         try:
             contracts = Contract.query.all()
-            contracts_list = []
+            return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
-            for contract in contracts:
-                contracts_list.append({
-                    'id': contract.id,
-                    'client_id': contract.client_id,
-                    'contract_name': contract.contract_name,
-                    'is_archived': contract.is_archived,                
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at,
-                    'created_by': contract.created_by,
-                    'updated_by': contract.updated_by
-                })
-
-            return jsonify({'contracts': contracts_list}), 200
-    
         except Exception as e:
-            return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
-
-    return jsonify({'message': 'Method not allowed'}), 405
+            return jsonify({"error": str(e)}), 400
 
 
-
-@contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT', 'DELETE'])
+@contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Contract_id(id):
-    '''
-    GET: Get existing contract from DB using contract ID
-    PUT: Update existing contract in DB using contract ID
-    DELETE: archive existing contract from DB using contract ID
+    ''' 
+    Get: Get details of specific Contract
+    Put/PATCH: Update details of contract with given ID
+    Delete: Archive a contract with given ID
     '''
     if request.method == 'GET':
         try:
@@ -80,41 +61,31 @@ def Contract_id(id):
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
-            contract_data = {
-                    'id': contract.id,
-                    'client_id': contract.client_id,
-                    'contract_name': contract.contract_name,
-                    'is_archived': contract.is_archived,                
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at,
-                    'created_by': contract.created_by,
-                    'updated_by': contract.updated_by
-            }
-
-            return jsonify({'contract': contract_data}), 200
+            return jsonify(contract=contract_read_schema.dump(contract)), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting contract', 'error': str(e)}), 500
-    
 
-    elif request.method == 'PUT':
+
+    elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
             contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
-            
-            if 'client_id' in data:
-                contract.client_id = data['client_id']
-            if 'contract_name' in data:
-                contract.contract_name = data['contract_name']
-            if 'is_archived' in data:
-                contract.is_archived = data['is_archived']
-            
+
+            validated = contract_write_schema.load(data, partial=True)
+
+            for key, value in validated.items():
+                setattr(contract, key, value)
+
             contract.updated_by = get_jwt_identity()
 
             db.session.commit()
             return jsonify({'message': 'Contract updated successfully'}), 200
+
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
             return jsonify({'message': 'Error updating contract', 'error': str(e)}), 500
@@ -134,10 +105,12 @@ def Contract_id(id):
 
         except Exception as e:
             return jsonify({'message': 'Error deleting contract', 'error': str(e)}), 500
-    
+
     return jsonify({'message': 'Method not allowed'}), 405
 
 
+
+"""
 @contract_bp.route('/Contracts/<id>/Product', methods=['POST','GET'])
 @jwt_required()
 def Contract_Product_id(id):
