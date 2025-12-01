@@ -102,7 +102,7 @@ def Users():
 
 
 @user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'DELETE'])
-@jwt_required()
+#@jwt_required()
 def User_id(id):
     '''
     GET: Get existing user from DB using user ID

@@ -12,8 +12,9 @@ client_bp = Blueprint('client', __name__)
 # Client Endpoints
 
 @client_bp.route('/Clients', methods=['POST','GET'])
-@jwt_required()
-def Clients():    '''
+#@jwt_required()
+def Clients():    
+    '''
     Post: Create a new client
     Get: Get all clients from DB
     '''

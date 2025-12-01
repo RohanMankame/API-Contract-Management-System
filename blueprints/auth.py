@@ -18,6 +18,8 @@ def login():
             password = data['password']
 
             user = User.query.filter_by(email=email).first()
+            if not user:
+                return {"error": "User not found"}, 404
 
             if not user or not user.check_password(password):
                 return {"error": "Wrong Password or Username"}, 401
