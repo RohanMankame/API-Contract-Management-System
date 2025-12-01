@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import subscription
+from models import Subscription
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_schema import subscription_read_schema, subscriptions_read_schema, subscription_write_schema
 from marshmallow import ValidationError
@@ -24,7 +24,7 @@ def Subscriptions():
             data = request.get_json()
             validated = subscription_write_schema.load(data)
 
-            new_subscription = subscription(**validated,created_by=curr_user_id,updated_by=curr_user_id)
+            new_subscription = Subscription(**validated,created_by=curr_user_id,updated_by=curr_user_id)
 
             db.session.add(new_subscription)
             db.session.commit()
@@ -39,7 +39,7 @@ def Subscriptions():
 
     elif request.method == 'GET':
         try:
-            subscriptions = subscription.query.all()
+            subscriptions = Subscription.query.all()
             return jsonify(subscriptions=subscriptions_read_schema.dump(subscriptions)), 200
 
         except Exception as e:
@@ -58,7 +58,7 @@ def Subscription_id(id):
 
     if request.method == 'GET':
         try:
-            subscription = subscription.query.get(id)
+            subscription = Subscription.query.get(id)
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
@@ -71,7 +71,7 @@ def Subscription_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            subscription = subscription.query.get(id)
+            subscription = Subscription.query.get(id)
 
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
@@ -95,7 +95,7 @@ def Subscription_id(id):
 
     elif request.method == 'DELETE':
         try:
-            subscription = subscription.query.get(id)
+            subscription = Subscription.query.get(id)
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
