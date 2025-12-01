@@ -5,6 +5,7 @@ from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.contract_schema import contract_read_schema, contracts_read_schema, contract_write_schema
 from marshmallow import ValidationError
+from utils.serializer import serialize_contract
 
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
@@ -61,7 +62,7 @@ def Contract_id(id):
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
-            return jsonify(contract=contract_read_schema.dump(contract)), 200
+            return jsonify(serialize_contract(contract)), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting contract', 'error': str(e)}), 500
