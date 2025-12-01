@@ -8,6 +8,9 @@ product_bp = Blueprint('product', __name__)
 
 # Product Endpoints
 
+
+
+"""
 @product_bp.route('/Products', methods=['POST', 'GET'])
 @jwt_required()
 def Products():
@@ -169,3 +172,5 @@ def Product_Contracts_id(id):
             return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
 
     return jsonify({'message': 'Method not allowed'}), 405
+
+    """

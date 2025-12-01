@@ -9,6 +9,9 @@ contract_bp = Blueprint('contract', __name__)
 
 # Contract Endpoints
 
+
+
+"""
 @contract_bp.route('/Contracts', methods=['POST','GET'])
 @jwt_required()
 def Contracts():
@@ -168,3 +171,6 @@ def Contract_Product_id(id):
     
     except Exception as e:
         return jsonify({'message': 'Error getting products', 'error': str(e)}), 500
+
+
+"""

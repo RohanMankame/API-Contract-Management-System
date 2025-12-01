@@ -3,9 +3,23 @@ from app import db
 from models import subscription
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-
+# Initialize subscription Blueprint
 subscription_bp = Blueprint('subscription', __name__)
 
+# Subscription Endpoints
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 @subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
 @jwt_required()
 def Subscriptions():
@@ -173,3 +187,5 @@ def Subscription_Tiers_id(id):
             return jsonify({'message': 'Error fetching subscription tiers', 'error': str(e)}), 500
     
     return jsonify({'message': 'Method not allowed'}), 405
+
+    """
