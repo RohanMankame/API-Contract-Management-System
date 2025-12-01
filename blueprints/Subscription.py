@@ -3,7 +3,7 @@ from app import db
 from models import Subscription, Subscription_tier
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_schema import subscription_read_schema, subscriptions_read_schema, subscription_write_schema
-
+from schemas.subscription_tier_schema import subscription_tiers_read_schema
 from marshmallow import ValidationError
 
 # Initialize subscription Blueprint
@@ -110,11 +110,6 @@ def Subscription_id(id):
             return jsonify({'message': 'Error archiving subscription', 'error': str(e)}), 500
 
 
-
-
-
-
-"""
 @subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
@@ -128,13 +123,13 @@ def Subscription_Tiers_id(id):
                 return jsonify({'message': 'Subscription not found'}), 404
 
             tiers_objs = Subscription_tier.query.filter_by(subscription_id=id, is_archived=False).all()
-            tiers = tiers_read_schema.dump(tiers_objs)
+            tiers = subscription_tiers_read_schema.dump(tiers_objs)
 
             return jsonify({'tiers':tiers}), 200
 
         except Exception as e:
             return jsonify({'message': 'Error fetching subscription tiers', 'error': str(e)}), 500
-    
-    return jsonify({'message': 'Method not allowed'}), 405
 
-"""
+
+
+
