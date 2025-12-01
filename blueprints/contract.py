@@ -62,7 +62,7 @@ def Contract_id(id):
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
-            return jsonify(serialize_contract(contract)), 200
+            return jsonify(contract=contract_read_schema.dump(contract)), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting contract', 'error': str(e)}), 500
