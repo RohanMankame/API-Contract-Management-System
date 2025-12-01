@@ -114,8 +114,7 @@ def Product_id(id):
         except Exception as e:
             return jsonify({'message': 'Error archiving product', 'error': str(e)}), 500
 
-
-
+"""
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
@@ -141,7 +140,7 @@ def Product_Contracts_id(id):
         except Exception as e:
             return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
             
-
+"""
 
 
 
