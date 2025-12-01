@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import Subscription
+from models import subscription
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
-Subscription_bp = Blueprint('subscription', __name__)
+subscription_bp = Blueprint('subscription', __name__)
 
-@Subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
+@subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
 @jwt_required()
 def Subscriptions():
     '''
@@ -63,7 +63,7 @@ def Subscriptions():
     return jsonify({'message': 'Invalid request method'}), 400
 
 
-@Subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','DELETE'])
+@subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','DELETE'])
 @jwt_required()
 def Subscription_id(id):
     ''' 
@@ -143,7 +143,7 @@ def Subscription_id(id):
     return jsonify({'message': 'Method not allowed'}), 405
 
 
-@Subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
+@subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
     '''

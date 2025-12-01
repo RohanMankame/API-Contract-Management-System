@@ -3,10 +3,10 @@ from app import db
 from models import Subscription_tier
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-Subscription_tier_bp = Blueprint('subscription_tier', __name__)
+subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
 
-@Subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
+@subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
 @jwt_required()
 def Subscription_tiers():
     if request.method == 'POST':
@@ -66,7 +66,7 @@ def Subscription_tiers():
     return jsonify({'message': 'Invalid request method'}), 400
 
 
-@Subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','DELETE'])
+@subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','DELETE'])
 @jwt_required()
 def Subscription_tier_id(id):
     if request.method == 'GET':
@@ -130,7 +130,7 @@ def Subscription_tier_id(id):
 
 
 
-@Subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
+@subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):
     if request.method == 'GET':
