@@ -6,7 +6,6 @@ class ClientReadSchema(ma.SQLAlchemyAutoSchema):
         model = Client
         load_instance = True
         include_fk = True
-        # hide sensitive fields from responses
         exclude = ("created_by", "updated_by",)
 
 class ClientWriteSchema(ma.SQLAlchemySchema):

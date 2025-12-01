@@ -49,12 +49,12 @@ def Clients():
 
 
 
-@client_bp.route('/Clients/<id>', methods=['GET', 'PUT', 'PATCH' ,'DELETE'])
+@client_bp.route('/Clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Client_id(id):
     '''
     GET: Get existing client from DB using client ID
-    PUT/PATCH: Update existing client in DB using client ID
+    PUT: Update existing client in DB using client ID
     DELETE: Archive existing client from DB using client ID
     '''
     curr_user_id = get_jwt_identity()

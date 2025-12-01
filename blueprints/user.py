@@ -3,17 +3,19 @@ from app import db
 from models import User
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from schemas.user_schema import user_read_schema, users_read_schema, user_write_schema
+from marshmallow import ValidationError
 
 # Initialize user Blueprint
 user_bp = Blueprint('user', __name__)
 
 # User Endpoints
 
+
 @user_bp.route('/UsersFirst', methods=['POST'])
 def UsersFirst():
     '''
     Post: Create the first user in the system
-    needed when DB is empty
     '''
     if request.method == 'POST':
         try:
@@ -39,8 +41,7 @@ def UsersFirst():
 
         except Exception as e:
             return jsonify({'message': 'Error creating first user', 'error': str(e)}), 500
-    
-    return jsonify({'message': 'Method not allowed'}), 405
+
 
 
 
@@ -51,114 +52,89 @@ def Users():
     Post: Create a new user
     Get: Get all users from DB
     '''
+    curr_user_id = get_jwt_identity()
+
     if request.method == 'POST':
         try:
-            curr_user_id = get_jwt_identity()
             data = request.get_json()
+            validated = user_write_schema.load(data)
 
-            new_user = User(
-                email=data['email'],
-                full_name=data['full_name'],
-                is_archived=data.get('is_archived', False),
-                created_by=curr_user_id,
-                updated_by=curr_user_id
-             )
+            new_user = User(**validated,created_by=curr_user_id,updated_by=curr_user_id)
 
             new_user.set_password(data['password'])
 
             db.session.add(new_user)
             db.session.commit()
 
-            return jsonify({'message': 'User created successfully', 'user_id': new_user.id}), 201
+            return jsonify(user=user_read_schema.dump(new_user)), 201
+            
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
-            return jsonify({'message': 'Error creating user', 'error': str(e)}), 500
-
-
+            return jsonify({"error": str(e)}), 400
+    
+    
     elif request.method == 'GET':
         try:
             users = User.query.all()
-            users_list = []
-
-            for user in users:
-                users_list.append({
-                    'id': user.id,
-                    'email': user.email,
-                    'full_name': user.full_name,
-                    'created_at': user.created_at,
-                    'updated_at': user.updated_at,
-                    'is_archived': user.is_archived,
-                    'created_by': user.created_by,
-                    'updated_by': user.updated_by
-                })
-
-            return jsonify({'users': users_list}), 200
-
+            return jsonify(users=users_read_schema.dump(users)), 200
         except Exception as e:
-            return jsonify({'message': 'Error getting users', 'error': str(e)}), 500
-    
-    return jsonify({'message': 'Method not allowed, only POST and GET are allowed'}), 405
+            return jsonify({"error": str(e)}), 400
 
 
 
-@user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'DELETE'])
-#@jwt_required()
+
+@user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
+@jwt_required()
 def User_id(id):
     '''
     GET: Get existing user from DB using user ID
     PUT: Update existing user in DB using user ID
     DELETE: archive existing user in DB using user ID
     '''
+    curr_user_id = get_jwt_identity()
+
     if request.method == 'GET':
         try:
             user = User.query.get(id)
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
-            user = {
-                'id': user.id,
-                'email': user.email,
-                'full_name': user.full_name,
-                'created_at': user.created_at,
-                'updated_at': user.updated_at,
-                'is_archived': user.is_archived,
-                'created_by': user.created_by,
-                'updated_by': user.updated_by
-            }
-
-            return jsonify({'message': f'User with id:{id} retrieved successfully','user': user}), 200
+            return jsonify(user=user_read_schema.dump(user)), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting user', 'error': str(e)}), 500
-    
 
-    elif request.method == 'PUT':
+
+
+    elif request.method == 'PUT' or request.method == 'PATCH':
         try:
-            
             data = request.get_json()
             user = User.query.get(id)
 
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
-            if 'email' in data:
-                user.email = data['email']
-            if 'full_name' in data:
-                user.full_name = data['full_name']
-            if 'password' in data:
-                user.set_password(data['password'])
-            if 'is_archived' in data:
-                user.is_archived = data['is_archived']
+            validated = user_write_schema.load(data, partial=True)
 
-            user.updated_by = get_jwt_identity() 
+            for key, value in validated.items():
+                if key == 'password':
+                    user.set_password(value)
+                else:
+                    setattr(user, key, value)
+
+            user.updated_by = curr_user_id
 
             db.session.commit()
             return jsonify({'message': 'User updated successfully'}), 200
+
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
         except Exception as e:
             return jsonify({'message': 'Error updating user', 'error': str(e)}), 500
-        
-
-    # No deletion of user, only archiving is allowed
+    
+    
     elif request.method == 'DELETE':
         try:
             user = User.query.get(id)
@@ -166,8 +142,8 @@ def User_id(id):
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
-            user.is_archived = True # only archive the user
-            user.updated_by = get_jwt_identity() 
+            user.is_archived = True 
+            user.updated_by = curr_user_id
 
             db.session.commit()
             return jsonify({'message': 'User archived successfully'}), 200
@@ -175,9 +151,18 @@ def User_id(id):
         except Exception as e:
             return jsonify({'message': 'Error archiving user', 'error': str(e)}), 500
 
-    return jsonify({'message': 'Method not allowed'}), 405
-        
-    
+
+
+
+
+
+
+
+
+
+
+
+"""
 
 @user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
@@ -213,3 +198,5 @@ def User_Contracts_id(id):
 
 
     return jsonify({'message': 'Method not allowed'}), 405
+
+"""
