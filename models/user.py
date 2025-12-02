@@ -12,7 +12,6 @@ class User(IdMixin, AuditMixin, OperatorMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
 
-    # override mixin fields to be nullable for bootstrapping first user
     created_by = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
     updated_by = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=True)
 

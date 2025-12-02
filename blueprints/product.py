@@ -132,10 +132,10 @@ def Product_Contracts_id(id):
 
            
             contracts_map = {}
-            for sub in product.subscriptions:
-                c = sub.contract
-                if c and c.id not in contracts_map:
-                    contracts_map[c.id] = c
+            for subscription in product.subscriptions:
+                cont = subscription.contract
+                if cont and cont.id not in contracts_map:
+                    contracts_map[cont.id] = cont
 
             contracts = list(contracts_map.values())
             return jsonify(contracts=contracts_read_schema.dump(contracts)), 200

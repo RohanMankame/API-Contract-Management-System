@@ -4,6 +4,7 @@ from models import Contract, User
 from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.contract_schema import contract_read_schema, contracts_read_schema, contract_write_schema
+from schemas.product_schema import product_read_schema, products_read_schema
 from marshmallow import ValidationError
 
 
@@ -110,9 +111,7 @@ def Contract_id(id):
     return jsonify({'message': 'Method not allowed'}), 405
 
 
-
-
-@contract_bp.route('/Contracts/<id>/Product', methods=['POST','GET'])
+@contract_bp.route('/Contracts/<id>/Product', methods=['GET'])
 @jwt_required()
 def Contract_Product_id(id):
     '''
@@ -123,26 +122,21 @@ def Contract_Product_id(id):
         if not contract:
             return jsonify({'message': 'Contract not found'}), 404
 
+        
         unique_products = {}
-    
         for subscription in contract.subscriptions:
-
+            
             product = subscription.product
-            if product.id not in unique_products:
-                unique_products[product.id] = {
-                    'id': str(product.id),
-                    'api_name': product.api_name,  
-                    'description': product.description,
-                    'is_archived': product.is_archived,
-                    'created_at': product.created_at.isoformat(),
-                    'updated_at': product.updated_at.isoformat(),
-                    'created_by': str(product.created_by),
-                    'updated_by': str(product.updated_by)
-                }
+            if not product:
+                continue
 
-        return jsonify({'products': list(unique_products.values())}), 200
-    
-    
+            if getattr(product, "is_archived", False):
+                continue
+
+            unique_products[str(product.id)] = product
+
+        products_list = products_read_schema.dump(list(unique_products.values()))
+        return jsonify({'products': products_list}), 200
+
     except Exception as e:
         return jsonify({'message': 'Error getting products', 'error': str(e)}), 500
-

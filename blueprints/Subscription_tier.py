@@ -3,6 +3,7 @@ from app import db
 from models import Subscription_tier
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_tier_schema import subscription_tier_read_schema, subscription_tiers_read_schema, subscription_tier_write_schema
+from schemas.subscription_schema import subscription_read_schema
 from marshmallow import ValidationError
 
 subscription_tier_bp = Blueprint('subscription_tier', __name__)
@@ -105,42 +106,24 @@ def Subscription_tier_id(id):
 
 
 
-
 @subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):
-    """
-    GET: Get subscriptions associated with a specific subscription tier using tier ID
-    """
-    if request.method == 'GET':
-        try:
-            tier = Subscription_tier.query.get(id)
-            if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+    '''
+    Get: Get the subscription associated with a specific subscription tier ID
+    '''
+    try:
+        tier = Subscription_tier.query.get(id)
+        if not tier:
+            return jsonify({'message': 'Subscription tier not found'}), 404
 
-            subscription = tier.subscription  
-            
-            if not subscription:
-                return jsonify({'message': 'No subscription found for this tier'}), 404
+        subscription = getattr(tier, 'subscription', None)
+        if not subscription:
+            return jsonify({'message': 'No subscription found for this tier'}), 404
 
-            subscription_data = {
-                'id': str(subscription.id),
-                'contract_id': str(subscription.contract_id),
-                'product_id': str(subscription.product_id),
-                'pricing_type': subscription.pricing_type,
-                'strategy': subscription.strategy,
-                'is_archived': subscription.is_archived,
-                'created_at': subscription.created_at.isoformat(),
-                'updated_at': subscription.updated_at.isoformat(),
-                'created_by': str(subscription.created_by),
-                'updated_by': str(subscription.updated_by)
-            }
+        subscription_data = subscription_read_schema.dump(subscription)
+        return jsonify({'subscription': subscription_data}), 200
 
-            return jsonify({'subscription': subscription_data}), 200
-            
-        except Exception as e:
-            return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
-
-
-
+    except Exception as e:
+        return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
 

@@ -4,6 +4,7 @@ from models import Client
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.client_schema import client_read_schema, clients_read_schema, client_write_schema
+from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
 
 # Initialize client Blueprint
@@ -127,7 +128,6 @@ def Client_Contracts_id(id):
                 return jsonify({"error": "Client not found"}), 404
 
             contracts = client.contracts
-            from schemas.contract_schema import contracts_read_schema
             return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
         except Exception as e:
