@@ -14,10 +14,3 @@ def test_login(client, app):
     assert "access_token" in response.json
 
 
-
-"""
-def test_add_user(client):
-    response = client.post('/users', json={"username": "test"})
-    assert response.status_code == 201
-    assert response.json == {"message": "User created"}
-"""
