@@ -89,50 +89,6 @@ def Users():
 
 
 
-
-
-
-"""
-@user_bp.route('/Users', methods=['POST','GET'])
-@jwt_required()
-def Users():
-    '''
-    Post: Create a new user
-    Get: Get all users from DB
-    '''
-    curr_user_id = get_jwt_identity()
-
-    if request.method == 'POST':
-        try:
-            data = request.get_json()
-            validated = user_write_schema.load(data)
-
-            new_user = User(**validated,created_by=curr_user_id,updated_by=curr_user_id)
-
-            new_user.set_password(data['password'])
-
-            db.session.add(new_user)
-            db.session.commit()
-
-            return jsonify(user=user_read_schema.dump(new_user)), 201
-            
-        except ValidationError as ve:
-            return jsonify({"error": ve.messages}), 400
-
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
-    
-    
-    elif request.method == 'GET':
-        try:
-            users = User.query.all()
-            return jsonify(users=users_read_schema.dump(users)), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
-
-"""
-
-
 @user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
 @jwt_required()
 def User_id(id):
@@ -152,6 +108,7 @@ def User_id(id):
             return jsonify(user=user_read_schema.dump(user)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error getting user', 'error': str(e)}), 500
 
 
@@ -178,8 +135,10 @@ def User_id(id):
             return jsonify({'message': 'User updated successfully'}), 200
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error updating user', 'error': str(e)}), 500
     
     
@@ -197,6 +156,7 @@ def User_id(id):
             return jsonify({'message': 'User archived successfully'}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error archiving user', 'error': str(e)}), 500
 
 
@@ -220,6 +180,7 @@ def User_Contracts_id(id):
 
             return jsonify({'contracts': contracts}), 200
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
 
 
