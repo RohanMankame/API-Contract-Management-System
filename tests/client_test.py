@@ -1,7 +1,7 @@
 from uuid import UUID
 
 ## for /Clients
-def test_create_client(client, auth_headers):
+def test_client(client, auth_headers):
     """
     Test creating a client and then retrieving it.
     """
@@ -33,7 +33,7 @@ def test_create_client(client, auth_headers):
 
 
 ## for /Clients/<id>
-def test_get_client_by_id(client, auth_headers):
+def test_client_by_id(client, auth_headers):
     """
     Test creating a client and then retrieving, updating, and deleting it by ID."""
     post_res = client.post("/Clients", headers=auth_headers, json={
