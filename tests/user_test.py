@@ -61,8 +61,7 @@ def test_user_by_id(client, auth_headers):
         "full_name": "Rohan Mankame 2",
     })
     assert put_res.status_code == 200
-    updated_data = put_res.get_json()["user"]
-    print(updated_data["is_archived"] )
+    updated_data = put_res.get_json()
 
     # DELETE by ID
     delete_res = client.delete(f"/Users/{user_id}", headers=auth_headers)

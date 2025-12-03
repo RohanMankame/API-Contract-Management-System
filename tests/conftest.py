@@ -27,11 +27,10 @@ def savedToken(client, app, monkeypatch):
     """Creates a test user, generates a JWT token for them, and monkeypatches blueprints
     so get_jwt_identity() returns a uuid.UUID object (test-only).
     """
-   
     email = f"testuser-{uuid.uuid4().hex}@example.com"
 
     with app.app_context():
-      
+
         User.query.filter_by(email=email).delete()
         _db.session.commit()
 
@@ -42,19 +41,15 @@ def savedToken(client, app, monkeypatch):
 
         user_id = user.id
 
-   
-    token = create_access_token(identity=str(user_id))
-
-
+    token = create_access_token(identity=str(user_id))   
     uuid_identity = uuid.UUID(str(user_id))
-
-    
     monkeypatch.setattr("blueprints.auth.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.client.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.user.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.subscription.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.subscription_tier.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.contract.get_jwt_identity", lambda: uuid_identity)
+    monkeypatch.setattr("blueprints.product.get_jwt_identity", lambda: uuid_identity)  
 
     return token
 
@@ -77,6 +72,10 @@ def URL_to_uuid(app):
         "subscription_tier.Subscription_tier_Subscriptions_id",
         "contract.Contract_id",
         "contract.Contract_Product_id",
+        "product.Product_id",                 
+        "product.Product_Contracts_id",       
+        "user.User_id",                       
+        "user.User_Contracts_id",             
     ]
     originals = {}
     for endpoint in endpoints_to_patch:
