@@ -2,6 +2,9 @@
 # for /Subscriptions
 
 
+import json
+
+
 def test_subscription(client, auth_headers):
     """
     Test creating a subscription and then retrieving it.
@@ -30,7 +33,8 @@ def test_subscription(client, auth_headers):
 # for /Subscriptions/<id>
 def test_subscription_by_id(client, auth_headers):
     """
-    Test creating a subscription and then retrieving, updating, and deleting it by ID."""
+    Test creating a subscription and then retrieving, updating, and deleting it by ID.
+    """
     post_res = client.post("/Subscriptions", headers=auth_headers, json={
         "contract_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "product_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -55,3 +59,17 @@ def test_subscription_by_id(client, auth_headers):
     assert "subscription" in data
     subscription_data = data["subscription"]
     assert subscription_data["id"] == subscription_id
+
+    # PUT 
+    put_res = client.put(f"/Subscriptions/{subscription_id}",headers=auth_headers,json={"pricing_type": "Variable"}
+)
+    assert put_res.status_code == 200   
+
+    # DELETE
+    delete_res = client.delete(f"/Subscriptions/{subscription_id}", headers=auth_headers)
+    assert delete_res.status_code == 200
+    get_res = client.get(f"/Subscriptions/{subscription_id}", headers=auth_headers)
+    
+    subscription_data = get_res.get_json()
+    assert subscription_data["subscription"]["is_archived"] == True
+    
