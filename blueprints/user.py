@@ -59,13 +59,8 @@ def Users():
             data = request.get_json()
             validated = user_write_schema.load(data)
 
-            # Extract plain password (schema includes it as load_only)
             password = validated.pop('password', None)
-
-            # Create user with only model fields
             new_user = User(**validated, created_by=curr_user_id, updated_by=curr_user_id)
-
-            # Set password using model helper
             if password:
                 new_user.set_password(password)
 
@@ -75,9 +70,11 @@ def Users():
             return jsonify(user=user_read_schema.dump(new_user)), 201
             
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
     
     
@@ -86,6 +83,7 @@ def Users():
             users = User.query.all()
             return jsonify(users=users_read_schema.dump(users)), 200
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 

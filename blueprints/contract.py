@@ -33,9 +33,11 @@ def Contracts():
             return jsonify(contract=contract_read_schema.dump(new_contract)), 201
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -46,6 +48,7 @@ def Contracts():
             return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -66,6 +69,7 @@ def Contract_id(id):
             return jsonify(contract=contract_read_schema.dump(contract)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error getting contract', 'error': str(e)}), 500
 
 
@@ -87,9 +91,11 @@ def Contract_id(id):
             return jsonify({'message': 'Contract updated successfully'}), 200
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error updating contract', 'error': str(e)}), 500
 
 
@@ -106,6 +112,7 @@ def Contract_id(id):
             return jsonify({'message': 'Contract has been archived successfully'}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error deleting contract', 'error': str(e)}), 500
 
     return jsonify({'message': 'Method not allowed'}), 405
@@ -139,4 +146,5 @@ def Contract_Product_id(id):
         return jsonify({'products': products_list}), 200
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({'message': 'Error getting products', 'error': str(e)}), 500

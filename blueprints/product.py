@@ -33,9 +33,11 @@ def Products():
             return jsonify(product=product_read_schema.dump(new_product)), 201
             
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
     
 
@@ -46,6 +48,7 @@ def Products():
             return jsonify(products=products_read_schema.dump(products)), 200
         
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -71,6 +74,7 @@ def Product_id(id):
             return jsonify(product=product_read_schema.dump(product)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error getting product', 'error': str(e)}), 500
 
 
@@ -92,9 +96,11 @@ def Product_id(id):
             return jsonify({'message': 'Product updated successfully'}), 200
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error updating product', 'error': str(e)}), 500
 
             
@@ -112,6 +118,7 @@ def Product_id(id):
             return jsonify({'message': 'Product has been archived successfully'}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error archiving product', 'error': str(e)}), 500
 
 

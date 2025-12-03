@@ -25,17 +25,18 @@ def Subscriptions():
             data = request.get_json()
             validated = subscription_write_schema.load(data)
 
-            new_subscription = Subscription(**validated,created_by=curr_user_id,updated_by=curr_user_id)
-
+            new_subscription = Subscription(**validated, created_by=curr_user_id, updated_by=curr_user_id)
             db.session.add(new_subscription)
             db.session.commit()
 
             return jsonify(subscription=subscription_read_schema.dump(new_subscription)), 201
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
     elif request.method == 'GET':
@@ -44,6 +45,7 @@ def Subscriptions():
             return jsonify(subscriptions=subscriptions_read_schema.dump(subscriptions)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -66,6 +68,7 @@ def Subscription_id(id):
             return jsonify(subscription=subscription_read_schema.dump(subscription)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error getting subscription', 'error': str(e)}), 500
         
 
@@ -88,9 +91,11 @@ def Subscription_id(id):
             return jsonify({'message': 'Subscription updated successfully'}), 200
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error updating subscription', 'error': str(e)}), 500
 
 
@@ -107,6 +112,7 @@ def Subscription_id(id):
             return jsonify({'message': 'Subscription has been archived successfully'}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error archiving subscription', 'error': str(e)}), 500
 
 
@@ -128,6 +134,7 @@ def Subscription_Tiers_id(id):
             return jsonify({'tiers':tiers}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error fetching subscription tiers', 'error': str(e)}), 500
 
 

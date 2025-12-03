@@ -27,9 +27,11 @@ def Subscription_tiers():
             return jsonify(subscription_tier=subscription_tier_read_schema.dump(new_tier)), 201
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
     
     
@@ -39,6 +41,7 @@ def Subscription_tiers():
             return jsonify(subscription_tiers=subscription_tiers_read_schema.dump(tiers)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -57,6 +60,7 @@ def Subscription_tier_id(id):
             return jsonify(subscription_tier=subscription_tier_read_schema.dump(tier)), 200
         
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error fetching subscription tier', 'error': str(e)}), 500
     
 
@@ -125,5 +129,6 @@ def Subscription_tier_Subscriptions_id(id):
         return jsonify({'subscription': subscription_data}), 200
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
 

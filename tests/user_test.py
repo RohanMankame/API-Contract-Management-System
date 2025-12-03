@@ -12,10 +12,9 @@ def test_user(client, auth_headers):
         "password": "pass122345"
         })
     
-    print(post_res.json)
+    print(post_res.get_json())
     
     assert post_res.status_code == 201
-
     
     # GET
     get_res = client.get("/Users", headers=auth_headers)

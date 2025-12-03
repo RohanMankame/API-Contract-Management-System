@@ -30,6 +30,7 @@ def login():
             return {"access_token": access_token}, 200
 
         except Exception as e:
+            db.session.rollback()
             return {"error": str(e)}, 500
 
     return {"error": "Invalid request method"}, 405

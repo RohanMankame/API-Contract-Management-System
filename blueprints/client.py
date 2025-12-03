@@ -34,9 +34,11 @@ def Clients():
             return jsonify(client=client_read_schema.dump(new_client)), 201
             
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
         
@@ -69,6 +71,7 @@ def Client_id(id):
             return jsonify(client=client_read_schema.dump(client)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -91,9 +94,11 @@ def Client_id(id):
             return jsonify(client=client_read_schema.dump(client)), 200
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -111,6 +116,7 @@ def Client_id(id):
             return jsonify({"message": "Client archived successfully"}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
@@ -131,6 +137,7 @@ def Client_Contracts_id(id):
             return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 400
 
 
