@@ -43,6 +43,7 @@ def savedToken(client, app, monkeypatch):
     monkeypatch.setattr("blueprints.user.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.subscription.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.subscription_tier.get_jwt_identity", lambda: uuid_identity)
+    monkeypatch.setattr("blueprints.contract.get_jwt_identity", lambda: uuid_identity)
     return token
 
 
@@ -61,6 +62,8 @@ def URL_to_uuid(app):
     "client.Client_Contracts_id",
     "subscription.Subscription_id",
     "subscription.Subscription_Tiers_id",
+    "subscription_tier.Subscription_tier_id",          
+    "subscription_tier.Subscription_tier_Subscriptions_id", 
 ]
     originals = {}
     for endpoint in endpoints_to_patch:

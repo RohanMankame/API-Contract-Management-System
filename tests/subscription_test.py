@@ -1,8 +1,4 @@
 
-# for /Subscriptions
-
-
-import json
 
 
 def test_subscription(client, auth_headers):
