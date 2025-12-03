@@ -45,7 +45,56 @@ def UsersFirst():
 
 
 
+@user_bp.route('/Users', methods=['POST','GET'])
+@jwt_required()
+def Users():
+    '''
+    Post: Create a new user
+    Get: Get all users from DB
+    '''
+    curr_user_id = get_jwt_identity()
 
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            validated = user_write_schema.load(data)
+
+            # Extract plain password (schema includes it as load_only)
+            password = validated.pop('password', None)
+
+            # Create user with only model fields
+            new_user = User(**validated, created_by=curr_user_id, updated_by=curr_user_id)
+
+            # Set password using model helper
+            if password:
+                new_user.set_password(password)
+
+            db.session.add(new_user)
+            db.session.commit()
+
+            return jsonify(user=user_read_schema.dump(new_user)), 201
+            
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+    
+    
+    elif request.method == 'GET':
+        try:
+            users = User.query.all()
+            return jsonify(users=users_read_schema.dump(users)), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+
+
+
+
+
+
+"""
 @user_bp.route('/Users', methods=['POST','GET'])
 @jwt_required()
 def Users():
@@ -83,7 +132,7 @@ def Users():
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
-
+"""
 
 
 @user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])

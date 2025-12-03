@@ -40,6 +40,8 @@ def savedToken(client, app, monkeypatch):
     uuid_identity = uuid.UUID(str(user_id))
     monkeypatch.setattr("blueprints.auth.get_jwt_identity", lambda: uuid_identity)
     monkeypatch.setattr("blueprints.client.get_jwt_identity", lambda: uuid_identity)
+    monkeypatch.setattr("blueprints.user.get_jwt_identity", lambda: uuid_identity)
+    monkeypatch.setattr("blueprints.contract.get_jwt_identity", lambda: uuid_identity)
 
     return token
 
@@ -84,3 +86,16 @@ def URL_to_uuid(app):
 
     for endpoint, orig in originals.items():
         app.view_functions[endpoint] = orig
+
+
+@pytest.fixture(autouse=True)
+def clean_db(app):
+    from app import db as _db
+    with app.app_context():
+        _db.session.remove()
+        _db.drop_all()
+        _db.create_all()
+    yield
+    with app.app_context():
+        _db.session.remove()
+        _db.drop_all()

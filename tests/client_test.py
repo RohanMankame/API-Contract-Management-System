@@ -1,4 +1,4 @@
-from uuid import UUID
+
 
 ## for /Clients
 def test_client(client, auth_headers):
