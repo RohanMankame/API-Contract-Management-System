@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.client_schema import client_read_schema, clients_read_schema, client_write_schema
 from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
 
 # Initialize client Blueprint
 client_bp = Blueprint('client', __name__)
@@ -45,7 +46,8 @@ def Clients():
 
     elif request.method == 'GET':
         try:
-            clients = Client.query.all()
+            clients = db.session.query(Client).all()
+            #clients = Client.query.all()
             return jsonify(clients=clients_read_schema.dump(clients)), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 400
@@ -64,7 +66,9 @@ def Client_id(id):
 
     if request.method == 'GET':
         try:
-            client = Client.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            client = db.session.get(Client, id_obj)
+            #client = Client.query.get(id)
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
@@ -81,7 +85,9 @@ def Client_id(id):
             data = request.get_json()
             validated = client_write_schema.load(data, partial=True)
 
-            client = Client.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            client = db.session.get(Client, id_obj)
+            #client = Client.query.get(id)
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
@@ -105,7 +111,9 @@ def Client_id(id):
     
     elif request.method == 'DELETE':
         try:
-            client = Client.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            client = db.session.get(Client, id_obj)
+            #client = Client.query.get(id)
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
@@ -129,7 +137,9 @@ def Client_Contracts_id(id):
     curr_user_id = get_jwt_identity()
     if request.method == 'GET':
         try:
-            client = Client.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            client = db.session.get(Client, id_obj)
+            #client = Client.query.get(id)
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
