@@ -46,7 +46,7 @@ def Contracts():
     elif request.method == 'GET':
         try:
             contracts = db.session.query(Contract).all()
-            #contracts = Contract.query.all()
+            
             return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
         except Exception as e:
@@ -66,7 +66,7 @@ def Contract_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             contract = db.session.get(Contract, id_obj)
-            #contract = Contract.query.get(id)
+            
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
@@ -82,7 +82,7 @@ def Contract_id(id):
             data = request.get_json()
             id_obj = UUID(id) if isinstance(id, str) else id
             contract = db.session.get(Contract, id_obj)
-            #contract = Contract.query.get(id)
+            
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
@@ -109,7 +109,7 @@ def Contract_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             contract = db.session.get(Contract, id_obj)
-            #contract = Contract.query.get(id)
+            
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
@@ -135,7 +135,7 @@ def Contract_Product_id(id):
     try:
         id_obj = UUID(id) if isinstance(id, str) else id
         contract = db.session.get(Contract, id_obj)
-        #contract = Contract.query.get(id)
+        
         if not contract:
             return jsonify({'message': 'Contract not found'}), 404
 

@@ -44,7 +44,7 @@ def Subscriptions():
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             subscriptions = db.session.query(Subscription).all()
-            #subscriptions = Subscription.query.all()
+            
             return jsonify(subscriptions=subscriptions_read_schema.dump(subscriptions)), 200
 
         except Exception as e:
@@ -66,7 +66,7 @@ def Subscription_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             subscription = db.session.get(Subscription, id_obj)
-            #subscription = Subscription.query.get(id)
+            
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
@@ -83,7 +83,7 @@ def Subscription_id(id):
             
             id_obj = UUID(id) if isinstance(id, str) else id
             subscription = db.session.get(Subscription, id_obj)
-            #subscription = Subscription.query.get(id)
+           
 
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
@@ -111,7 +111,7 @@ def Subscription_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             subscription = db.session.get(Subscription, id_obj)
-            #subscription = Subscription.query.get(id)
+            
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
@@ -136,7 +136,7 @@ def Subscription_Tiers_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             subscription = db.session.get(Subscription, id_obj)
-            #subscription = Subscription.query.get(id)
+            
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 

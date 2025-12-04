@@ -46,7 +46,7 @@ def Products():
     elif request.method == 'GET':
         try:
             products = db.session.query(Product).all()
-            #products = Product.query.all()
+            
             return jsonify(products=products_read_schema.dump(products)), 200
         
         except Exception as e:
@@ -71,7 +71,7 @@ def Product_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             product = db.session.get(Product, id_obj)
-            #product = Product.query.get(id)
+            
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
@@ -90,7 +90,7 @@ def Product_id(id):
 
             id_obj = UUID(id) if isinstance(id, str) else id
             product = db.session.get(Product, id_obj)
-            #product = Product.query.get(id)
+            
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
@@ -115,7 +115,7 @@ def Product_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             product = db.session.get(Product, id_obj)
-            #product = Product.query.get(id)
+            
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
@@ -143,7 +143,7 @@ def Product_Contracts_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             product = db.session.get(Product, id_obj)
-            #product = Product.query.get(id)
+            
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 

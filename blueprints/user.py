@@ -104,7 +104,7 @@ def User_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             user = db.session.get(User, id_obj)
-            #user = User.query.get(id)
+            
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
@@ -122,7 +122,7 @@ def User_id(id):
             
             id_obj = UUID(id) if isinstance(id, str) else id
             user = db.session.get(User, id_obj)
-            #user = User.query.get(id)
+            
 
             if not user:
                 return jsonify({'message': 'User not found'}), 404
@@ -152,8 +152,7 @@ def User_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             user = db.session.get(User, id_obj)
-            #user = User.query.get(id)
-
+            
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
@@ -180,7 +179,7 @@ def User_Contracts_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             user = db.session.get(User, id_obj)
-            #user = User.query.get(id)
+            
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 

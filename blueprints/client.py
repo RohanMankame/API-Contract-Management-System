@@ -47,7 +47,7 @@ def Clients():
     elif request.method == 'GET':
         try:
             clients = db.session.query(Client).all()
-            #clients = Client.query.all()
+            
             return jsonify(clients=clients_read_schema.dump(clients)), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 400
@@ -68,7 +68,7 @@ def Client_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
-            #client = Client.query.get(id)
+            
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
@@ -87,7 +87,7 @@ def Client_id(id):
 
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
-            #client = Client.query.get(id)
+            
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
@@ -113,7 +113,7 @@ def Client_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
-            #client = Client.query.get(id)
+            
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 
@@ -139,7 +139,7 @@ def Client_Contracts_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
-            #client = Client.query.get(id)
+            
             if not client:
                 return jsonify({"error": "Client not found"}), 404
 

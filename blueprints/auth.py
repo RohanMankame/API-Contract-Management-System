@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import User
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from uuid import UUID
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -43,7 +44,9 @@ def protected():
     A test protected endpoint that requires a valid JWT to access
     '''
     current_user_id = get_jwt_identity() 
-    current_user = User.query.get(current_user_id)
+    current_user_id_obj = UUID(current_user_id) if isinstance(current_user_id, str) else current_user_id
+    current_user = db.session.get(User, current_user_id_obj)
+    
     if not current_user:
         return {"error": "User not found"}, 404
 
