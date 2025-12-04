@@ -27,6 +27,9 @@ def UsersFirst():
             password = data['password']
             full_name = data['full_name']
 
+            if not all([email, password, full_name]):
+                return jsonify({'message': 'Missing required fields: email, password, full_name'}), 400
+
             new_user = User(
                 email=email,
                 full_name=full_name,
@@ -42,7 +45,8 @@ def UsersFirst():
             return jsonify({'message': 'First user created successfully', 'user_id': new_user.id}), 201
 
         except Exception as e:
-            return jsonify({'message': 'Error creating first user', 'error': str(e)}), 500
+            db.session.rollback()
+            return jsonify({'message': 'Error creating first user', 'error': str(e)}), 400
 
 
 
@@ -183,8 +187,8 @@ def User_Contracts_id(id):
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
-            
-            contracts_objs = Contract.query.filter_by(created_by=id).all()
+            contracts_objs = db.session.query(Contract).filter(Contract.created_by==id_obj).all()
+            #contracts_objs = Contract.query.filter_by(created_by=id).all()
             contracts = contracts_read_schema.dump(contracts_objs)
 
             return jsonify({'contracts': contracts}), 200

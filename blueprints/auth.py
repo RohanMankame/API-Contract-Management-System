@@ -18,21 +18,21 @@ def login():
             email = data['email']
             password = data['password']
 
+            if not email or not password:
+                return {"error": "Email and password are required"}, 400
+
             user = User.query.filter_by(email=email).first()
-            if not user:
-                return {"error": "User not found"}, 404
 
-            if not user or not user.check_password(password):
-                return {"error": "Wrong Password or Username"}, 401
-
+            if not user.check_password(password):
+                return {"error": "Invalid credentials"}, 401
+    
             # identity is user.id
             access_token = create_access_token(identity=user.id)
 
             return {"access_token": access_token}, 200
 
         except Exception as e:
-            db.session.rollback()
-            return {"error": str(e)}, 500
+            return {"error": "An error occurred during login"}, 500
 
     return {"error": "Invalid request method"}, 405
 
@@ -43,11 +43,17 @@ def protected():
     '''
     A test protected endpoint that requires a valid JWT to access
     '''
-    current_user_id = get_jwt_identity() 
-    current_user_id_obj = UUID(current_user_id) if isinstance(current_user_id, str) else current_user_id
-    current_user = db.session.get(User, current_user_id_obj)
-    
-    if not current_user:
-        return {"error": "User not found"}, 404
+    try:
+        current_user_id = get_jwt_identity() 
+        current_user_id_obj = UUID(current_user_id) if isinstance(current_user_id, str) else current_user_id
+        current_user = db.session.get(User, current_user_id_obj)
+        
+        if not current_user:
+            return {"error": "User not found"}, 404
+        
+        return jsonify(logged_in_as=current_user.email), 200
+        
+    except Exception as e:
+        return {"error": "An error occurred while fetching user data"}, 500
 
-    return jsonify(logged_in_as=current_user.email), 200
+    

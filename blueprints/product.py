@@ -26,7 +26,7 @@ def Products():
             data = request.get_json()
             validated = product_write_schema.load(data)
 
-            new_product = Product(**validated,created_by=curr_user_id,updated_by=curr_user_id)
+            new_product = Product(**validated, created_by=curr_user_id, updated_by=curr_user_id)
 
             db.session.add(new_product)
             db.session.commit()
@@ -39,7 +39,7 @@ def Products():
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": str(e)}), 500
     
 
 
@@ -86,13 +86,17 @@ def Product_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            validated = product_write_schema.load(data, partial=True)
+            is_partial = request.method == 'PATCH'
+            validated = product_write_schema.load(data, partial=is_partial)
 
             id_obj = UUID(id) if isinstance(id, str) else id
             product = db.session.get(Product, id_obj)
             
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
+            
+            if product.is_archived:
+                return jsonify({'message': 'Cannot update an archived product'}), 400
 
             for key, value in validated.items():
                 setattr(product, key, value)

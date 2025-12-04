@@ -42,7 +42,6 @@ def Subscriptions():
 
     elif request.method == 'GET':
         try:
-            id_obj = UUID(id) if isinstance(id, str) else id
             subscriptions = db.session.query(Subscription).all()
             
             return jsonify(subscriptions=subscriptions_read_schema.dump(subscriptions)), 200
@@ -140,7 +139,8 @@ def Subscription_Tiers_id(id):
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
-            tiers_objs = Subscription_tier.query.filter_by(subscription_id=id, is_archived=False).all()
+            tiers_objs = db.session.query(Subscription_tier).filter(Subscription_tier.subscription_id==id_obj).all()
+            #tiers_objs = Subscription_tier.query.filter_by(subscription_id=id_obj, is_archived=False).all()
             tiers = subscription_tiers_read_schema.dump(tiers_objs)
 
             return jsonify({'tiers':tiers}), 200

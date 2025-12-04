@@ -7,7 +7,6 @@ def test_contract(client, auth_headers):
     post_res = client.post("/Contracts", headers=auth_headers, json={
         "client_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "contract_name": "Contract A",
-        
         })
     
     assert post_res.status_code == 201
@@ -49,3 +48,14 @@ def test_contract_by_id(client, auth_headers):
     assert "contract" in data
     contract_data = data["contract"]
     assert contract_data["id"] == contract_id
+    assert contract_data["contract_name"] == "Contract B"
+    assert contract_data["client_id"] == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+    # PUT by ID
+    put_res = client.put(f"/Contracts/{contract_id}", headers=auth_headers, json={
+        "contract_name": "Contract B Updated"
+        })
+    assert put_res.status_code == 200
+    updated_data = put_res.get_json()
+    assert updated_data["message"] == "Contract updated successfully"
+    

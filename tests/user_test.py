@@ -9,7 +9,7 @@ def test_user(client, auth_headers):
     post_res = client.post("/Users", headers=auth_headers, json={
         "full_name": "Rohan Mankame",
         "email": "Rohan@gmail.com",
-        "password": "pass122345"
+        "password": "pass12345"
         })
     
     print(post_res.get_json())
@@ -29,10 +29,11 @@ def test_user(client, auth_headers):
 
 
 
-## for /Clients/<id>
+## for /Users/<id>
 def test_user_by_id(client, auth_headers):
     """
-    Test creating a client and then retrieving, updating, and deleting it by ID."""
+    Test creating a user and then retrieving, updating, and deleting it by ID.
+    """
     post_res = client.post("/Users", headers=auth_headers, json={
         "full_name": "Rohan Mankame",
         "email": "Rohan@gmail.com",

@@ -20,7 +20,7 @@ def Subscription_tiers():
             data = request.get_json()
             validated = subscription_tier_write_schema.load(data)
 
-            new_tier = Subscription_tier(**validated,created_by=curr_user_id,updated_by=curr_user_id)
+            new_tier = Subscription_tier(**validated, created_by=curr_user_id, updated_by=curr_user_id)
 
             db.session.add(new_tier)
             db.session.commit()
@@ -28,13 +28,10 @@ def Subscription_tiers():
             return jsonify(subscription_tier=subscription_tier_read_schema.dump(new_tier)), 201
 
         except ValidationError as ve:
-            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
-            db.session.rollback()
-            return jsonify({"error": str(e)}), 400
-    
+            return jsonify({"error": str(e)}), 500    
     
     elif request.method == 'GET':
         try:
@@ -90,9 +87,11 @@ def Subscription_tier_id(id):
             return jsonify({'message': 'Subscription tier updated successfully'}), 200
 
         except ValidationError as ve:
+            db.session.rollback()
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error updating subscription tier', 'error': str(e)}), 500
 
 
@@ -113,6 +112,7 @@ def Subscription_tier_id(id):
             return jsonify({'message': 'Subscription tier archived successfully'}), 200
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({'message': 'Error archiving subscription tier', 'error': str(e)}), 500
 
 

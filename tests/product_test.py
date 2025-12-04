@@ -26,8 +26,9 @@ def test_product(client, auth_headers):
 ## for /Products/<id>
 def test_product_by_id(client, auth_headers):
     """
-    Test creating a product and then retrieving, updating, and deleting it by ID.
+    Test creating a product and then retrieving it by ID.  
     """
+     # POST
     post_res = client.post("/Products", headers=auth_headers, json={
         "api_name": "Open AI Pro",
         "description": "Advanced AI LLM Service",

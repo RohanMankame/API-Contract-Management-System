@@ -59,7 +59,9 @@ def test_subscription_by_id(client, auth_headers):
     # PUT 
     put_res = client.put(f"/Subscriptions/{subscription_id}",headers=auth_headers,json={"pricing_type": "Variable"}
 )
-    assert put_res.status_code == 200   
+    updated_data = put_res.get_json()
+    assert put_res.status_code == 200  
+    
 
     # DELETE
     delete_res = client.delete(f"/Subscriptions/{subscription_id}", headers=auth_headers)

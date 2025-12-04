@@ -51,7 +51,7 @@ def Contracts():
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": "An error occurred while fetching contracts"}), 500
 
 
 @contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
@@ -86,7 +86,8 @@ def Contract_id(id):
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
-            validated = contract_write_schema.load(data, partial=True)
+            is_partial = request.method == 'PATCH'
+            validated = contract_write_schema.load(data, partial=is_partial) # changed partial=True to is_partial
 
             for key, value in validated.items():
                 setattr(contract, key, value)
@@ -95,7 +96,7 @@ def Contract_id(id):
 
             db.session.commit()
             return jsonify({'message': 'Contract updated successfully'}), 200
-
+        
         except ValidationError as ve:
             db.session.rollback()
             return jsonify({"error": ve.messages}), 400

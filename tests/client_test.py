@@ -1,5 +1,4 @@
 
-
 ## for /Clients
 def test_client(client, auth_headers):
     """
@@ -67,7 +66,6 @@ def test_client_by_id(client, auth_headers):
     updated_data = put_res.get_json()["client"]
     assert updated_data["phone_number"] == "999-999-9999"
 
-    print(updated_data["is_archived"] )
 
     # DELETE by ID
     delete_res = client.delete(f"/Clients/{client_id}", headers=auth_headers)
@@ -77,6 +75,5 @@ def test_client_by_id(client, auth_headers):
     assert get_res.status_code == 200
 
     get_res = get_res.get_json()["client"]
-    print(get_res)
-    assert get_res["is_archived"] == True
+    assert get_res["is_archived"] is True
     

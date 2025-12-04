@@ -47,6 +47,7 @@ def Clients():
     elif request.method == 'GET':
         try:
             clients = db.session.query(Client).all()
+            #clients = db.session.query(Client).all()
             
             return jsonify(clients=clients_read_schema.dump(clients)), 200
         except Exception as e:
@@ -79,11 +80,11 @@ def Client_id(id):
             return jsonify({"error": str(e)}), 400
 
 
-
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            validated = client_write_schema.load(data, partial=True)
+            partial = (request.method == 'PATCH')
+            validated = client_write_schema.load(data, partial=partial)   #was validated = client_write_schema.load(data, partial=True)
 
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
