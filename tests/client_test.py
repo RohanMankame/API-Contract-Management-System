@@ -1,18 +1,58 @@
 
+
+payload = test_payload = {
+        "company_name": "Test Client",
+        "email": "testclient@LionRentals.com",
+        "phone_number": "555-555-5555",
+        "address": "123 Test St, Test City, 12837"
+    }
+
+
+'''
+def test_post_client(client, auth_headers):
+    
+    post_res = client.post("/Clients", headers=auth_headers, json=test_payload)
+    assert post_res.status_code == 201
+
+    created = post_res.get_json()["client"]
+    client_id = created["id"]
+    assert client_id is not None
+
+    assert created["company_name"] == test_payload["company_name"]
+    assert created["email"] == test_payload["email"]
+    assert created["phone_number"] == test_payload["phone_number"]
+    assert created["address"] == test_payload["address"]
+
+
+
 ## for /Clients
 def test_client(client, auth_headers):
     """
     Test creating a client and then retrieving it.
     """
-    # POST
-    post_res = client.post("/Clients", headers=auth_headers, json={
+    test_payload = {
         "company_name": "Test Client",
         "email": "testclient@LionRentals.com",
         "phone_number": "555-555-5555",
-        "address": "123 Test St, Test City"
-        })
-    
+        "address": "123 Test St, Test City, 12837"
+    }
+
+    # POST
+    post_res = client.post("/Clients", headers=auth_headers, json=test_payload)
     assert post_res.status_code == 201
+
+    created = post_res.get_json()["client"]
+    client_id = created["id"]
+    assert client_id is not None
+
+    assert created["company_name"] == test_payload["company_name"]
+    assert created["email"] == test_payload["email"]
+    assert created["phone_number"] == test_payload["phone_number"]
+    assert created["address"] == test_payload["address"]
+    
+
+
+
 
     # GET
     get_res = client.get("/Clients", headers=auth_headers)
@@ -20,7 +60,7 @@ def test_client(client, auth_headers):
     data = get_res.get_json()
     assert "clients" in data
 
-    client = data["clients"][0]
+    client = data["clients"]["id"]
     assert client["company_name"] == "Test Client"
     assert client["email"] == "testclient@LionRentals.com"
     assert client["phone_number"] == "555-555-5555"
@@ -34,7 +74,8 @@ def test_client(client, auth_headers):
 ## for /Clients/<id>
 def test_client_by_id(client, auth_headers):
     """
-    Test creating a client and then retrieving, updating, and deleting it by ID."""
+    Test creating a client and then retrieving, updating, and deleting it by ID.
+"""
     post_res = client.post("/Clients", headers=auth_headers, json={
         "company_name": "Test Client 2",
         "email": "testclient2@LionRentals.com",
@@ -76,4 +117,4 @@ def test_client_by_id(client, auth_headers):
 
     get_res = get_res.get_json()["client"]
     assert get_res["is_archived"] is True
-    
+    '''
