@@ -24,7 +24,8 @@ def client(app):
 
 @pytest.fixture
 def savedToken(client, app, monkeypatch):
-    """Creates a test user, generates a JWT token for them, and monkeypatches blueprints
+    """
+    Creates a test user, generates a JWT token for them, and monkeypatches blueprints
     so get_jwt_identity() returns a uuid.UUID object (test-only).
     """
     email = f"testuser-{uuid.uuid4().hex}@example.com"
@@ -57,49 +58,6 @@ def savedToken(client, app, monkeypatch):
 @pytest.fixture
 def auth_headers(savedToken):
     return {"Authorization": f"Bearer {savedToken}"}
-
-
-@pytest.fixture(autouse=True)
-def URL_to_uuid(app):
-    """Wrap specific view functions so any 'id' kwarg that is a string
-    is converted to a uuid.UUID before the view runs."""
-    endpoints_to_patch = [
-        "client.Client_id",
-        "client.Client_Contracts_id",
-        "subscription.Subscription_id",
-        "subscription.Subscription_Tiers_id",
-        "subscription_tier.Subscription_tier_id",
-        "subscription_tier.Subscription_tier_Subscriptions_id",
-        "contract.Contract_id",
-        "contract.Contract_Product_id",
-        "product.Product_id",                 
-        "product.Product_Contracts_id",       
-        "user.User_id",                       
-        "user.User_Contracts_id",             
-    ]
-    originals = {}
-    for endpoint in endpoints_to_patch:
-        orig = app.view_functions.get(endpoint)
-        if not orig:
-            continue
-        originals[endpoint] = orig
-
-        @functools.wraps(orig)
-        def wrapper(*args, __orig__=orig, **kwargs):
-            if "id" in kwargs and isinstance(kwargs["id"], str):
-                try:
-                    kwargs["id"] = UUID(kwargs["id"])
-                except ValueError:
-                    pass
-            return __orig__(*args, **kwargs)
-
-        app.view_functions[endpoint] = wrapper
-
-    yield
-
-    # restore originals
-    for endpoint, orig in originals.items():
-        app.view_functions[endpoint] = orig
 
 
 @pytest.fixture(autouse=True)
