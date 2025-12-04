@@ -1,5 +1,8 @@
-from app import ma
+from app import ma, db
 from models.contract import Contract
+from marshmallow import validates_schema, ValidationError
+from models import Client
+from uuid import UUID
 
 
 class ContractReadSchema(ma.SQLAlchemyAutoSchema):
@@ -20,6 +23,18 @@ class ContractWriteSchema(ma.SQLAlchemySchema):
     
     class Meta:
         model = Contract
+
+    # make sure client_id exists in DB before assigning to new Contract
+    @validates_schema
+    def check_client_exists(self, data, **kwargs):
+        client_id = data.get("client_id")
+        if client_id:
+            id_obj = UUID(client_id) if isinstance(client_id, str) else client_id
+            if not db.session.get(Client, id_obj):
+                raise ValidationError({"client_id":"Client does not exist"})
+
+    
+
 
 contract_read_schema = ContractReadSchema()
 
