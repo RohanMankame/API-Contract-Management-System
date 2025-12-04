@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_tier_schema import subscription_tier_read_schema, subscription_tiers_read_schema, subscription_tier_write_schema
 from schemas.subscription_schema import subscription_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
 
 subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
@@ -37,7 +38,8 @@ def Subscription_tiers():
     
     elif request.method == 'GET':
         try:
-            tiers = Subscription_tier.query.all()
+            tiers = db.session.query(Subscription_tier).all()
+            #tiers = Subscription_tier.query.all()
             return jsonify(subscription_tiers=subscription_tiers_read_schema.dump(tiers)), 200
 
         except Exception as e:
@@ -53,7 +55,9 @@ def Subscription_tier_id(id):
 
     if request.method == 'GET':
         try:
-            tier = Subscription_tier.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            tier = db.session.get(Subscription_tier, id_obj)
+            #tier = Subscription_tier.query.get(id)
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
@@ -69,7 +73,9 @@ def Subscription_tier_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            tier = Subscription_tier.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            tier = db.session.get(Subscription_tier, id_obj)
+            #tier = Subscription_tier.query.get(id)
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
@@ -94,7 +100,9 @@ def Subscription_tier_id(id):
 
     elif request.method == 'DELETE':
         try:
-            tier = Subscription_tier.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            tier = db.session.get(Subscription_tier, id_obj)
+            #tier = Subscription_tier.query.get(id)
             if not tier:
                 return jsonify({'message': 'Subscription tier not found'}), 404
 
@@ -117,7 +125,9 @@ def Subscription_tier_Subscriptions_id(id):
     Get: Get the subscription associated with a specific subscription tier ID
     '''
     try:
-        tier = Subscription_tier.query.get(id)
+        id_obj = UUID(id) if isinstance(id, str) else id
+        tier = db.session.get(Subscription_tier, id_obj)
+        #tier = Subscription_tier.query.get(id)
         if not tier:
             return jsonify({'message': 'Subscription tier not found'}), 404
 

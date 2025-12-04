@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.user_schema import user_read_schema, users_read_schema, user_write_schema
 from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
 
 # Initialize user Blueprint
 user_bp = Blueprint('user', __name__)
@@ -101,7 +102,9 @@ def User_id(id):
 
     if request.method == 'GET':
         try:
-            user = User.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            user = db.session.get(User, id_obj)
+            #user = User.query.get(id)
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 
@@ -116,7 +119,10 @@ def User_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            user = User.query.get(id)
+            
+            id_obj = UUID(id) if isinstance(id, str) else id
+            user = db.session.get(User, id_obj)
+            #user = User.query.get(id)
 
             if not user:
                 return jsonify({'message': 'User not found'}), 404
@@ -144,7 +150,9 @@ def User_id(id):
     
     elif request.method == 'DELETE':
         try:
-            user = User.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            user = db.session.get(User, id_obj)
+            #user = User.query.get(id)
 
             if not user:
                 return jsonify({'message': 'User not found'}), 404
@@ -170,7 +178,9 @@ def User_Contracts_id(id):
     curr_user_id = get_jwt_identity()
     if request.method == 'GET':
         try:
-            user = User.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            user = db.session.get(User, id_obj)
+            #user = User.query.get(id)
             if not user:
                 return jsonify({'message': 'User not found'}), 404
 

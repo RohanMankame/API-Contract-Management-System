@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.product_schema import product_read_schema, products_read_schema, product_write_schema
 from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
 
 # Initialize product Blueprint
 product_bp = Blueprint('product', __name__)
@@ -44,7 +45,8 @@ def Products():
 
     elif request.method == 'GET':
         try:
-            products = Product.query.all()
+            products = db.session.query(Product).all()
+            #products = Product.query.all()
             return jsonify(products=products_read_schema.dump(products)), 200
         
         except Exception as e:
@@ -67,7 +69,9 @@ def Product_id(id):
 
     if request.method == 'GET':
         try:
-            product = Product.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            product = db.session.get(Product, id_obj)
+            #product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
@@ -84,7 +88,9 @@ def Product_id(id):
             data = request.get_json()
             validated = product_write_schema.load(data, partial=True)
 
-            product = Product.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            product = db.session.get(Product, id_obj)
+            #product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
@@ -107,7 +113,9 @@ def Product_id(id):
     
     elif request.method == 'DELETE':
         try:
-            product = Product.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            product = db.session.get(Product, id_obj)
+            #product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
@@ -133,7 +141,9 @@ def Product_Contracts_id(id):
     '''
     if request.method == 'GET':
         try:
-            product = Product.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            product = db.session.get(Product, id_obj)
+            #product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 

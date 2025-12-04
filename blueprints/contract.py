@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.contract_schema import contract_read_schema, contracts_read_schema, contract_write_schema
 from schemas.product_schema import product_read_schema, products_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
 
 
 # Initialize contract Blueprint
@@ -44,7 +45,8 @@ def Contracts():
 
     elif request.method == 'GET':
         try:
-            contracts = Contract.query.all()
+            contracts = db.session.query(Contract).all()
+            #contracts = Contract.query.all()
             return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
         except Exception as e:
@@ -62,7 +64,9 @@ def Contract_id(id):
     '''
     if request.method == 'GET':
         try:
-            contract = Contract.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            contract = db.session.get(Contract, id_obj)
+            #contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
@@ -76,7 +80,9 @@ def Contract_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            contract = Contract.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            contract = db.session.get(Contract, id_obj)
+            #contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
@@ -101,7 +107,9 @@ def Contract_id(id):
 
     elif request.method == 'DELETE':
         try:
-            contract = Contract.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            contract = db.session.get(Contract, id_obj)
+            #contract = Contract.query.get(id)
             if not contract:
                 return jsonify({'message': 'Contract not found'}), 404
 
@@ -125,7 +133,9 @@ def Contract_Product_id(id):
     Get: Get all products associated with a specific contract ID
     '''
     try:
-        contract = Contract.query.get(id)
+        id_obj = UUID(id) if isinstance(id, str) else id
+        contract = db.session.get(Contract, id_obj)
+        #contract = Contract.query.get(id)
         if not contract:
             return jsonify({'message': 'Contract not found'}), 404
 

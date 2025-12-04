@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_schema import subscription_read_schema, subscriptions_read_schema, subscription_write_schema
 from schemas.subscription_tier_schema import subscription_tiers_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
 
 # Initialize subscription Blueprint
 subscription_bp = Blueprint('subscription', __name__)
@@ -41,7 +42,9 @@ def Subscriptions():
 
     elif request.method == 'GET':
         try:
-            subscriptions = Subscription.query.all()
+            id_obj = UUID(id) if isinstance(id, str) else id
+            subscriptions = db.session.query(Subscription).all()
+            #subscriptions = Subscription.query.all()
             return jsonify(subscriptions=subscriptions_read_schema.dump(subscriptions)), 200
 
         except Exception as e:
@@ -61,7 +64,9 @@ def Subscription_id(id):
 
     if request.method == 'GET':
         try:
-            subscription = Subscription.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            subscription = db.session.get(Subscription, id_obj)
+            #subscription = Subscription.query.get(id)
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
@@ -75,7 +80,10 @@ def Subscription_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            subscription = Subscription.query.get(id)
+            
+            id_obj = UUID(id) if isinstance(id, str) else id
+            subscription = db.session.get(Subscription, id_obj)
+            #subscription = Subscription.query.get(id)
 
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
@@ -101,7 +109,9 @@ def Subscription_id(id):
 
     elif request.method == 'DELETE':
         try:
-            subscription = Subscription.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            subscription = db.session.get(Subscription, id_obj)
+            #subscription = Subscription.query.get(id)
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
@@ -124,7 +134,9 @@ def Subscription_Tiers_id(id):
     '''
     if request.method == 'GET':
         try:
-            subscription = Subscription.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            subscription = db.session.get(Subscription, id_obj)
+            #subscription = Subscription.query.get(id)
             if not subscription:
                 return jsonify({'message': 'Subscription not found'}), 404
 
