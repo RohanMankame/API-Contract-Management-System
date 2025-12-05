@@ -25,6 +25,9 @@ def clean_db(app):
         _db.session.remove()
         _db.drop_all()
 
+
+        
+'''
 @pytest.fixture
 def saved_token(app):
     with app.app_context():
@@ -34,9 +37,43 @@ def saved_token(app):
         _db.session.commit()
         token = create_access_token(identity=str(user.id))
     return token
+'''
+
+
+@pytest.fixture
+def saved_token(app, monkeypatch):
+    # create unique user in test DB
+    with app.app_context():
+        user = User(email=f"testuser-{uuid.uuid4().hex}@example.com", full_name="Test")
+        user.set_password("pass12345")
+        _db.session.add(user)
+        _db.session.commit()
+
+        user_id = user.id
+
+    # create token with string identity (normal usage)
+    token = create_access_token(identity=str(user_id))
+    # convert once and monkeypatch get_jwt_identity in blueprints to return UUID
+    uuid_identity = uuid.UUID(str(user_id))
+    modules_to_patch = [
+        "blueprints.auth",
+        "blueprints.client",
+        "blueprints.user",
+        "blueprints.contract",
+        "blueprints.product",
+        "blueprints.subscription",
+        "blueprints.subscription_tier",
+    ]
+    for mod in modules_to_patch:
+        monkeypatch.setattr(f"{mod}.get_jwt_identity", lambda: uuid_identity)
+
+    return token
+
+
 
 
 @pytest.fixture
 def auth_headers(saved_token):
     return {"Authorization": f"Bearer {saved_token}"}
+
 
