@@ -64,7 +64,6 @@ def test_update_patch_client(client, auth_headers):
     updated_client = res_put.get_json()["client"]
     assert updated_client["company_name"] == update_payload["company_name"]
     assert updated_client["phone_number"] == update_payload["phone_number"]
-    # unchanged fields
     assert updated_client["email"] == payload["email"]
     assert updated_client["address"] == payload["address"]
 

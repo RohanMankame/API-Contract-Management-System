@@ -31,7 +31,7 @@ def Products():
             db.session.add(new_product)
             db.session.commit()
 
-            return jsonify(product=product_read_schema.dump(new_product)), 201
+            return jsonify({"message": "Product created successfully", "product": product_read_schema.dump(new_product)}), 201
             
         except ValidationError as ve:
             db.session.rollback()
@@ -47,7 +47,7 @@ def Products():
         try:
             products = db.session.query(Product).all()
             
-            return jsonify(products=products_read_schema.dump(products)), 200
+            return jsonify({"message": "Products retrieved successfully", "products": products_read_schema.dump(products)}), 200
         
         except Exception as e:
             db.session.rollback()
@@ -73,13 +73,13 @@ def Product_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'message': 'Product not found'}), 404
+                return jsonify({'error': 'Product not found'}), 404
 
-            return jsonify(product=product_read_schema.dump(product)), 200
+            return jsonify({"message": "Product retrieved successfully", "product": product_read_schema.dump(product)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error getting product', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting product', 'error': str(e)}), 500
 
 
 
@@ -93,17 +93,17 @@ def Product_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'message': 'Product not found'}), 404
+                return jsonify({'error': 'Product not found'}), 404
             
             if product.is_archived:
-                return jsonify({'message': 'Cannot update an archived product'}), 400
+                return jsonify({'error': 'Cannot update an archived product'}), 400
 
             for key, value in validated.items():
                 setattr(product, key, value)
             product.updated_by = curr_user_id
             db.session.commit()
 
-            return jsonify({'message': 'Product updated successfully'}), 200
+            return jsonify({'message': 'Product updated successfully', "product": product_read_schema.dump(product)}), 200
 
         except ValidationError as ve:
             db.session.rollback()
@@ -111,7 +111,7 @@ def Product_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error updating product', 'error': str(e)}), 500
+            return jsonify({'error': 'Error updating product', 'error': str(e)}), 500
 
             
     
@@ -121,18 +121,17 @@ def Product_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'message': 'Product not found'}), 404
+                return jsonify({'error': 'Product not found'}), 404
 
             product.is_archived = True
             product.updated_by = curr_user_id
 
             db.session.commit()
-            return jsonify({'message': 'Product has been archived successfully'}), 200
+            return jsonify({'message': 'Product has been archived successfully', "product": product_read_schema.dump(product)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error archiving product', 'error': str(e)}), 500
-
+            return jsonify({'error': 'Error archiving product', 'error': str(e)}), 500
 
 
 
@@ -159,10 +158,10 @@ def Product_Contracts_id(id):
                     contracts_map[cont.id] = cont
 
             contracts = list(contracts_map.values())
-            return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
+            return jsonify({"message": "Contracts retrieved successfully", "contracts": contracts_read_schema.dump(contracts)}), 200
 
         except Exception as e:
-            return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting contracts', 'exception': str(e)}), 500
             
 
 

@@ -21,3 +21,13 @@ def user_payload(**overrides):
     }
     base.update(overrides)
     return base
+
+
+
+def product_payload(**overrides):
+    base = {
+        "api_name": "Test API",
+        "description": "This is a test API product.",
+    }
+    base.update(overrides)
+    return base

@@ -1,51 +1,116 @@
+from tests.factories import product_payload
+from uuid import uuid4
 
 
-def test_product(client, auth_headers):
-    """
-    Test creating a product and then retrieving it.
-    """
-    # POST
-    post_res = client.post("/Products", headers=auth_headers, json={
-        "api_name": "Open AI",
-        "description": "AI LLM Service",
-        })
-    
-    assert post_res.status_code == 201
 
-    # GET
-    get_res = client.get("/Products", headers=auth_headers)
-    assert get_res.status_code == 200
-    data = get_res.get_json()
-    assert "products" in data
+def test_create_product(client, auth_headers):
+    payload = product_payload()
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
 
-    product = data["products"][0]
-    assert product["api_name"] == "Open AI"
-    assert product["description"] == "AI LLM Service"
+    assert res_post.status_code == 201
+    assert res_post.get_json()["message"] == "Product created successfully"
+    created_product = res_post.get_json()["product"]
+    for key in payload:
+        assert created_product[key] == payload[key]
 
 
-## for /Products/<id>
-def test_product_by_id(client, auth_headers):
-    """
-    Test creating a product and then retrieving it by ID.  
-    """
-     # POST
-    post_res = client.post("/Products", headers=auth_headers, json={
-        "api_name": "Open AI Pro",
-        "description": "Advanced AI LLM Service",
-        })
-    
-    assert post_res.status_code == 201
 
-    product_id = post_res.get_json()["product"]["id"]
+def test_get_products(client, auth_headers):
+    payload = product_payload()
+    client.post("/Products", headers=auth_headers, json=payload)
 
-    assert product_id is not None
-    assert isinstance(product_id, str)
+    res_get = client.get("/Products", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "Products retrieved successfully"
+    products = res_get.get_json()["products"]
+    assert len(products) >= 1
 
-    # GET by ID
-    get_res = client.get(f"/Products/{product_id}", headers=auth_headers)
-    assert get_res.status_code == 200
 
-    data = get_res.get_json()
-    assert "product" in data
-    product_data = data["product"]
-    assert product_data["id"] == product_id
+
+def test_get_product_by_id(client, auth_headers):
+    payload = product_payload()
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    created_product = res_post.get_json()["product"]
+    product_id = created_product["id"]
+
+    res_get = client.get(f"/Products/{product_id}", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "Product retrieved successfully"
+    fetched_product = res_get.get_json()["product"]
+    assert fetched_product["id"] == product_id
+    for key in payload:
+        assert fetched_product[key] == payload[key]
+
+
+def test_get_product_by_id_not_found(client, auth_headers):
+    non_existent_id = str(uuid4())
+    res_get = client.get(f"/Products/{non_existent_id}", headers=auth_headers)
+    assert res_get.status_code == 404
+    assert res_get.get_json()["error"] == "Product not found"
+
+
+
+
+def test_update_patch_product(client, auth_headers):
+    payload = product_payload()
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    created_product = res_post.get_json()["product"]
+    product_id = created_product["id"]
+
+    patch_payload = {
+        "description": "Partially updated description."
+    }
+    res_patch = client.patch(f"/Products/{product_id}", headers=auth_headers, json=patch_payload)
+    assert res_patch.status_code == 200
+    assert res_patch.get_json()["message"] == "Product updated successfully"
+    updated_product_patch = res_patch.get_json()["product"]
+    assert updated_product_patch["api_name"] == patch_payload.get("api_name", payload["api_name"])  
+    assert updated_product_patch["description"] == patch_payload["description"]  
+
+
+
+
+def test_update_put_product(client, auth_headers):
+    payload = product_payload()
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    created_product = res_post.get_json()["product"]
+    product_id = created_product["id"]
+
+    put_payload = {
+        "api_name": "Updated API Name",
+        "description": "Updated description."
+    }
+    res_put = client.put(f"/Products/{product_id}", headers=auth_headers, json=put_payload)
+    assert res_put.status_code == 200
+    assert res_put.get_json()["message"] == "Product updated successfully"
+    updated_product_put = res_put.get_json()["product"]
+    assert updated_product_put["api_name"] == put_payload["api_name"]
+    assert updated_product_put["description"] == put_payload["description"]
+
+
+
+
+
+def test_delete_product(client, auth_headers):
+    payload = product_payload()
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    created_product = res_post.get_json()["product"]
+    product_id = created_product["id"]
+
+    res_delete = client.delete(f"/Products/{product_id}", headers=auth_headers)
+    assert res_delete.status_code == 200
+    assert res_delete.get_json()["message"] == "Product has been archived successfully"
+
+    res_get = client.get(f"/Products/{product_id}", headers=auth_headers)
+    assert res_get.status_code == 200
+    fetched_product = res_get.get_json()["product"]
+    assert fetched_product["id"] == product_id
+    assert fetched_product["is_archived"] is True
+
+
+
+def test_delete_product_not_found(client, auth_headers):
+    non_existent_id = str(uuid4())
+    res_delete = client.delete(f"/Products/{non_existent_id}", headers=auth_headers)
+    assert res_delete.status_code == 404
+    assert res_delete.get_json()["error"] == "Product not found"
