@@ -28,13 +28,15 @@ def clean_db(app):
 @pytest.fixture
 def saved_token(app):
     with app.app_context():
-        user = User(email=f"testuser-{uuid.uuid4().hex}@example.com", full_name="Test")
+        user = User(email=f"testuser-{uuid.uuid4().hex}@example.com", full_name="Test User")
         user.set_password("pass12345")
         _db.session.add(user)
         _db.session.commit()
         token = create_access_token(identity=str(user.id))
     return token
 
+
 @pytest.fixture
 def auth_headers(saved_token):
     return {"Authorization": f"Bearer {saved_token}"}
+
