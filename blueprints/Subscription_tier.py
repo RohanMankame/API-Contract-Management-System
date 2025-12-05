@@ -37,7 +37,7 @@ def Subscription_tiers():
         try:
             tiers = db.session.query(Subscription_tier).all()
             
-            return jsonify(subscription_tiers=subscription_tiers_read_schema.dump(tiers)), 200
+            return jsonify({"message":"Success","subscription_tiers":subscription_tiers_read_schema.dump(tiers)}), 200
 
         except Exception as e:
             db.session.rollback()

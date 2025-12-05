@@ -5,6 +5,7 @@ from models import Client
 from uuid import UUID
 
 
+
 class ContractReadSchema(ma.SQLAlchemyAutoSchema):
 
     subscriptions = ma.Nested('SubscriptionReadSchema', many=True)
@@ -32,6 +33,10 @@ class ContractWriteSchema(ma.SQLAlchemySchema):
             id_obj = UUID(client_id) if isinstance(client_id, str) else client_id
             if not db.session.get(Client, id_obj):
                 raise ValidationError({"client_id":"Client does not exist"})
+            
+    
+
+    
 
     
 
