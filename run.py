@@ -8,7 +8,6 @@ app = create_app()
 def home():
     return "Home page"
 
-
 #Debug mode
 debug_mode = os.environ.get('DEBUG_MODE', 'True') == 'True'
 

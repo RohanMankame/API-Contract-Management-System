@@ -72,7 +72,7 @@ def Users():
             db.session.add(new_user)
             db.session.commit()
 
-            return jsonify(user=user_read_schema.dump(new_user)), 201
+            return jsonify({"message": "User created successfully", "user": user_read_schema.dump(new_user)}), 201
             
         except ValidationError as ve:
             db.session.rollback()
@@ -86,7 +86,7 @@ def Users():
     elif request.method == 'GET':
         try:
             users = User.query.all()
-            return jsonify(users=users_read_schema.dump(users)), 200
+            return jsonify({"message": "Users retrieved successfully", "users": users_read_schema.dump(users)}), 200
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": str(e)}), 400
@@ -110,13 +110,13 @@ def User_id(id):
             user = db.session.get(User, id_obj)
             
             if not user:
-                return jsonify({'message': 'User not found'}), 404
+                return jsonify({'error': 'User not found'}), 404
 
-            return jsonify(user=user_read_schema.dump(user)), 200
+            return jsonify({"message": "User retrieved successfully", "user": user_read_schema.dump(user)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error getting user', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting user', 'error': str(e)}), 500
 
 
 
@@ -129,7 +129,7 @@ def User_id(id):
             
 
             if not user:
-                return jsonify({'message': 'User not found'}), 404
+                return jsonify({'error': 'User not found'}), 404
 
             validated = user_write_schema.load(data, partial=True)
 
@@ -142,14 +142,14 @@ def User_id(id):
             user.updated_by = curr_user_id
 
             db.session.commit()
-            return jsonify({'message': 'User updated successfully'}), 200
+            return jsonify({'message': 'User updated successfully', "user": user_read_schema.dump(user)}), 200
 
         except ValidationError as ve:
             db.session.rollback()
             return jsonify({"error": ve.messages}), 400
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error updating user', 'error': str(e)}), 500
+            return jsonify({'error': 'Error updating user', 'error': str(e)}), 500
     
     
     elif request.method == 'DELETE':
@@ -158,17 +158,17 @@ def User_id(id):
             user = db.session.get(User, id_obj)
             
             if not user:
-                return jsonify({'message': 'User not found'}), 404
+                return jsonify({'error': 'User not found'}), 404
 
             user.is_archived = True 
             user.updated_by = curr_user_id
 
             db.session.commit()
-            return jsonify({'message': 'User archived successfully'}), 200
+            return jsonify({'message': 'User archived successfully', "user": user_read_schema.dump(user)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error archiving user', 'error': str(e)}), 500
+            return jsonify({'error': 'Error archiving user', 'error': str(e)}), 500
 
 
 

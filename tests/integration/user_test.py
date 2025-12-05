@@ -1,76 +1,106 @@
+from tests.factories import user_payload
+import uuid
 
-def test_user(client, auth_headers):
-    """
-    Test creating a user and then retrieving it.
-    """
-    
+def test_create_user(client, auth_headers):
+    payload = user_payload()
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
 
-    # POST
-    post_res = client.post("/Users", headers=auth_headers, json={
-        "full_name": "Rohan Mankame",
-        "email": "Rohan@gmail.com",
-        "password": "pass12345"
-        })
-    
-    print(post_res.get_json())
-    
-    assert post_res.status_code == 201
-    
-    # GET
-    get_res = client.get("/Users", headers=auth_headers)
-    assert get_res.status_code == 200
-    data = get_res.get_json()
-    assert "users" in data
+    assert res_post.status_code == 201
+    assert res_post.get_json()["message"] == "User created successfully"
+    created_user = res_post.get_json()["user"]
+    for key in payload:
+        if key != "password":  
+            assert created_user[key] == payload[key]
 
-    user = data["users"][0]
-    assert user["full_name"] == "Test User"
-    
+
+def test_get_users(client, auth_headers):
+    payload = user_payload()
+    client.post("/Users", headers=auth_headers, json=payload)
+
+    res_get = client.get("/Users", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "Users retrieved successfully"
+    users = res_get.get_json()["users"]
+    assert len(users) >= 1
 
 
 
+def test_get_user_by_id(client, auth_headers): 
+    payload = user_payload()
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
+    created_user = res_post.get_json()["user"]
+    user_id = created_user["id"]
 
-## for /Users/<id>
-def test_user_by_id(client, auth_headers):
-    """
-    Test creating a user and then retrieving, updating, and deleting it by ID.
-    """
-    post_res = client.post("/Users", headers=auth_headers, json={
-        "full_name": "Rohan Mankame",
-        "email": "Rohan@gmail.com",
-        "password": "pass12345"
-        })
-    
-    assert post_res.status_code == 201
+    res_get = client.get(f"/Users/{user_id}", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "User retrieved successfully"
+    fetched_user = res_get.get_json()["user"]
+    assert fetched_user["id"] == user_id
+    for key in payload:
+        if key != "password":  
+            assert fetched_user[key] == payload[key]
 
-    user_id = post_res.get_json()["user"]["id"]
 
-    assert user_id is not None
-    assert isinstance(user_id, str)
+def test_get_user_by_id_not_found(client, auth_headers):
+    non_existent_id = str(uuid.uuid4())
+    res_get = client.get(f"/Users/{non_existent_id}", headers=auth_headers)
+    assert res_get.status_code == 404
+    assert res_get.get_json()["error"] == "User not found"
 
-    # GET by ID
-    get_res = client.get(f"/Users/{user_id}", headers=auth_headers)
-    assert get_res.status_code == 200
 
-    data = get_res.get_json()
-    assert "user" in data
-    user_data = data["user"]
-    assert user_data["id"] == user_id
 
-    # PUT and PATCH by ID
-    put_res = client.put(f"/Users/{user_id}", headers=auth_headers, json={
-        "full_name": "Rohan Mankame 2",
-    })
-    assert put_res.status_code == 200
-    updated_data = put_res.get_json()
+def test_update_patch_user(client, auth_headers):
+    payload = user_payload()
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
+    created_user = res_post.get_json()["user"]
+    user_id = created_user["id"]
 
-    # DELETE by ID
-    delete_res = client.delete(f"/Users/{user_id}", headers=auth_headers)
-    assert delete_res.status_code == 200
+    update_payload = {
+        "full_name": "Updated User Name",
+    }
 
-    get_res = client.get(f"/Users/{user_id}", headers=auth_headers)
-    assert get_res.status_code == 200
+    res_put = client.put(f"/Users/{user_id}", headers=auth_headers, json=update_payload)
+    assert res_put.status_code == 200
+    updated_user = res_put.get_json()["user"]
+    assert updated_user["full_name"] == "Updated User Name"
 
-    get_res = get_res.get_json()["user"]
-    print(get_res)
-    assert get_res["is_archived"] == True
-    
+
+def test_update_put_user(client, auth_headers):
+    payload = user_payload()
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
+    created_user = res_post.get_json()["user"]
+    user_id = created_user["id"]
+
+    update_payload = {
+        "full_name": "Updated User Name",
+        "email": "updatedemail@example.com"
+    }
+
+    res_put = client.put(f"/Users/{user_id}", headers=auth_headers, json=update_payload)
+    assert res_put.status_code == 200
+    updated_user = res_put.get_json()["user"]
+    assert updated_user["full_name"] == "Updated User Name"
+    assert updated_user["email"] == "updatedemail@example.com"
+
+
+def test_delete_user(client, auth_headers):
+    payload = user_payload()
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
+    created_user = res_post.get_json()["user"]
+    user_id = created_user["id"]
+
+    res_delete = client.delete(f"/Users/{user_id}", headers=auth_headers)
+    assert res_delete.status_code == 200
+    assert res_delete.get_json()["message"] == "User archived successfully"
+
+    res_get = client.get(f"/Users/{user_id}", headers=auth_headers)
+    assert res_get.status_code == 200
+    fetched_user = res_get.get_json()["user"]
+    assert fetched_user["is_archived"] == True
+
+
+def test_delete_user_not_found(client, auth_headers):
+    non_existent_id = str(uuid.uuid4())
+    res_delete = client.delete(f"/Users/{non_existent_id}", headers=auth_headers)
+    assert res_delete.status_code == 404
+    assert res_delete.get_json()["error"] == "User not found"

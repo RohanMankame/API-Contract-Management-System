@@ -70,7 +70,7 @@ def test_update_patch_client(client, auth_headers):
 
 
 
-def test_update_patch_client(client, auth_headers):
+def test_update_put_client(client, auth_headers):
     payload = client_payload()
     res_post = client.post("/Clients", headers=auth_headers, json=payload)
     created_client = res_post.get_json()["client"]
@@ -113,4 +113,9 @@ def test_delete_client(client, auth_headers):
     fetched_client = res_get.get_json()["client"]
     assert fetched_client["is_archived"] is True
 
-    
+
+def test_delete_client_not_found(client, auth_headers):
+    non_existent_id = str(uuid4())
+    res_delete = client.delete(f"/Clients/{non_existent_id}", headers=auth_headers)
+    assert res_delete.status_code == 404
+    assert res_delete.get_json()["error"] == "Client not found"

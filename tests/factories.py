@@ -11,3 +11,13 @@ def client_payload(**overrides):
     base.update(overrides)
     return base
 
+
+
+def user_payload(**overrides):
+    base = {
+        "email": f"testuser-{uuid.uuid4().hex}@example.com",
+        "full_name": "Test User",
+        "password": "pass12345",
+    }
+    base.update(overrides)
+    return base
