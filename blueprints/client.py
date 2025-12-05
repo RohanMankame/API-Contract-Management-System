@@ -47,7 +47,6 @@ def Clients():
     elif request.method == 'GET':
         try:
             clients = db.session.query(Client).all()
-            #clients = db.session.query(Client).all()
             
             return jsonify({"message":"Client retrieved successfully", "clients": clients_read_schema.dump(clients)}), 200
         
