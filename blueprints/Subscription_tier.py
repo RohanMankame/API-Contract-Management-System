@@ -25,12 +25,12 @@ def Subscription_tiers():
             db.session.add(new_tier)
             db.session.commit()
 
-            return jsonify({"message": "Subscription tiers retrieved successfully","subscription_tier": subscription_tier_read_schema.dump(new_tier)}), 201
-
+            return jsonify({"message": "Subscription tier created successfully","subscription_tier": subscription_tier_read_schema.dump(new_tier)}), 201
         except ValidationError as ve:
             return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
+            db.session.rollback()
             return jsonify({"error": str(e)}), 500
     
     elif request.method == 'GET':

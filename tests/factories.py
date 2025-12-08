@@ -54,6 +54,18 @@ def subscription_payload(contract_id, product_id, **overrides):
     base.update(overrides)
     return base
 
+def subscription_tier_payload(subscription_id, **overrides):
+    base = {
+        "subscription_id": subscription_id,
+        "min_calls": 0,
+        "max_calls": 1000,
+        "start_date": "2025-12-08T09:25:18.505Z",
+        "end_date": "2027-11-08T09:25:18.505Z",
+        "base_price": 5000,
+        "price_per_tier": 10
+    }
+    base.update(overrides)
+    return base
 
 
 
@@ -94,5 +106,17 @@ def create_subscription_dependencies(client, auth_headers, client_payload=None, 
     contract_obj = create_contract_using_api(client, auth_headers, client_obj["id"], payload=contract_payload_overrides)
     return {"product": product_obj, "client": client_obj, "contract": contract_obj}
 
+
+def create_subscription_using_api(client, auth_headers, contract_id, product_id, payload=None):
+    payload = payload or subscription_payload(contract_id, product_id)
+    res = client.post("/Subscriptions", headers=auth_headers, json=payload)
+    assert res.status_code == 201, f"create_subscription failed: {res.get_data(as_text=True)}"
+    return res.get_json()["subscription"]
+
+def create_subscription_tier_using_api(client, auth_headers, subscription_id, payload=None):
+    payload =payload or subscription_tier_payload(subscription_id)
+    res = client.post("/SubscriptionTiers", headers=auth_headers, json=payload)
+    assert res.status_code == 201, f"create_subscription_tier failed: {res.get_data(as_text=True)}"
+    return res.get_json()["subscription_tier"]
 
 
