@@ -50,9 +50,7 @@ def Products():
             return jsonify({"message": "Products retrieved successfully", "products": products_read_schema.dump(products)}), 200
         
         except Exception as e:
-            db.session.rollback()
-            return jsonify({"error": str(e)}), 400
-
+            return jsonify({"error": str(e)}), 500
 
 
 
@@ -63,8 +61,7 @@ def Product_id(id):
     ''' 
     Get: Get details of spefic Product(API)
     Put/PATCH: Update details of product with given ID
-    Delete: Archive a product with given ID
-    '''
+    Get: Get details of specific Product(API)    '''
     curr_user_id = get_jwt_identity()
 
     if request.method == 'GET':
@@ -78,9 +75,7 @@ def Product_id(id):
             return jsonify({"message": "Product retrieved successfully", "product": product_read_schema.dump(product)}), 200
 
         except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': 'Error getting product', 'error': str(e)}), 500
-
+            return jsonify({'error': 'Error getting product', 'details': str(e)}), 500
 
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -111,7 +106,7 @@ def Product_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error updating product', 'error': str(e)}), 500
+            return jsonify({'error': 'Error updating product'}), 500
 
             
     
@@ -148,8 +143,7 @@ def Product_Contracts_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'message': 'Product not found'}), 404
-
+                return jsonify({'error': 'Product not found'}), 404
            
             contracts_map = {}
             for subscription in product.subscriptions:

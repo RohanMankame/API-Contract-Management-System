@@ -1,4 +1,4 @@
-from tests.factories import contract_payload, client_payload, product_payload
+from tests.factories import contract_payload, client_payload
 import uuid
 
 def test_create_contract(client, auth_headers):

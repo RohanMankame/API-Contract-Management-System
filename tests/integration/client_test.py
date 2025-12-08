@@ -5,7 +5,7 @@ from uuid import uuid4
 def test_create_client(client, auth_headers):
     payload = client_payload()
     res_post = client.post("/Clients", headers=auth_headers, json=payload)
-    assert  res_post.status_code == 201
+    assert res_post.status_code == 201
     assert res_post.get_json()["message"] == "Client created successfully"
     created_client = res_post.get_json()["client"]
     for key in payload:

@@ -41,7 +41,7 @@ def Subscription_tiers():
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": str(e)}), 500
 
 
 
@@ -92,7 +92,7 @@ def Subscription_tier_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error updating subscription tier', 'error': str(e)}), 500
+            return jsonify({'message': 'Error updating subscription tier', 'error': str(e)}), 400
 
 
 

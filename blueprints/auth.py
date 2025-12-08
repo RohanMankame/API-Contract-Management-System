@@ -14,16 +14,19 @@ def login():
     if request.method == 'POST':
         try:
             data = request.get_json()
-
-            email = data['email']
-            password = data['password']
+            
+            if not data:
+                return {"error": "Invalid request body"}, 400
+            
+            email = data.get('email')
+            password = data.get('password')
 
             if not email or not password:
                 return {"error": "Email and password are required"}, 400
-
+            
             user = User.query.filter_by(email=email).first()
 
-            if not user.check_password(password):
+            if not user or not user.check_password(password):
                 return {"error": "Invalid credentials"}, 401
     
             # identity is user.id

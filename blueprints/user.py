@@ -88,9 +88,7 @@ def Users():
             users = User.query.all()
             return jsonify({"message": "Users retrieved successfully", "users": users_read_schema.dump(users)}), 200
         except Exception as e:
-            db.session.rollback()
             return jsonify({"error": str(e)}), 400
-
 
 
 
@@ -193,8 +191,7 @@ def User_Contracts_id(id):
 
             return jsonify({'contracts': contracts}), 200
         except Exception as e:
-            db.session.rollback()
-            return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting contracts'}), 500
 
 
 

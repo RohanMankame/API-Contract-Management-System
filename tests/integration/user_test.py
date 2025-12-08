@@ -96,7 +96,7 @@ def test_delete_user(client, auth_headers):
     res_get = client.get(f"/Users/{user_id}", headers=auth_headers)
     assert res_get.status_code == 200
     fetched_user = res_get.get_json()["user"]
-    assert fetched_user["is_archived"] == True
+    assert fetched_user["is_archived"] is True
 
 
 def test_delete_user_not_found(client, auth_headers):
