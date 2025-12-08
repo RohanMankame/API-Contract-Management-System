@@ -14,6 +14,26 @@ def test_create_product(client, auth_headers):
         assert created_product[key] == payload[key]
 
 
+def test_create_product_missing_fields(client, auth_headers):
+    payload = {
+        # "api_name" is missing
+        "description": "A sample product description."
+    }
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
+
+    assert res_post.status_code == 400
+
+
+def test_create_product_invalid_fields(client, auth_headers):
+    payload = {
+        "api_name": 88,  # Invalid: empty string
+        "description": "A sample product description."
+    }
+    res_post = client.post("/Products", headers=auth_headers, json=payload)
+
+    assert res_post.status_code == 400
+
+
 
 def test_get_products(client, auth_headers):
     payload = product_payload()
@@ -86,7 +106,6 @@ def test_update_put_product(client, auth_headers):
     updated_product_put = res_put.get_json()["product"]
     assert updated_product_put["api_name"] == put_payload["api_name"]
     assert updated_product_put["description"] == put_payload["description"]
-
 
 
 

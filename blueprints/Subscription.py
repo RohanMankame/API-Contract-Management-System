@@ -123,7 +123,7 @@ def Subscription_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error archiving subscription', 'error': str(e)}), 500
+            return jsonify({'error': 'Error archiving subscription'}), 500
 
 
 @subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
@@ -147,7 +147,6 @@ def Subscription_Tiers_id(id):
             return jsonify({'tiers':tiers}), 200
 
         except Exception as e:
-            db.session.rollback()
             return jsonify({'error': 'Error fetching subscription tiers', 'error': str(e)}), 500
 
 

@@ -103,7 +103,7 @@ def Contract_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error updating contract', 'error': str(e)}), 500
+            return jsonify({'error': 'Error updating contract'}), 500
 
 
     elif request.method == 'DELETE':
@@ -122,7 +122,7 @@ def Contract_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error deleting contract', 'error': str(e)}), 500
+            return jsonify({'error': 'Error deleting contract'}), 500
 
     return jsonify({'error': 'Method not allowed'}), 405
 

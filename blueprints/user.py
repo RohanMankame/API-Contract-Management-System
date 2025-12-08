@@ -116,7 +116,7 @@ def User_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error getting user', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting user'}), 500
 
 
 
