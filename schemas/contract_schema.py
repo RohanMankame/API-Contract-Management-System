@@ -3,6 +3,7 @@ from models.contract import Contract
 from marshmallow import validates_schema, ValidationError
 from models import Client
 from uuid import UUID
+from models.product import Product
 
 
 
@@ -25,7 +26,7 @@ class ContractWriteSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Contract
 
-    # make sure client_id exists in DB before assigning to new Contract
+    # make sure client_id exists
     @validates_schema
     def check_client_exists(self, data, **kwargs):
         client_id = data.get("client_id")

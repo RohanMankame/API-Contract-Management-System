@@ -44,11 +44,11 @@ def Subscriptions():
         try:
             subscriptions = db.session.query(Subscription).all()
             
-            return jsonify(subscriptions=subscriptions_read_schema.dump(subscriptions)), 200
+            return jsonify({"message": "Subscriptions fetched successfully","subscriptions": subscriptions_read_schema.dump(subscriptions)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": "Error fetching subscriptions"}), 400
 
 
 @subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
@@ -69,11 +69,12 @@ def Subscription_id(id):
             if not subscription:
                 return jsonify({'error': 'Subscription not found'}), 404
 
-            return jsonify(subscription=subscription_read_schema.dump(subscription)), 200
+            return jsonify({"message": "Subscription fetched successfully", "subscription": subscription_read_schema.dump(subscription)}), 200
+        
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error getting subscription', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting subscription'}), 400
         
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -99,11 +100,11 @@ def Subscription_id(id):
 
         except ValidationError as ve:
             db.session.rollback()
-            return jsonify({"error": ve.messages}), 400
+            return jsonify({"error": "Validation error"}), 400
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error updating subscription', 'error': str(e)}), 500
+            return jsonify({'error': 'Error updating subscription'}), 500
 
 
     elif request.method == 'DELETE':
