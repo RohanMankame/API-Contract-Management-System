@@ -1,64 +1,144 @@
+from tests.factories import contract_payload, client_payload
+import uuid
+
+def test_create_contract(client, auth_headers):
+    # create client for contract
+    client_payload_data = client_payload()
+    res_client = client.post("/Clients", headers=auth_headers, json=client_payload_data)
+    created_client = res_client.get_json()["client"]
+    client_id = created_client["id"]
+
+    # create contract with the client_id
+    payload = contract_payload(client_id=client_id)
+    res_post = client.post("/Contracts", headers=auth_headers, json=payload)
+
+    assert res_post.status_code == 201
+    assert res_post.get_json()["message"] == "Contract created successfully"
+    created_contract = res_post.get_json()["contract"]
+    for key in payload:
+        assert created_contract[key] == payload[key]
 
 
-'''
+def test_get_contracts(client, auth_headers):
+    # create client for contract
+    client_payload_data = client_payload()
+    res_client = client.post("/Clients", headers=auth_headers, json=client_payload_data)
+    created_client = res_client.get_json()["client"]
+    client_id = created_client["id"]
 
-def test_contract(client, auth_headers):
-    """
-    Test creating a contract and then retrieving it.
-    """
-    # POST
-    post_res = client.post("/Contracts", headers=auth_headers, json={
-        "client_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "contract_name": "Contract A",
-        })
+    # create contract with the client_id
+    payload = contract_payload(client_id=client_id)
+    client.post("/Contracts", headers=auth_headers, json=payload)
+
+    res_get = client.get("/Contracts", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "Contracts fetched successfully"
+    contracts = res_get.get_json()["contracts"]
+    assert len(contracts) >= 1
+
+
+def test_get_contract_by_id(client, auth_headers):
+    # create client for contract
+    client_payload_data = client_payload()
+    res_client = client.post("/Clients", headers=auth_headers, json=client_payload_data)
+    created_client = res_client.get_json()["client"]
+    client_id = created_client["id"]
+
+    # create contract with the client_id
+    payload = contract_payload(client_id=client_id)
+    res_post = client.post("/Contracts", headers=auth_headers, json=payload)
+    created_contract = res_post.get_json()["contract"]
+    contract_id = created_contract["id"]
+
+    res_get = client.get(f"/Contracts/{contract_id}", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "Contract fetched successfully"
+    fetched_contract = res_get.get_json()["contract"]
+    assert fetched_contract["id"] == contract_id
+    for key in payload:
+        assert fetched_contract[key] == payload[key]
+
+def test_get_contract_by_id_not_found(client, auth_headers):
+    non_existent_id = str(uuid.uuid4())
+    res_get = client.get(f"/Contracts/{non_existent_id}", headers=auth_headers)
+    assert res_get.status_code == 404
+    assert res_get.get_json()["error"] == "Contract not found"
+
+
+
+def test_update_patch_contract(client, auth_headers):
+    # create client for contract
+    client_payload_data = client_payload()
+    res_client = client.post("/Clients", headers=auth_headers, json=client_payload_data)
+    created_client = res_client.get_json()["client"]
+    client_id = created_client["id"]
+
+    # create contract with the client_id
+    payload = contract_payload(client_id=client_id)
+    res_post = client.post("/Contracts", headers=auth_headers, json=payload)
+    created_contract = res_post.get_json()["contract"]
+    contract_id = created_contract["id"]
+
+    update_payload = {
+        "contract_name": "Updated Contract Name"
+    }
+
+    res_put = client.patch(f"/Contracts/{str(contract_id)}", headers=auth_headers, json=update_payload)
+    assert res_put.status_code == 200
+    assert res_put.get_json()["message"] == "Contract updated successfully"
+    updated_contract = res_put.get_json()["contract"]
+    assert updated_contract["contract_name"] == update_payload["contract_name"]
     
-    assert post_res.status_code == 201
 
-    # GET
-    get_res = client.get("/Contracts", headers=auth_headers)
-    assert get_res.status_code == 200
-    data = get_res.get_json()
-    assert "contracts" in data
+def test_update_put_contract(client, auth_headers):
+    # create client for contract
+    client_payload_data = client_payload()
+    res_client = client.post("/Clients", headers=auth_headers, json=client_payload_data)
+    created_client = res_client.get_json()["client"]
+    client_id = created_client["id"]
 
-    contract = data["contracts"][0]
-    assert contract["contract_name"] == "Contract A"
-    assert contract["client_id"] == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-   
+    # create contract with the client_id
+    payload = contract_payload(client_id=client_id)
+    res_post = client.post("/Contracts", headers=auth_headers, json=payload)
+    created_contract = res_post.get_json()["contract"]
+    contract_id = created_contract["id"]
 
+    update_payload = {
+        "contract_name": "Updated Contract Name"
+    }
 
-## for /Contracts/<id>
-def test_contract_by_id(client, auth_headers):
-    """
-    Test creating a contract and then retrieving, updating, and deleting it by ID."""
-    post_res = client.post("/Contracts", headers=auth_headers, json={
-        "client_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "contract_name": "Contract B",
-        
-        })
+    res_put = client.patch(f"/Contracts/{str(contract_id)}", headers=auth_headers, json=update_payload)
+    assert res_put.status_code == 200
+    assert res_put.get_json()["message"] == "Contract updated successfully"
+    updated_contract = res_put.get_json()["contract"]
+    assert updated_contract["contract_name"] == update_payload["contract_name"]
     
-    assert post_res.status_code == 201
 
-    contract_id = post_res.get_json()["contract"]["id"]
+def test_delete_contract(client, auth_headers):
+    # create client for contract
+    client_payload_data = client_payload()
+    res_client = client.post("/Clients", headers=auth_headers, json=client_payload_data)
+    created_client = res_client.get_json()["client"]
+    client_id = created_client["id"]
 
-    assert contract_id is not None
-    assert isinstance(contract_id, str)
+    # create contract with the client_id
+    payload = contract_payload(client_id=client_id)
+    res_post = client.post("/Contracts", headers=auth_headers, json=payload)
+    created_contract = res_post.get_json()["contract"]
+    contract_id = created_contract["id"]
 
-    # GET by ID
-    get_res = client.get(f"/Contracts/{contract_id}", headers=auth_headers)
-    assert get_res.status_code == 200
+    res_delete = client.delete(f"/Contracts/{contract_id}", headers=auth_headers)
+    assert res_delete.status_code == 200
+    assert res_delete.get_json()["message"] == "Contract has been archived successfully"
 
-    data = get_res.get_json()
-    assert "contract" in data
-    contract_data = data["contract"]
-    assert contract_data["id"] == contract_id
-    assert contract_data["contract_name"] == "Contract B"
-    assert contract_data["client_id"] == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    res_get = client.get(f"/Contracts/{contract_id}", headers=auth_headers)
+    assert res_get.status_code == 200
+    fetched_contract = res_get.get_json()["contract"]
+    assert fetched_contract["is_archived"] == True
 
-    # PUT by ID
-    put_res = client.put(f"/Contracts/{contract_id}", headers=auth_headers, json={
-        "contract_name": "Contract B Updated"
-        })
-    assert put_res.status_code == 200
-    updated_data = put_res.get_json()
-    assert updated_data["message"] == "Contract updated successfully"
-'''
+
+def test_delete_contract_not_found(client, auth_headers):
+    non_existent_id = str(uuid.uuid4())
+    res_delete = client.delete(f"/Contracts/{non_existent_id}", headers=auth_headers)
+    assert res_delete.status_code == 404
+    assert res_delete.get_json()["error"] == "Contract not found"

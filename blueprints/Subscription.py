@@ -30,7 +30,7 @@ def Subscriptions():
             db.session.add(new_subscription)
             db.session.commit()
 
-            return jsonify(subscription=subscription_read_schema.dump(new_subscription)), 201
+            return jsonify({"message": "Subscription created successfully", "subscription": subscription_read_schema.dump(new_subscription)}), 201
 
         except ValidationError as ve:
             db.session.rollback()
@@ -67,13 +67,13 @@ def Subscription_id(id):
             subscription = db.session.get(Subscription, id_obj)
             
             if not subscription:
-                return jsonify({'message': 'Subscription not found'}), 404
+                return jsonify({'error': 'Subscription not found'}), 404
 
             return jsonify(subscription=subscription_read_schema.dump(subscription)), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error getting subscription', 'error': str(e)}), 500
+            return jsonify({'error': 'Error getting subscription', 'error': str(e)}), 500
         
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -85,7 +85,7 @@ def Subscription_id(id):
            
 
             if not subscription:
-                return jsonify({'message': 'Subscription not found'}), 404
+                return jsonify({'error': 'Subscription not found'}), 404
             
             validated = subscription_write_schema.load(data, partial=True)
 
@@ -95,7 +95,7 @@ def Subscription_id(id):
             subscription.updated_by = curr_user_id
             db.session.commit()
 
-            return jsonify({'message': 'Subscription updated successfully'}), 200
+            return jsonify({'error': 'Subscription updated successfully'}), 200
 
         except ValidationError as ve:
             db.session.rollback()
@@ -112,17 +112,17 @@ def Subscription_id(id):
             subscription = db.session.get(Subscription, id_obj)
             
             if not subscription:
-                return jsonify({'message': 'Subscription not found'}), 404
+                return jsonify({'error': 'Subscription not found'}), 404
 
             subscription.is_archived = True
             subscription.updated_by = curr_user_id
             db.session.commit()
 
-            return jsonify({'message': 'Subscription has been archived successfully'}), 200
+            return jsonify({'message': 'Subscription has been archived successfully', "subscription": subscription_read_schema.dump(subscription)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error archiving subscription', 'error': str(e)}), 500
+            return jsonify({'error': 'Error archiving subscription', 'error': str(e)}), 500
 
 
 @subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
@@ -137,7 +137,7 @@ def Subscription_Tiers_id(id):
             subscription = db.session.get(Subscription, id_obj)
             
             if not subscription:
-                return jsonify({'message': 'Subscription not found'}), 404
+                return jsonify({'error': 'Subscription not found'}), 404
 
             tiers_objs = db.session.query(Subscription_tier).filter(Subscription_tier.subscription_id==id_obj).all()
             #tiers_objs = Subscription_tier.query.filter_by(subscription_id=id_obj, is_archived=False).all()
@@ -147,7 +147,7 @@ def Subscription_Tiers_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error fetching subscription tiers', 'error': str(e)}), 500
+            return jsonify({'error': 'Error fetching subscription tiers', 'error': str(e)}), 500
 
 
 
