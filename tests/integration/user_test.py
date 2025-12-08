@@ -13,6 +13,26 @@ def test_create_user(client, auth_headers):
             assert created_user[key] == payload[key]
 
 
+def test_create_user_missing_fields(client, auth_headers):
+    payload = {
+        "full_name": "Test User"
+    }
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
+
+    assert res_post.status_code == 400
+    
+
+def test_create_user_invalid_email(client, auth_headers):
+    payload = {
+        "full_name": "Test User",
+        "email": "invalidemail",
+        "password": "SecurePass123!"
+    }
+    res_post = client.post("/Users", headers=auth_headers, json=payload)
+    assert res_post.status_code == 400
+    assert res_post.get_json()["error"]["email"][0] == "Invalid email address"
+
+
 def test_get_users(client, auth_headers):
     payload = user_payload()
     client.post("/Users", headers=auth_headers, json=payload)
@@ -22,6 +42,9 @@ def test_get_users(client, auth_headers):
     assert res_get.get_json()["message"] == "Users retrieved successfully"
     users = res_get.get_json()["users"]
     assert len(users) >= 1
+
+
+
 
 
 
