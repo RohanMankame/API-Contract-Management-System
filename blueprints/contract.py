@@ -74,7 +74,7 @@ def Contract_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error getting contract', 'error': str(e)}), 500
+            return jsonify({"message": "Error getting contract", "error": str(e)}), 500
 
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -84,7 +84,7 @@ def Contract_id(id):
             contract = db.session.get(Contract, id_obj)
             
             if not contract:
-                return jsonify({'error': 'Contract not found'}), 404
+                return jsonify({"error": "Contract not found"}), 404
 
             is_partial = request.method == 'PATCH'
             validated = contract_write_schema.load(data, partial=is_partial) # changed partial=True to is_partial
@@ -95,7 +95,7 @@ def Contract_id(id):
             contract.updated_by = get_jwt_identity()
 
             db.session.commit()
-            return jsonify({'message': 'Contract updated successfully', "contract": contract_read_schema.dump(contract)}), 200
+            return jsonify({"message": "Contract updated successfully", "contract": contract_read_schema.dump(contract)}), 200
         
         except ValidationError as ve:
             db.session.rollback()
@@ -103,7 +103,7 @@ def Contract_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error updating contract'}), 500
+            return jsonify({"error": "Error updating contract"}), 500
 
 
     elif request.method == 'DELETE':
@@ -112,19 +112,19 @@ def Contract_id(id):
             contract = db.session.get(Contract, id_obj)
             
             if not contract:
-                return jsonify({'error': 'Contract not found'}), 404
+                return jsonify({"error": "Contract not found"}), 404
 
             contract.is_archived = True
             contract.updated_by = get_jwt_identity()
 
             db.session.commit()
-            return jsonify({'message': 'Contract has been archived successfully'}), 200
+            return jsonify({"message": "Contract has been archived successfully"}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error deleting contract'}), 500
+            return jsonify({"error": "Error deleting contract"}), 500
 
-    return jsonify({'error': 'Method not allowed'}), 405
+    return jsonify({"error": "Method not allowed"}), 405
 
 
 @contract_bp.route('/Contracts/<id>/Product', methods=['GET'])
@@ -138,7 +138,7 @@ def Contract_Product_id(id):
         contract = db.session.get(Contract, id_obj)
         
         if not contract:
-            return jsonify({'message': 'Contract not found'}), 404
+            return jsonify({"error": "Contract not found"}), 404
 
         
         unique_products = {}
@@ -158,4 +158,4 @@ def Contract_Product_id(id):
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': 'Error getting products', 'error': str(e)}), 500
+        return jsonify({"error": "Error getting products"}), 500

@@ -75,7 +75,7 @@ def Product_id(id):
             return jsonify({"message": "Product retrieved successfully", "product": product_read_schema.dump(product)}), 200
 
         except Exception as e:
-            return jsonify({'error': 'Error getting product', 'details': str(e)}), 500
+            return jsonify({"error": "Error getting product"}), 500
 
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -88,17 +88,17 @@ def Product_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'error': 'Product not found'}), 404
+                return jsonify({"error": "Product not found"}), 404
             
             if product.is_archived:
-                return jsonify({'error': 'Cannot update an archived product'}), 400
+                return jsonify({"error": "Cannot update an archived product"}), 400
 
             for key, value in validated.items():
                 setattr(product, key, value)
             product.updated_by = curr_user_id
             db.session.commit()
 
-            return jsonify({'message': 'Product updated successfully', "product": product_read_schema.dump(product)}), 200
+            return jsonify({"message": "Product updated successfully", "product": product_read_schema.dump(product)}), 200
 
         except ValidationError as ve:
             db.session.rollback()
@@ -106,7 +106,7 @@ def Product_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error updating product'}), 500
+            return jsonify({"error": "Error updating product"}), 500
 
             
     
@@ -116,17 +116,17 @@ def Product_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'error': 'Product not found'}), 404
+                return jsonify({"error": "Product not found"}), 404
 
             product.is_archived = True
             product.updated_by = curr_user_id
 
             db.session.commit()
-            return jsonify({'message': 'Product has been archived successfully', "product": product_read_schema.dump(product)}), 200
+            return jsonify({"message": "Product has been archived successfully", "product": product_read_schema.dump(product)}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Error archiving product', 'error': str(e)}), 500
+            return jsonify({"error": "Error archiving product"}), 500
 
 
 
@@ -143,7 +143,7 @@ def Product_Contracts_id(id):
             product = db.session.get(Product, id_obj)
             
             if not product:
-                return jsonify({'error': 'Product not found'}), 404
+                return jsonify({"error": "Product not found"}), 404
            
             contracts_map = {}
             for subscription in product.subscriptions:
@@ -155,7 +155,7 @@ def Product_Contracts_id(id):
             return jsonify({"message": "Contracts retrieved successfully", "contracts": contracts_read_schema.dump(contracts)}), 200
 
         except Exception as e:
-            return jsonify({'error': 'Error getting contracts', 'exception': str(e)}), 500
+            return jsonify({"error": "Error getting contracts"}), 500
             
 
 

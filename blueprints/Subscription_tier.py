@@ -56,13 +56,13 @@ def Subscription_tier_id(id):
             tier = db.session.get(Subscription_tier, id_obj)
             
             if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+                return jsonify({"message": "Subscription tier not found"}), 404
 
             return jsonify(subscription_tier=subscription_tier_read_schema.dump(tier)), 200
         
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error fetching subscription tier', 'error': str(e)}), 500
+            return jsonify({"message": "Error fetching subscription tier"}), 500
     
 
 
@@ -74,7 +74,7 @@ def Subscription_tier_id(id):
             tier = db.session.get(Subscription_tier, id_obj)
             
             if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+                return jsonify({"message": "Subscription tier not found"}), 404
 
             validated = subscription_tier_write_schema.load(data, partial=True)
 
@@ -84,7 +84,7 @@ def Subscription_tier_id(id):
 
             db.session.commit()
 
-            return jsonify({'message': 'Subscription tier updated successfully'}), 200
+            return jsonify({"message": "Subscription tier updated successfully"}), 200
 
         except ValidationError as ve:
             db.session.rollback()
@@ -92,7 +92,7 @@ def Subscription_tier_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error updating subscription tier', 'error': str(e)}), 400
+            return jsonify({"message": "Error updating subscription tier"}), 400
 
 
 
@@ -103,18 +103,17 @@ def Subscription_tier_id(id):
             tier = db.session.get(Subscription_tier, id_obj)
             
             if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+                return jsonify({"error": "Subscription tier not found"}), 404
 
             tier.is_archived = True
             tier.updated_by = curr_user_id
 
             db.session.commit()
-            return jsonify({'message': 'Subscription tier archived successfully'}), 200
+            return jsonify({"message": "Subscription tier archived successfully"}), 200
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error archiving subscription tier', 'error': str(e)}), 500
-
+            return jsonify({"error": "Error archiving subscription tier"}), 500
 
 
 
@@ -129,16 +128,16 @@ def Subscription_tier_Subscriptions_id(id):
         tier = db.session.get(Subscription_tier, id_obj)
         
         if not tier:
-            return jsonify({'message': 'Subscription tier not found'}), 404
+            return jsonify({"error": "Subscription tier not found"}), 404
 
         subscription = getattr(tier, 'subscription', None)
         if not subscription:
-            return jsonify({'message': 'No subscription found for this tier'}), 404
+            return jsonify({"error": "No subscription found for this tier"}), 404
 
         subscription_data = subscription_read_schema.dump(subscription)
         return jsonify({'subscription': subscription_data}), 200
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
+        return jsonify({"error": "Error fetching subscriptions for tier"}), 500
 

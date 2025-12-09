@@ -31,8 +31,9 @@ def login():
     
             # identity is user.id
             access_token = create_access_token(identity=user.id)
-
-            return {"access_token": access_token}, 200
+            
+            return jsonify({'token': access_token}), 200
+           
 
         except Exception as e:
             return {"error": "An error occurred during login"}, 500
