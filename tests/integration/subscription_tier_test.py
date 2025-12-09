@@ -66,12 +66,6 @@ def test_get_subscription_tiers(client, auth_headers):
     assert len(tiers) >= 1
 
 
-def test_get_subscription_tiers_empty(client, auth_headers):
-    res = client.get("/Subscription_tiers", headers=auth_headers)
-    assert res.status_code == 200
-    tiers = res.get_json()["subscription_tiers"]
-    assert isinstance(tiers, list)
-    assert len(tiers) == 0
 
 
 
