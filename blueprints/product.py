@@ -1,7 +1,10 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import Product
+from models import Product, Contract
 from flask_jwt_extended import jwt_required, get_jwt_identity   
+from schemas.product_schema import product_read_schema, products_read_schema, product_write_schema
+from schemas.contract_schema import contracts_read_schema
+from marshmallow import ValidationError
 
 # Initialize product Blueprint
 product_bp = Blueprint('product', __name__)
@@ -15,125 +18,106 @@ def Products():
     Post: Create a new API product
     Get: Get all API products from DB
     '''
+    curr_user_id = get_jwt_identity()
+
     if request.method == 'POST':
         try:
-            curr_user_id = get_jwt_identity()
             data = request.get_json()
+            validated = product_write_schema.load(data)
 
-            new_product = Product(
-                api_name=data['api_name'],
-                description=data['description'],
-                is_archived=data.get('is_archived', False),
-                created_by=curr_user_id,
-                updated_by=curr_user_id
-                )
+            new_product = Product(**validated,created_by=curr_user_id,updated_by=curr_user_id)
 
             db.session.add(new_product)
             db.session.commit()
-            return jsonify({'message': 'Product created successfully', 'product_id': new_product.id}), 201
+
+            return jsonify(product=product_read_schema.dump(new_product)), 201
+            
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
 
         except Exception as e:
-            return jsonify({'message': 'Error creating product', 'error': str(e)}), 500
-        
+            return jsonify({"error": str(e)}), 400
+    
+
+
     elif request.method == 'GET':
         try:
             products = Product.query.all()
-            products_list = []
-
-            for product in products:
-                products_list.append({
-                    'id': product.id,
-                    'api_name': product.api_name,
-                    'description': product.description,
-                    'is_archived': product.is_archived,
-                    'created_at': product.created_at,
-                    'updated_at': product.updated_at
-                })
-
-            return jsonify({'products': products_list}), 200
+            return jsonify(products=products_read_schema.dump(products)), 200
+        
         except Exception as e:
-            return jsonify({'message': 'Error getting products', 'error': str(e)}), 500
-
-    return jsonify({'message': 'Method not allowed'}), 405
+            return jsonify({"error": str(e)}), 400
 
 
-@product_bp.route('/Products/<id>', methods=['GET','PUT','DELETE'])
+
+
+
+@product_bp.route('/Products/<id>', methods=['GET','PUT', 'PATCH','DELETE'])
 @jwt_required()
 def Product_id(id):
     ''' 
     Get: Get details of spefic Product(API)
-    Put: Update details of product with given ID
-    Delete: Delete product with given ID
+    Put/PATCH: Update details of product with given ID
+    Delete: Archive a product with given ID
     '''
+    curr_user_id = get_jwt_identity()
+
     if request.method == 'GET':
         try:
             product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
-            product_data = {
-                'id': product.id,
-                'api_name': product.api_name,
-                'description': product.description,
-                'is_archived': product.is_archived,
-                'created_at': product.created_at,
-                'updated_at': product.updated_at,
-                'created_by': product.created_by,
-                'updated_by': product.updated_by
-            }
-
-            return jsonify({'product': product_data}), 200
+            return jsonify(product=product_read_schema.dump(product)), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting product', 'error': str(e)}), 500
 
 
 
-    elif request.method == 'PUT':
+    elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
+            validated = product_write_schema.load(data, partial=True)
 
             product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
-            if 'api_name' in data:
-                product.api_name = data['api_name']
-            if 'description' in data:
-                product.description = data['description']
-            if 'is_archived' in data:
-                product.is_archived = data['is_archived']
-            product.updated_by = get_jwt_identity()
+            for key, value in validated.items():
+                setattr(product, key, value)
+            product.updated_by = curr_user_id
             db.session.commit()
 
             return jsonify({'message': 'Product updated successfully'}), 200
 
+        except ValidationError as ve:
+            return jsonify({"error": ve.messages}), 400
+
         except Exception as e:
             return jsonify({'message': 'Error updating product', 'error': str(e)}), 500
 
-
-    # no delete, just archive allowed
+            
+    
     elif request.method == 'DELETE':
         try:
             product = Product.query.get(id)
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
-            
+
             product.is_archived = True
-            product.updated_by = get_jwt_identity()
+            product.updated_by = curr_user_id
 
             db.session.commit()
             return jsonify({'message': 'Product has been archived successfully'}), 200
-        
+
         except Exception as e:
             return jsonify({'message': 'Error archiving product', 'error': str(e)}), 500
 
-    return jsonify({'message': 'Method not allowed'}), 405
 
 
 
 
-# TODO fix
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
@@ -146,25 +130,19 @@ def Product_Contracts_id(id):
             if not product:
                 return jsonify({'message': 'Product not found'}), 404
 
-            contracts_list = []
+           
+            contracts_map = {}
             for subscription in product.subscriptions:
-                contract = subscription.contract
-                
-                contracts_list.append({
-                    'contract_id': contract.id,
-                    'client_id': contract.client_id,
-                    'contract_type': contract.contract_type,
-                    'created_by_user_id': contract.created_by_user_id,
-                    'updated_by_user_id': contract.updated_by_user_id,
-                    'contract_name': contract.contract_name,
-                    'created_at': contract.created_at,
-                    'updated_at': contract.updated_at,
-                    'is_archived': contract.is_archived
-                })
+                cont = subscription.contract
+                if cont and cont.id not in contracts_map:
+                    contracts_map[cont.id] = cont
 
-            return jsonify({'contracts': contracts_list}), 200
+            contracts = list(contracts_map.values())
+            return jsonify(contracts=contracts_read_schema.dump(contracts)), 200
 
         except Exception as e:
             return jsonify({'message': 'Error getting contracts', 'error': str(e)}), 500
+            
 
-    return jsonify({'message': 'Method not allowed'}), 405
+
+

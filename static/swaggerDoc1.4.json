@@ -60,7 +60,7 @@
       },
       "ClientInput": {
         "type": "object",
-        "required": ["company_name", "email", "phone_number", "address"],
+        "required": ["company_name", "email"],
         "properties": {
           "company_name": { "type": "string" },
           "email": { "type": "string", "format": "email" },
@@ -119,11 +119,11 @@
           "id": { "type": "string", "format": "uuid" },
           "contract_id": { "type": "string", "format": "uuid" },
           "product_id": { "type": "string", "format": "uuid" },
-          "pricing_type": { 
+          "pricing_type": {
             "type": "string",
             "enum": ["Fixed", "Variable"]
           },
-          "strategy": { 
+          "strategy": {
             "type": "string",
             "enum": ["Pick", "Fill", "Flat", "Fixed"]
           },
@@ -140,11 +140,11 @@
         "properties": {
           "contract_id": { "type": "string", "format": "uuid" },
           "product_id": { "type": "string", "format": "uuid" },
-          "pricing_type": { 
+          "pricing_type": {
             "type": "string",
             "enum": ["Fixed", "Variable"]
           },
-          "strategy": { 
+          "strategy": {
             "type": "string",
             "enum": ["Pick", "Fill", "Flat", "Fixed"]
           },
@@ -508,8 +508,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
-                    "client_id": { "type": "string", "format": "uuid" }
+                    "client": { "$ref": "#/components/schemas/Client" }
                   }
                 }
               }
@@ -685,8 +684,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
-                    "contract_id": { "type": "string", "format": "uuid" }
+                    "contract": { "$ref": "#/components/schemas/Contract" }
                   }
                 }
               }
@@ -859,8 +857,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
-                    "product_id": { "type": "string", "format": "uuid" }
+                    "product": { "$ref": "#/components/schemas/Product" }
                   }
                 }
               }
@@ -1028,8 +1025,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
-                    "subscription_id": { "type": "string", "format": "uuid" }
+                    "subscription": { "$ref": "#/components/schemas/Subscription" }
                   }
                 }
               }
@@ -1086,11 +1082,11 @@
                 "properties": {
                   "contract_id": { "type": "string", "format": "uuid" },
                   "product_id": { "type": "string", "format": "uuid" },
-                  "pricing_type": { 
+                  "pricing_type": {
                     "type": "string",
                     "enum": ["Fixed", "Variable"]
                   },
-                  "strategy": { 
+                  "strategy": {
                     "type": "string",
                     "enum": ["Pick", "Fill", "Flat", "Fixed"]
                   },
@@ -1195,8 +1191,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
-                    "tier_id": { "type": "string", "format": "uuid" }
+                    "subscription_tier": { "$ref": "#/components/schemas/SubscriptionTier" }
                   }
                 }
               }
