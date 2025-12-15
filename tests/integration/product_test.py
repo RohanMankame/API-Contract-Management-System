@@ -133,3 +133,14 @@ def test_delete_product_not_found(client, auth_headers):
     res_delete = client.delete(f"/Products/{non_existent_id}", headers=auth_headers)
     assert res_delete.status_code == 404
     assert res_delete.get_json()["error"] == "Product not found"
+
+
+def test_cannot_update_archived_product(client, auth_headers):
+    payload = product_payload()
+    create = client.post("/Products", headers=auth_headers, json=payload).get_json()["product"]
+    pid = create["id"]
+    client.delete(f"/Products/{pid}", headers=auth_headers)
+
+    res = client.patch(f"/Products/{pid}", headers=auth_headers, json={"api_name": "newname"})
+    assert res.status_code == 400
+    assert "Cannot update an archived product" == res.get_json()["error"]

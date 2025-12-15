@@ -3,6 +3,8 @@ from models.mixins import IdMixin, AuditMixin, OperatorMixin
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from tests.factories import user_payload
+
 
 class User(IdMixin, AuditMixin, OperatorMixin, db.Model):
     '''
@@ -26,3 +28,11 @@ class User(IdMixin, AuditMixin, OperatorMixin, db.Model):
     
     def __repr__(self):
         return f'User_Id:{self.id}, User: {self.full_name}, Email: {self.email}'
+
+
+def test_create_user_duplicate_email(client, auth_headers):
+    payload = user_payload()
+    client.post("/Users", headers=auth_headers, json=payload)
+    res = client.post("/Users", headers=auth_headers, json=payload)
+    assert res.status_code == 400
+    assert "error" in res.get_json()

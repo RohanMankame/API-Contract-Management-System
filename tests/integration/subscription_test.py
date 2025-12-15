@@ -105,3 +105,16 @@ def test_archive_subscription_not_found(client, auth_headers):
     assert res.get_json()["error"] == "Subscription not found"
 
 
+
+def test_subscription_invalid_parent_ids(client, auth_headers):
+    invalid_uuid = str(uuid.uuid4())
+    payload = subscription_payload(contract_id=invalid_uuid, product_id=invalid_uuid)
+    res = client.post("/Subscriptions", headers=auth_headers, json=payload)
+    assert res.status_code == 400
+    assert "error" in res.get_json()
+
+
+def test_protected_endpoints_require_auth(client):
+    res = client.get("/Subscriptions")
+    assert res.status_code == 401
+

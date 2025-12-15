@@ -1,4 +1,4 @@
-from validators import ValidationError
+from marshmallow import ValidationError
 from app import ma, db
 from models.user import User
 from marshmallow import validates_schema

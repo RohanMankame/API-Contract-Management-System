@@ -48,7 +48,7 @@ def Clients():
         try:
             clients = db.session.query(Client).all()
             
-            return jsonify({"message":"Client retrieved successfully", "clients": clients_read_schema.dump(clients)}), 200
+            return jsonify({"message":"Clients retrieved successfully", "clients": clients_read_schema.dump(clients)}), 200
         
         except Exception as e:
             return jsonify({"error": str(e)}), 400
@@ -102,7 +102,7 @@ def Client_id(id):
 
         except ValidationError as ve:
             db.session.rollback()
-            return jsonify({"error": ve.messages}), 400
+            return jsonify({"error": ve.messages}), 500
 
         except Exception as e:
             db.session.rollback()

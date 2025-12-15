@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, app, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -6,6 +6,8 @@ from flask_jwt_extended import JWTManager
 import os
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
+from marshmallow import ValidationError
+from werkzeug.exceptions import HTTPException
 
 # Initialize DB and Marshmallow
 db = SQLAlchemy()
@@ -33,9 +35,11 @@ def create_app():
 
     # Swagger UI setup
     SWAGGER_URL = '/api/docs'
-    API_URL = '/static/swaggerDoc1.4.json'  
+    API_URL = '/static/swaggerDoc1.6.json'  
     swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "API Contract Management System Project"},)
     app.register_blueprint(swaggerui_blueprint)
+
+
 
 
     # Register Blueprints
@@ -67,4 +71,3 @@ def create_app():
         db.create_all()
     
     return app
-

@@ -39,7 +39,7 @@ def Products():
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "error creating product",  "exception": str(e)}), 500
     
 
 
@@ -50,7 +50,7 @@ def Products():
             return jsonify({"message": "Products retrieved successfully", "products": products_read_schema.dump(products)}), 200
         
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "error fetching products", "exception": str(e)}), 500
 
 
 
@@ -75,7 +75,7 @@ def Product_id(id):
             return jsonify({"message": "Product retrieved successfully", "product": product_read_schema.dump(product)}), 200
 
         except Exception as e:
-            return jsonify({"error": "Error getting product"}), 500
+            return jsonify({"error": "Error getting product", "exception": str(e)}), 500
 
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -106,7 +106,7 @@ def Product_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": "Error updating product"}), 500
+            return jsonify({"error": "Error updating product", "exception": str(e)}), 500
 
             
     
@@ -126,7 +126,7 @@ def Product_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": "Error archiving product"}), 500
+            return jsonify({"error": "Error archiving product", "exception": str(e)}), 500
 
 
 
@@ -155,7 +155,7 @@ def Product_Contracts_id(id):
             return jsonify({"message": "Contracts retrieved successfully", "contracts": contracts_read_schema.dump(contracts)}), 200
 
         except Exception as e:
-            return jsonify({"error": "Error getting contracts"}), 500
+            return jsonify({"error": "Error getting contracts", "exception": str(e)}), 500
             
 
 

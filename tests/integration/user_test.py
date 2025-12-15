@@ -127,3 +127,4 @@ def test_delete_user_not_found(client, auth_headers):
     res_delete = client.delete(f"/Users/{non_existent_id}", headers=auth_headers)
     assert res_delete.status_code == 404
     assert res_delete.get_json()["error"] == "User not found"
+

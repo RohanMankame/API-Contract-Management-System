@@ -9,11 +9,12 @@ def test_auth(client, saved_token):
 # Negative tests
 def test_auth_no_jwt_token(client):
     res = client.get("/protected")
-    assert res.status_code == 401 # Automaticlly handled by flask_jwt_extended
+    assert res.status_code == 401 
 
 
 def test_auth_invalid_jwt_token(client):
     res = client.get("/protected", headers={"Authorization": "Bearer ?|-RANDOM_INVALID_TOKEN-|?"})
-    assert res.status_code == 422 # Automatically handled by flask_jwt_extended
+    assert res.status_code == 422 
+
 
 

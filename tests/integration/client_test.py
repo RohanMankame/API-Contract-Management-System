@@ -19,7 +19,7 @@ def test_get_clients(client, auth_headers):
 
     res_get = client.get("/Clients", headers=auth_headers)
     assert res_get.status_code == 200
-    assert res_get.get_json()["message"] == "Client retrieved successfully"
+    assert res_get.get_json()["message"] == "Clients retrieved successfully"
     clients = res_get.get_json()["clients"]
     assert len(clients) >= 1  
 
@@ -118,3 +118,19 @@ def test_delete_client_not_found(client, auth_headers):
     res_delete = client.delete(f"/Clients/{non_existent_id}", headers=auth_headers)
     assert res_delete.status_code == 404
     assert res_delete.get_json()["error"] == "Client not found"
+
+
+
+
+def test_archive_client_and_get(client, auth_headers):
+    payload = client_payload()
+    create = client.post("/Clients", headers=auth_headers, json=payload)
+    client_id = create.get_json()["client"]["id"]
+
+    del_res = client.delete(f"/Clients/{client_id}", headers=auth_headers)
+    assert del_res.status_code == 200
+    assert del_res.get_json()["client"]["is_archived"] is True
+    
+    get_res = client.get(f"/Clients/{client_id}", headers=auth_headers)
+    assert get_res.status_code == 200
+    assert get_res.get_json()["client"]["is_archived"] is True

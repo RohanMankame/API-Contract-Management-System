@@ -1,0 +1,634 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Contract Management System",
+    "version": "1.6",
+    "description": "API documentation for the API Contract Management System."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    { "name": "Authentication", "description": "Authorization and authentication endpoints" },
+    { "name": "Users", "description": "User management endpoints" },
+    { "name": "Clients", "description": "Client management endpoints" },
+    { "name": "Products", "description": "Product management endpoints" },
+    { "name": "Contracts", "description": "Contract management endpoints" },
+    { "name": "Subscriptions", "description": "Subscription management endpoints" },
+    { "name": "Subscription Tiers", "description": "Subscription tier endpoints" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" }
+        }
+      },
+      "UserRead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "full_name": { "type": "string" },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserWrite": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" },
+          "full_name": { "type": "string" }
+        },
+        "required": ["email", "password", "full_name"]
+      },
+      "ClientRead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "company_name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone_number": { "type": "string" },
+          "address": { "type": "string" },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ClientWrite": {
+        "type": "object",
+        "properties": {
+          "company_name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone_number": { "type": "string" },
+          "address": { "type": "string" }
+        },
+        "required": ["company_name", "email"]
+      },
+      "ProductRead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "api_name": { "type": "string" },
+          "description": { "type": "string" },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ProductWrite": {
+        "type": "object",
+        "properties": {
+          "api_name": { "type": "string" },
+          "description": { "type": "string" },
+          "is_archived": { "type": "boolean" }
+        },
+        "required": ["api_name"]
+      },
+      "ContractRead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "client_id": { "type": "string", "format": "uuid" },
+          "contract_name": { "type": "string" },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "subscriptions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SubscriptionRead" }
+          }
+        }
+      },
+      "ContractWrite": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "format": "uuid" },
+          "contract_name": { "type": "string" },
+          "is_archived": { "type": "boolean" }
+        },
+        "required": ["client_id", "contract_name"]
+      },
+      "SubscriptionRead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "contract_id": { "type": "string", "format": "uuid" },
+          "product_id": { "type": "string", "format": "uuid" },
+          "pricing_type": { "type": "string", "enum": ["Fixed", "Variable"] },
+          "strategy": { "type": "string", "enum": ["Pick", "Fill", "Flat", "Fixed"] },
+          "is_archived": { "type": "boolean" },
+          "product": { "$ref": "#/components/schemas/ProductRead" },
+          "tiers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SubscriptionTierRead" }
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SubscriptionWrite": {
+        "type": "object",
+        "properties": {
+          "contract_id": { "type": "string", "format": "uuid" },
+          "product_id": { "type": "string", "format": "uuid" },
+          "pricing_type": { "type": "string", "enum": ["Fixed", "Variable"] },
+          "strategy": { "type": "string", "enum": ["Pick", "Fill", "Flat", "Fixed"] },
+          "is_archived": { "type": "boolean" }
+        },
+        "required": ["contract_id", "product_id", "pricing_type", "strategy"]
+      },
+      "SubscriptionTierRead": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "subscription_id": { "type": "string", "format": "uuid" },
+          "min_calls": { "type": "integer" },
+          "max_calls": { "type": "integer" },
+          "start_date": { "type": "string", "format": "date-time" },
+          "end_date": { "type": "string", "format": "date-time" },
+          "base_price": { "type": "number", "format": "double" },
+          "price_per_tier": { "type": "number", "format": "double" },
+          "is_archived": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SubscriptionTierWrite": {
+        "type": "object",
+        "properties": {
+          "subscription_id": { "type": "string", "format": "uuid" },
+          "min_calls": { "type": "integer" },
+          "max_calls": { "type": "integer" },
+          "start_date": { "type": "string", "format": "date-time" },
+          "end_date": { "type": "string", "format": "date-time" },
+          "base_price": { "type": "number", "format": "double" },
+          "price_per_tier": { "type": "number", "format": "double" },
+          "is_archived": { "type": "boolean" }
+        },
+        "required": ["subscription_id", "min_calls", "max_calls", "base_price", "price_per_tier"]
+      }
+    },
+    "parameters": {
+      "idParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login (returns JWT token)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Token returned", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenResponse" } } } },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Invalid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/protected": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Test protected endpoint",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Protected resource", "content": { "application/json": { "schema": { "type": "object", "properties": { "logged_in_as": { "type": "string" } } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/UsersFirst": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create first user (no auth)",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserWrite" } } }
+        },
+        "responses": {
+          "201": { "description": "First user created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "user_id": { "type": "string", "format": "uuid" } } } } } },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/Users": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserWrite" } } } },
+        "responses": {
+          "201": { "description": "User created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "user": { "$ref": "#/components/schemas/UserRead" } } } } } },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Users retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "users": { "type": "array", "items": { "$ref": "#/components/schemas/UserRead" } } } } } } }
+        }
+      }
+    },
+    "/Users/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "User retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "user": { "$ref": "#/components/schemas/UserRead" } } } } } },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update a user (full)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserWrite" } } } },
+        "responses": {
+          "200": { "description": "User updated", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "user": { "$ref": "#/components/schemas/UserRead" } } } } } },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update a user (partial)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserWrite" } } } },
+        "responses": { "200": { "description": "User updated" }, "400": { "description": "Validation error" } }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Archive (soft-delete) a user",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "User archived", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "user": { "$ref": "#/components/schemas/UserRead" } } } } } },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/Users/{id}/Contracts": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get contracts created by a user",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Contracts for user", "content": { "application/json": { "schema": { "type": "object", "properties": { "contracts": { "type": "array", "items": { "$ref": "#/components/schemas/ContractRead" } } } } } } },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+    "/Clients": {
+      "post": {
+        "tags": ["Clients"],
+        "summary": "Create a new client",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ClientWrite" } } } },
+        "responses": {
+          "201": { "description": "Client created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "client": { "$ref": "#/components/schemas/ClientRead" } } } } } },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Get all clients",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Clients retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "clients": { "type": "array", "items": { "$ref": "#/components/schemas/ClientRead" } } } } } } }
+        }
+      }
+    },
+    "/Clients/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Get client by ID",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Client retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "client": { "$ref": "#/components/schemas/ClientRead" } } } } } },
+          "404": { "description": "Client not found" }
+        }
+      },
+      "put": {
+        "tags": ["Clients"],
+        "summary": "Update client (full)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ClientWrite" } } } },
+        "responses": {
+          "200": { "description": "Client updated", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "client": { "$ref": "#/components/schemas/ClientRead" } } } } } }
+        }
+      },
+      "patch": {
+        "tags": ["Clients"],
+        "summary": "Update client (partial)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ClientWrite" } } } },
+        "responses": { "200": { "description": "Client updated" }, "400": { "description": "Validation error" } }
+      },
+      "delete": {
+        "tags": ["Clients"],
+        "summary": "Archive client",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Client archived", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "client": { "$ref": "#/components/schemas/ClientRead" } } } } } },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/Clients/{id}/Contracts": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Get contracts for client",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Contracts list", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "contracts": { "type": "array", "items": { "$ref": "#/components/schemas/ContractRead" } } } } } } },
+          "404": { "description": "Client not found" }
+        }
+      }
+    },
+    "/Products": {
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create a new product",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProductWrite" } } } },
+        "responses": {
+          "201": { "description": "Product created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "product": { "$ref": "#/components/schemas/ProductRead" } } } } } },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Products retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "products": { "type": "array", "items": { "$ref": "#/components/schemas/ProductRead" } } } } } } }
+        }
+      }
+    },
+    "/Products/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Product retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "product": { "$ref": "#/components/schemas/ProductRead" } } } } } },
+          "404": { "description": "Product not found" }
+        }
+      },
+      "put": {
+        "tags": ["Products"],
+        "summary": "Update product (full)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProductWrite" } } } },
+        "responses": { "200": { "description": "Product updated" }, "400": { "description": "Validation error" } }
+      },
+      "patch": {
+        "tags": ["Products"],
+        "summary": "Update product (partial)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProductWrite" } } } },
+        "responses": { "200": { "description": "Product updated" }, "400": { "description": "Validation error" } }
+      },
+      "delete": {
+        "tags": ["Products"],
+        "summary": "Archive product",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Product archived", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "product": { "$ref": "#/components/schemas/ProductRead" } } } } } },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/Products/{id}/Contracts": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get contracts associated with a product",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Contracts for product", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "contracts": { "type": "array", "items": { "$ref": "#/components/schemas/ContractRead" } } } } } } },
+          "404": { "description": "Product not found" }
+        }
+      }
+    },
+    "/Contracts": {
+      "post": {
+        "tags": ["Contracts"],
+        "summary": "Create a new contract",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ContractWrite" } } } },
+        "responses": {
+          "201": { "description": "Contract created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "contract": { "$ref": "#/components/schemas/ContractRead" } } } } } },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Contracts"],
+        "summary": "Get all contracts",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Contracts retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "contracts": { "type": "array", "items": { "$ref": "#/components/schemas/ContractRead" } } } } } } }
+        }
+      }
+    },
+    "/Contracts/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Contracts"],
+        "summary": "Get contract by ID",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Contract retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "contract": { "$ref": "#/components/schemas/ContractRead" } } } } } },
+          "404": { "description": "Contract not found" }
+        }
+      },
+      "put": {
+        "tags": ["Contracts"],
+        "summary": "Update contract (full)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ContractWrite" } } } },
+        "responses": { "200": { "description": "Contract updated" }, "400": { "description": "Validation error" } }
+      },
+      "patch": {
+        "tags": ["Contracts"],
+        "summary": "Update contract (partial)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ContractWrite" } } } },
+        "responses": { "200": { "description": "Contract updated" }, "400": { "description": "Validation error" } }
+      },
+      "delete": {
+        "tags": ["Contracts"],
+        "summary": "Archive contract",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Contract archived" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/Contracts/{id}/Product": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Contracts"],
+        "summary": "Get products associated with contract",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Products retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "products": { "type": "array", "items": { "$ref": "#/components/schemas/ProductRead" } } } } } } },
+          "404": { "description": "Contract not found" }
+        }
+      }
+    },
+    "/Subscriptions": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Create a new subscription",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubscriptionWrite" } } } },
+        "responses": { "201": { "description": "Subscription created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "subscription": { "$ref": "#/components/schemas/SubscriptionRead" } } } } } }, "400": { "description": "Validation error" } }
+      },
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Get all subscriptions",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscriptions retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "subscriptions": { "type": "array", "items": { "$ref": "#/components/schemas/SubscriptionRead" } } } } } } } }
+      }
+    },
+    "/Subscriptions/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Get subscription by ID",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscription retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "subscription": { "$ref": "#/components/schemas/SubscriptionRead" } } } } } }, "404": { "description": "Not found" } }
+      },
+      "put": {
+        "tags": ["Subscriptions"],
+        "summary": "Update subscription (full)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubscriptionWrite" } } } },
+        "responses": { "200": { "description": "Subscription updated" } }
+      },
+      "patch": {
+        "tags": ["Subscriptions"],
+        "summary": "Update subscription (partial)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubscriptionWrite" } } } },
+        "responses": { "200": { "description": "Subscription updated" } }
+      },
+      "delete": {
+        "tags": ["Subscriptions"],
+        "summary": "Archive subscription",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscription archived", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "subscription": { "$ref": "#/components/schemas/SubscriptionRead" } } } } } } }
+      }
+    },
+    "/Subscriptions/{id}/Tiers": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Get tiers for a subscription",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Tiers list", "content": { "application/json": { "schema": { "type": "object", "properties": { "tiers": { "type": "array", "items": { "$ref": "#/components/schemas/SubscriptionTierRead" } } } } } } } }
+      }
+    },
+    "/Subscription_tiers": {
+      "post": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Create a new subscription tier",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubscriptionTierWrite" } } } },
+        "responses": { "201": { "description": "Subscription tier created", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "subscription_tier": { "$ref": "#/components/schemas/SubscriptionTierRead" } } } } } }, "400": { "description": "Validation error" } }
+      },
+      "get": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Get all subscription tiers",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscription tiers retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "subscription_tiers": { "type": "array", "items": { "$ref": "#/components/schemas/SubscriptionTierRead" } } } } } } } }
+      }
+    },
+    "/Subscription_tiers/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Get subscription tier by ID",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscription tier retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "subscription_tier": { "$ref": "#/components/schemas/SubscriptionTierRead" } } } } } }, "404": { "description": "Not found" } }
+      },
+      "put": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Update subscription tier (full)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubscriptionTierWrite" } } } },
+        "responses": { "200": { "description": "Subscription tier updated" } }
+      },
+      "patch": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Update subscription tier (partial)",
+        "security": [ { "BearerAuth": [] } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubscriptionTierWrite" } } } },
+        "responses": { "200": { "description": "Subscription tier updated" } }
+      },
+      "delete": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Archive subscription tier",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscription tier archived" } }
+      }
+    },
+    "/Subscription_tiers/{id}/Subscriptions": {
+      "parameters": [ { "$ref": "#/components/parameters/idParam" } ],
+      "get": {
+        "tags": ["Subscription Tiers"],
+        "summary": "Get subscription associated with a tier",
+        "security": [ { "BearerAuth": [] } ],
+        "responses": { "200": { "description": "Subscription retrieved", "content": { "application/json": { "schema": { "type": "object", "properties": { "subscription": { "$ref": "#/components/schemas/SubscriptionRead" } } } } } }, "404": { "description": "Not found" } }
+      }
+    }
+  }
+}
