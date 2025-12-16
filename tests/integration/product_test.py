@@ -5,7 +5,7 @@ from uuid import uuid4
 
 def test_create_product(client, auth_headers):
     payload = product_payload()
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
 
     assert res_post.status_code == 201
     assert res_post.get_json()["message"] == "Product created successfully"
@@ -19,7 +19,7 @@ def test_create_product_missing_fields(client, auth_headers):
         # "api_name" is missing
         "description": "A sample product description."
     }
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
 
     assert res_post.status_code == 400
 
@@ -29,7 +29,7 @@ def test_create_product_invalid_fields(client, auth_headers):
         "api_name": 88,  # Invalid: empty string
         "description": "A sample product description."
     }
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
 
     assert res_post.status_code == 400
 
@@ -37,9 +37,9 @@ def test_create_product_invalid_fields(client, auth_headers):
 
 def test_get_products(client, auth_headers):
     payload = product_payload()
-    client.post("/Products", headers=auth_headers, json=payload)
+    client.post("/products", headers=auth_headers, json=payload)
 
-    res_get = client.get("/Products", headers=auth_headers)
+    res_get = client.get("/products", headers=auth_headers)
     assert res_get.status_code == 200
     assert res_get.get_json()["message"] == "Products retrieved successfully"
     products = res_get.get_json()["products"]
@@ -49,11 +49,11 @@ def test_get_products(client, auth_headers):
 
 def test_get_product_by_id(client, auth_headers):
     payload = product_payload()
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
     created_product = res_post.get_json()["product"]
     product_id = created_product["id"]
 
-    res_get = client.get(f"/Products/{product_id}", headers=auth_headers)
+    res_get = client.get(f"/products/{product_id}", headers=auth_headers)
     assert res_get.status_code == 200
     assert res_get.get_json()["message"] == "Product retrieved successfully"
     fetched_product = res_get.get_json()["product"]
@@ -64,7 +64,7 @@ def test_get_product_by_id(client, auth_headers):
 
 def test_get_product_by_id_not_found(client, auth_headers):
     non_existent_id = str(uuid4())
-    res_get = client.get(f"/Products/{non_existent_id}", headers=auth_headers)
+    res_get = client.get(f"/products/{non_existent_id}", headers=auth_headers)
     assert res_get.status_code == 404
     assert res_get.get_json()["error"] == "Product not found"
 
@@ -73,14 +73,14 @@ def test_get_product_by_id_not_found(client, auth_headers):
 
 def test_update_patch_product(client, auth_headers):
     payload = product_payload()
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
     created_product = res_post.get_json()["product"]
     product_id = created_product["id"]
 
     patch_payload = {
         "description": "Partially updated description."
     }
-    res_patch = client.patch(f"/Products/{product_id}", headers=auth_headers, json=patch_payload)
+    res_patch = client.patch(f"/products/{product_id}", headers=auth_headers, json=patch_payload)
     assert res_patch.status_code == 200
     assert res_patch.get_json()["message"] == "Product updated successfully"
     updated_product_patch = res_patch.get_json()["product"]
@@ -92,7 +92,7 @@ def test_update_patch_product(client, auth_headers):
 
 def test_update_put_product(client, auth_headers):
     payload = product_payload()
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
     created_product = res_post.get_json()["product"]
     product_id = created_product["id"]
 
@@ -100,7 +100,7 @@ def test_update_put_product(client, auth_headers):
         "api_name": "Updated API Name",
         "description": "Updated description."
     }
-    res_put = client.put(f"/Products/{product_id}", headers=auth_headers, json=put_payload)
+    res_put = client.put(f"/products/{product_id}", headers=auth_headers, json=put_payload)
     assert res_put.status_code == 200
     assert res_put.get_json()["message"] == "Product updated successfully"
     updated_product_put = res_put.get_json()["product"]
@@ -112,15 +112,15 @@ def test_update_put_product(client, auth_headers):
 
 def test_delete_product(client, auth_headers):
     payload = product_payload()
-    res_post = client.post("/Products", headers=auth_headers, json=payload)
+    res_post = client.post("/products", headers=auth_headers, json=payload)
     created_product = res_post.get_json()["product"]
     product_id = created_product["id"]
 
-    res_delete = client.delete(f"/Products/{product_id}", headers=auth_headers)
+    res_delete = client.delete(f"/products/{product_id}", headers=auth_headers)
     assert res_delete.status_code == 200
     assert res_delete.get_json()["message"] == "Product has been archived successfully"
 
-    res_get = client.get(f"/Products/{product_id}", headers=auth_headers)
+    res_get = client.get(f"/products/{product_id}", headers=auth_headers)
     assert res_get.status_code == 200
     fetched_product = res_get.get_json()["product"]
     assert fetched_product["id"] == product_id
@@ -130,17 +130,17 @@ def test_delete_product(client, auth_headers):
 
 def test_delete_product_not_found(client, auth_headers):
     non_existent_id = str(uuid4())
-    res_delete = client.delete(f"/Products/{non_existent_id}", headers=auth_headers)
+    res_delete = client.delete(f"/products/{non_existent_id}", headers=auth_headers)
     assert res_delete.status_code == 404
     assert res_delete.get_json()["error"] == "Product not found"
 
 
 def test_cannot_update_archived_product(client, auth_headers):
     payload = product_payload()
-    create = client.post("/Products", headers=auth_headers, json=payload).get_json()["product"]
+    create = client.post("/products", headers=auth_headers, json=payload).get_json()["product"]
     pid = create["id"]
-    client.delete(f"/Products/{pid}", headers=auth_headers)
+    client.delete(f"/products/{pid}", headers=auth_headers)
 
-    res = client.patch(f"/Products/{pid}", headers=auth_headers, json={"api_name": "newname"})
+    res = client.patch(f"/products/{pid}", headers=auth_headers, json={"api_name": "newname"})
     assert res.status_code == 400
     assert "Cannot update an archived product" == res.get_json()["error"]
