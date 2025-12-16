@@ -9,7 +9,7 @@ from uuid import UUID
 
 subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
-
+@subscription_tier_bp.route('/subscription-tiers', methods=['POST', 'GET'])
 @subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
 @jwt_required()
 def Subscription_tier():
@@ -44,7 +44,7 @@ def Subscription_tier():
             return jsonify({"error": str(e)}), 500
 
 
-
+@subscription_tier_bp.route('/subscription-tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @jwt_required()
 def Subscription_tier_id(id):
@@ -116,7 +116,7 @@ def Subscription_tier_id(id):
             return jsonify({"error": "Error archiving subscription tier"}), 500
 
 
-
+@subscription_tier_bp.route('/subscription-tiers/<id>/subscriptions', methods=['GET'])
 @subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):

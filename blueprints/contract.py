@@ -12,7 +12,7 @@ from uuid import UUID
 # Initialize contract Blueprint
 contract_bp = Blueprint('contract', __name__)
 
-# Contract Endpoints
+@contract_bp.route('/contracts', methods=['POST','GET'])
 @contract_bp.route('/Contracts', methods=['POST','GET'])
 @jwt_required()
 def Contracts():
@@ -54,6 +54,7 @@ def Contracts():
             return jsonify({"error": "An error occurred while fetching contracts"}), 500
 
 
+@contract_bp.route('/contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Contract_id(id):
@@ -127,6 +128,8 @@ def Contract_id(id):
     return jsonify({"error": "Method not allowed"}), 405
 
 
+
+@contract_bp.route('/contracts/<id>/product', methods=['GET'])
 @contract_bp.route('/Contracts/<id>/Product', methods=['GET'])
 @jwt_required()
 def Contract_Product_id(id):

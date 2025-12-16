@@ -54,7 +54,7 @@ def Clients():
             return jsonify({"error": str(e)}), 400
 
 
-
+@client_bp.route('/clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @client_bp.route('/Clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Client_id(id):
@@ -129,6 +129,7 @@ def Client_id(id):
             return jsonify({"error": str(e)}), 400
 
 
+@client_bp.route('/clients/<id>/contracts', methods=['GET'])
 @client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Client_Contracts_id(id):

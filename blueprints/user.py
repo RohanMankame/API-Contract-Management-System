@@ -13,7 +13,7 @@ user_bp = Blueprint('user', __name__)
 
 # User Endpoints
 
-
+@user_bp.route('/users-first', methods=['POST'])
 @user_bp.route('/UsersFirst', methods=['POST'])
 def UsersFirst():
     '''
@@ -49,7 +49,7 @@ def UsersFirst():
             return jsonify({'message': 'Error creating first user', 'error': str(e)}), 400
 
 
-
+@user_bp.route('/users', methods=['POST','GET'])
 @user_bp.route('/Users', methods=['POST','GET'])
 @jwt_required()
 def Users():
@@ -91,7 +91,7 @@ def Users():
             return jsonify({"error": str(e)}), 400
 
 
-
+@user_bp.route('/users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
 @user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
 @jwt_required()
 def User_id(id):
@@ -169,7 +169,7 @@ def User_id(id):
             return jsonify({'error': 'Error archiving user', 'error': str(e)}), 500
 
 
-
+@user_bp.route('/users/<id>/contracts', methods=['GET'])
 @user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def User_Contracts_id(id):

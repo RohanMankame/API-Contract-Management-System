@@ -11,7 +11,7 @@ from uuid import UUID
 product_bp = Blueprint('product', __name__)
 
 # Product Endpoints
-
+@product_bp.route('/products', methods=['POST', 'GET'])
 @product_bp.route('/Products', methods=['POST', 'GET'])
 @jwt_required()
 def Products():
@@ -54,7 +54,7 @@ def Products():
 
 
 
-
+@product_bp.route('/products/<id>', methods=['GET','PUT', 'PATCH','DELETE'])
 @product_bp.route('/Products/<id>', methods=['GET','PUT', 'PATCH','DELETE'])
 @jwt_required()
 def Product_id(id):
@@ -130,7 +130,7 @@ def Product_id(id):
 
 
 
-
+@product_bp.route('/products/<id>/contracts', methods=['GET'])
 @product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
