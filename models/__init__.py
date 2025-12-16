@@ -3,7 +3,7 @@ from .user import User
 from .product import Product
 from .contract import Contract
 from .subscription import Subscription
-from .subscription_tier import Subscription_tier
+from .subscription_tier import SubscriptionTier 
 
 __all__ = [
     "Client",
@@ -11,5 +11,6 @@ __all__ = [
     "Product",
     "Contract",
     "Subscription",
+    "SubscriptionTier",
     "Subscription_tier",
 ]

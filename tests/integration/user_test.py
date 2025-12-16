@@ -45,9 +45,6 @@ def test_get_users(client, auth_headers):
 
 
 
-
-
-
 def test_get_user_by_id(client, auth_headers): 
     payload = user_payload()
     res_post = client.post("/Users", headers=auth_headers, json=payload)

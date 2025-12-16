@@ -115,7 +115,7 @@ def create_subscription_using_api(client, auth_headers, contract_id, product_id,
 
 def create_subscription_tier_using_api(client, auth_headers, subscription_id, payload=None):
     payload =payload or subscription_tier_payload(subscription_id)
-    res = client.post("/SubscriptionTiers", headers=auth_headers, json=payload)
+    res = client.post("/Subscription_tiers", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_subscription_tier failed: {res.get_data(as_text=True)}"
     return res.get_json()["subscription_tier"]
 

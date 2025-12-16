@@ -1,5 +1,5 @@
 from app import ma, db
-from models.subscription_tier import Subscription_tier
+from models.subscription_tier import SubscriptionTier 
 from marshmallow import validates_schema, ValidationError
 from models import Subscription
 from uuid import UUID
@@ -8,7 +8,7 @@ from datetime import datetime
 
 class SubscriptionTierReadSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = Subscription_tier
+        model = SubscriptionTier 
         load_instance = True
         include_fk = True
         exclude = ("created_by", "updated_by",)
@@ -25,7 +25,7 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
     is_archived = ma.auto_field()
     
     class Meta:
-        model = Subscription_tier
+        model = SubscriptionTier 
 
     @validates_schema
     def validate_dependency(self, data, **kwargs):

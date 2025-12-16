@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from models import Subscription, Subscription_tier
+from models import Subscription, SubscriptionTier 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_schema import subscription_read_schema, subscriptions_read_schema, subscription_write_schema
 from schemas.subscription_tier_schema import subscription_tiers_read_schema
@@ -139,7 +139,7 @@ def Subscription_Tiers_id(id):
             if not subscription:
                 return jsonify({"error": "Subscription not found"}), 404
 
-            tiers_objs = db.session.query(Subscription_tier).filter(Subscription_tier.subscription_id==id_obj).all()
+            tiers_objs = db.session.query(SubscriptionTier).filter(SubscriptionTier.subscription_id==id_obj).all()
             #tiers_objs = Subscription_tier.query.filter_by(subscription_id=id_obj, is_archived=False).all()
             tiers = subscription_tiers_read_schema.dump(tiers_objs)
 

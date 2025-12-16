@@ -12,7 +12,7 @@ from uuid import UUID
 client_bp = Blueprint('client', __name__)
 
 # Client Endpoints
-
+@client_bp.route('/clients', methods=['POST','GET'])
 @client_bp.route('/Clients', methods=['POST','GET'])
 @jwt_required()
 def Clients():    

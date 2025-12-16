@@ -1,6 +1,17 @@
 from tests.factories import *
 import uuid
 
+
+
+def test_dependencies_setup(client, auth_headers):
+    deps = create_subscription_dependencies(client, auth_headers)
+    assert "client" in deps
+    assert "product" in deps
+    assert "contract" in deps
+    
+
+
+
 def test_create_subscription_tier(client, auth_headers):
     deps = create_subscription_dependencies(client, auth_headers)
     subscription_obj = create_subscription_using_api(
@@ -13,12 +24,15 @@ def test_create_subscription_tier(client, auth_headers):
     res = client.post("/Subscription_tiers", headers=auth_headers, json=payload)
     assert res.status_code == 201
     created_tier = res.get_json()["subscription_tier"]
+
     #THIS IS CAUSING ISSUES WITH DATETIME COMPARISON AND FLOAT INT COMPARISON
     '''
     for key in payload:
         if key != "start_date" and key != "end_date":
             assert created_tier[key] == payload[key]
     '''
+
+
 
 
 def test_create_subscription_tier_missing_fields(client, auth_headers):
@@ -48,8 +62,11 @@ def test_create_subscription_tier_invalid_subscription(client, auth_headers):
     assert res.status_code == 400
 
 
+
+
 def test_get_subscription_tiers(client, auth_headers):
     deps = create_subscription_dependencies(client, auth_headers)
+    
     subscription_obj = create_subscription_using_api(
         client,
         auth_headers,
