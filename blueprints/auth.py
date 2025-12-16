@@ -3,6 +3,7 @@ from app import db
 from models import User
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from uuid import UUID
+from utils.response import ok, created, bad_request, not_found, server_error
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -16,29 +17,34 @@ def login():
             data = request.get_json()
             
             if not data:
-                return {"error": "Invalid request body"}, 400
+                #return {"error": "Invalid request body"}, 400
+                return bad_request(message="Invalid request body")
             
             email = data.get('email')
             password = data.get('password')
 
             if not email or not password:
-                return {"error": "Email and password are required"}, 400
+                #return {"error": "Email and password are required"}, 400
+                return bad_request(message="Email and password are required")
             
             user = User.query.filter_by(email=email).first()
 
             if not user or not user.check_password(password):
-                return {"error": "Invalid credentials"}, 401
+                #return {"error": "Invalid credentials"}, 401
+                return bad_request(message="Invalid credentials")
     
             # identity is user.id
             access_token = create_access_token(identity=user.id)
             
-            return jsonify({'token': access_token}), 200
+            #return jsonify({'token': access_token}), 200
+            return ok(data={"token": access_token}, message="Login successful")
            
 
         except Exception as e:
-            return {"error": "An error occurred during login"}, 500
+            #return {"error": "An error occurred during login"}, 500
+            return server_error(message="An error occurred during login")
 
-    return {"error": "Invalid request method"}, 405
+    #return {"error": "Invalid request method"}, 405
 
 
 @auth_bp.route('/protected', methods=['GET'])
@@ -53,11 +59,11 @@ def protected():
         current_user = db.session.get(User, current_user_id_obj)
         
         if not current_user:
-            return {"error": "User not found"}, 404
+            return not_found(message="User not found")
         
-        return jsonify(logged_in_as=current_user.email), 200
+        return ok(data={"email": current_user.email}, message="Protected endpoint accessed successfully")
         
     except Exception as e:
-        return {"error": "An error occurred while fetching user data"}, 500
+        return server_error(message="An error occurred while fetching user data")
 
     
