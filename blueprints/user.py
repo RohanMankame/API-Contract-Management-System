@@ -158,7 +158,7 @@ def User_id(id):
         except ValidationError as ve:
             db.session.rollback()
             #return jsonify({"error": ve.messages}), 400
-            return bad_request(message="Validation error", errors=str(ve.messages))
+            return bad_request(message="Validation error", errors=ve.messages)
         
         except Exception as e:
             db.session.rollback()
