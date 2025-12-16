@@ -10,17 +10,16 @@ from uuid import UUID
 subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
 @subscription_tier_bp.route('/subscription-tiers', methods=['POST', 'GET'])
-#@subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
 @jwt_required()
 def Subscription_tier():
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'POST':
         try:
             data = request.get_json()
             validated = subscription_tier_write_schema.load(data)
 
-            new_tier = SubscriptionTier(**validated, created_by=curr_user_id, updated_by=curr_user_id)
+            new_tier = SubscriptionTier(**validated, created_by=current_user_id, updated_by=current_user_id)
 
             db.session.add(new_tier)
             db.session.commit()
@@ -45,10 +44,9 @@ def Subscription_tier():
 
 
 @subscription_tier_bp.route('/subscription-tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
-#@subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @jwt_required()
 def Subscription_tier_id(id):
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'GET':
         try:
@@ -80,7 +78,7 @@ def Subscription_tier_id(id):
 
             for key, value in validated.items():
                 setattr(tier, key, value)
-            tier.updated_by = curr_user_id
+            tier.updated_by = current_user_id
 
             db.session.commit()
 
@@ -106,7 +104,7 @@ def Subscription_tier_id(id):
                 return jsonify({"error": "Subscription tier not found"}), 404
 
             tier.is_archived = True
-            tier.updated_by = curr_user_id
+            tier.updated_by = current_user_id
 
             db.session.commit()
             return jsonify({"message": "Subscription tier archived successfully"}), 200
@@ -117,7 +115,6 @@ def Subscription_tier_id(id):
 
 
 @subscription_tier_bp.route('/subscription-tiers/<id>/subscriptions', methods=['GET'])
-#@subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):
     '''

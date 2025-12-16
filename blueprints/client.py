@@ -13,21 +13,20 @@ client_bp = Blueprint('client', __name__)
 
 # Client Endpoints
 @client_bp.route('/clients', methods=['POST','GET'])
-#@client_bp.route('/Clients', methods=['POST','GET'])
 @jwt_required()
 def Clients():    
     '''
     Post: Create a new client
     Get: Get all clients from DB
     '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'POST':
         try:
             data = request.get_json()
             validated = client_write_schema.load(data)
 
-            new_client = Client(**validated, created_by=curr_user_id, updated_by=curr_user_id)
+            new_client = Client(**validated, created_by=current_user_id, updated_by=current_user_id)
 
             db.session.add(new_client)
             db.session.commit()
@@ -55,7 +54,6 @@ def Clients():
 
 
 @client_bp.route('/clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
-#@client_bp.route('/Clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Client_id(id):
     '''
@@ -63,7 +61,7 @@ def Client_id(id):
     PUT: Update existing client in DB using client ID
     DELETE: Archive existing client from DB using client ID
     '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'GET':
         try:
@@ -84,7 +82,7 @@ def Client_id(id):
         try:
             data = request.get_json()
             partial = (request.method == 'PATCH')
-            validated = client_write_schema.load(data, partial=partial)   #was validated = client_write_schema.load(data, partial=True)
+            validated = client_write_schema.load(data, partial=partial)   
 
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
@@ -94,7 +92,7 @@ def Client_id(id):
 
             for key, value in validated.items():
                 setattr(client, key, value)
-            client.updated_by = curr_user_id
+            client.updated_by = current_user_id
 
             db.session.commit()
 
@@ -119,7 +117,7 @@ def Client_id(id):
                 return jsonify({"error": "Client not found"}), 404
 
             client.is_archived = True
-            client.updated_by = curr_user_id
+            client.updated_by = current_user_id
 
             db.session.commit()
             return jsonify({"message": "Client archived successfully", "client": client_read_schema.dump(client)}), 200
@@ -130,13 +128,12 @@ def Client_id(id):
 
 
 @client_bp.route('/clients/<id>/contracts', methods=['GET'])
-#@client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Client_Contracts_id(id):
     '''
     Get: Get all contracts associated with a specific client
     '''
-    curr_user_id = get_jwt_identity()
+    #current_user_id = get_jwt_identity()
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id

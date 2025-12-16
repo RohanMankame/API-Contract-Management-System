@@ -13,20 +13,19 @@ from uuid import UUID
 contract_bp = Blueprint('contract', __name__)
 
 @contract_bp.route('/contracts', methods=['POST','GET'])
-#@contract_bp.route('/Contracts', methods=['POST','GET'])
 @jwt_required()
 def Contracts():
     '''
     Post: Create a new contract
     Get: Get all contracts from DB
     '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
     if request.method == 'POST':
         try:
             data = request.get_json()
             validated = contract_write_schema.load(data)
 
-            new_contract = Contract(**validated,created_by=curr_user_id,updated_by=curr_user_id)
+            new_contract = Contract(**validated,created_by=current_user_id,updated_by=current_user_id)
 
             db.session.add(new_contract)
             db.session.commit()
@@ -55,7 +54,6 @@ def Contracts():
 
 
 @contract_bp.route('/contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
-#@contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Contract_id(id):
     ''' 
@@ -88,7 +86,7 @@ def Contract_id(id):
                 return jsonify({"error": "Contract not found"}), 404
 
             is_partial = request.method == 'PATCH'
-            validated = contract_write_schema.load(data, partial=is_partial) # changed partial=True to is_partial
+            validated = contract_write_schema.load(data, partial=is_partial) 
 
             for key, value in validated.items():
                 setattr(contract, key, value)
@@ -130,7 +128,6 @@ def Contract_id(id):
 
 
 @contract_bp.route('/contracts/<id>/product', methods=['GET'])
-#@contract_bp.route('/Contracts/<id>/Product', methods=['GET'])
 @jwt_required()
 def Contract_Product_id(id):
     '''

@@ -12,21 +12,20 @@ product_bp = Blueprint('product', __name__)
 
 # Product Endpoints
 @product_bp.route('/products', methods=['POST', 'GET'])
-#@product_bp.route('/Products', methods=['POST', 'GET'])
 @jwt_required()
 def Products():
     '''
     Post: Create a new API product
     Get: Get all API products from DB
     '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'POST':
         try:
             data = request.get_json()
             validated = product_write_schema.load(data)
 
-            new_product = Product(**validated, created_by=curr_user_id, updated_by=curr_user_id)
+            new_product = Product(**validated, created_by=current_user_id, updated_by=current_user_id)
 
             db.session.add(new_product)
             db.session.commit()
@@ -55,14 +54,13 @@ def Products():
 
 
 @product_bp.route('/products/<id>', methods=['GET','PUT', 'PATCH','DELETE'])
-#@product_bp.route('/Products/<id>', methods=['GET','PUT', 'PATCH','DELETE'])
 @jwt_required()
 def Product_id(id):
     ''' 
     Get: Get details of spefic Product(API)
     Put/PATCH: Update details of product with given ID
     Get: Get details of specific Product(API)    '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'GET':
         try:
@@ -95,7 +93,7 @@ def Product_id(id):
 
             for key, value in validated.items():
                 setattr(product, key, value)
-            product.updated_by = curr_user_id
+            product.updated_by = current_user_id
             db.session.commit()
 
             return jsonify({"message": "Product updated successfully", "product": product_read_schema.dump(product)}), 200
@@ -119,7 +117,7 @@ def Product_id(id):
                 return jsonify({"error": "Product not found"}), 404
 
             product.is_archived = True
-            product.updated_by = curr_user_id
+            product.updated_by = current_user_id
 
             db.session.commit()
             return jsonify({"message": "Product has been archived successfully", "product": product_read_schema.dump(product)}), 200
@@ -131,7 +129,6 @@ def Product_id(id):
 
 
 @product_bp.route('/products/<id>/contracts', methods=['GET'])
-#@product_bp.route('/Products/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Product_Contracts_id(id):
     '''

@@ -12,21 +12,20 @@ subscription_bp = Blueprint('subscription', __name__)
 
 # Subscription Endpoints
 @subscription_bp.route('/subscriptions', methods=['POST', 'GET'])
-#@subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
 @jwt_required()
 def Subscriptions():
     '''
     Post: Create a new subscription
     Get: Get all subscriptions from DB
     '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'POST':
         try:
             data = request.get_json()
             validated = subscription_write_schema.load(data)
 
-            new_subscription = Subscription(**validated, created_by=curr_user_id, updated_by=curr_user_id)
+            new_subscription = Subscription(**validated, created_by=current_user_id, updated_by=current_user_id)
             db.session.add(new_subscription)
             db.session.commit()
 
@@ -52,7 +51,6 @@ def Subscriptions():
 
 
 @subscription_bp.route('/subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
-#@subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @jwt_required()
 def Subscription_id(id):
     ''' 
@@ -60,7 +58,7 @@ def Subscription_id(id):
     Put: Update details of subscription with given ID
     Delete: Archive a subscription with given ID
     '''
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'GET':
         try:
@@ -94,7 +92,7 @@ def Subscription_id(id):
             for key, value in validated.items():
                 setattr(subscription, key, value)
 
-            subscription.updated_by = curr_user_id
+            subscription.updated_by = current_user_id
             db.session.commit()
 
             return jsonify({"message": "Subscription updated successfully"}), 200
@@ -117,7 +115,7 @@ def Subscription_id(id):
                 return jsonify({"error": "Subscription not found"}), 404
 
             subscription.is_archived = True
-            subscription.updated_by = curr_user_id
+            subscription.updated_by = current_user_id
             db.session.commit()
 
             return jsonify({"message": "Subscription has been archived successfully", "subscription": subscription_read_schema.dump(subscription)}), 200
@@ -128,7 +126,6 @@ def Subscription_id(id):
 
 
 @subscription_bp.route('/subscriptions/<id>/tiers', methods=['GET'])
-#@subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
     '''
@@ -143,7 +140,6 @@ def Subscription_Tiers_id(id):
                 return jsonify({"error": "Subscription not found"}), 404
 
             tiers_objs = db.session.query(SubscriptionTier).filter(SubscriptionTier.subscription_id==id_obj).all()
-            #tiers_objs = Subscription_tier.query.filter_by(subscription_id=id_obj, is_archived=False).all()
             tiers = subscription_tiers_read_schema.dump(tiers_objs)
 
             return jsonify({'tiers':tiers}), 200
