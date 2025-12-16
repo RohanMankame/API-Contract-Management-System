@@ -71,21 +71,21 @@ def subscription_tier_payload(subscription_id, **overrides):
 
 def create_user_using_api(client, auth_headers, payload=None):
     payload = payload or user_payload()
-    res = client.post("/Users", headers=auth_headers, json=payload)
+    res = client.post("/users", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_user failed: {res.get_data(as_text=True)}"
     return res.get_json()["user"]
 
 # create client
 def create_client_using_api(client, auth_headers, payload=None):
     payload = payload or client_payload()
-    res = client.post("/Clients", headers=auth_headers, json=payload)
+    res = client.post("/clients", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_client failed: {res.get_data(as_text=True)}"
     return res.get_json()["client"]
 
 # create product
 def create_product_using_api(client, auth_headers, payload=None):
     payload = payload or product_payload()
-    res = client.post("/Products", headers=auth_headers, json=payload)
+    res = client.post("/products", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_product failed: {res.get_data(as_text=True)}"
     return res.get_json()["product"]
 
@@ -95,7 +95,7 @@ def create_contract_using_api(client, auth_headers, client_id=None, payload=None
         client_obj = create_client_using_api(client, auth_headers)
         client_id = client_obj["id"]
     payload = payload or contract_payload(client_id)
-    res = client.post("/Contracts", headers=auth_headers, json=payload)
+    res = client.post("/contracts", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_contract failed: {res.get_data(as_text=True)}"
     return res.get_json()["contract"]
 
@@ -109,13 +109,13 @@ def create_subscription_dependencies(client, auth_headers, client_payload=None, 
 
 def create_subscription_using_api(client, auth_headers, contract_id, product_id, payload=None):
     payload = payload or subscription_payload(contract_id, product_id)
-    res = client.post("/Subscriptions", headers=auth_headers, json=payload)
+    res = client.post("/subscriptions", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_subscription failed: {res.get_data(as_text=True)}"
     return res.get_json()["subscription"]
 
 def create_subscription_tier_using_api(client, auth_headers, subscription_id, payload=None):
     payload =payload or subscription_tier_payload(subscription_id)
-    res = client.post("/Subscription_tiers", headers=auth_headers, json=payload)
+    res = client.post("/subscription-tiers", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_subscription_tier failed: {res.get_data(as_text=True)}"
     return res.get_json()["subscription_tier"]
 
