@@ -14,7 +14,7 @@ user_bp = Blueprint('user', __name__)
 # User Endpoints
 
 @user_bp.route('/users-first', methods=['POST'])
-@user_bp.route('/UsersFirst', methods=['POST'])
+#@user_bp.route('/UsersFirst', methods=['POST'])
 def UsersFirst():
     '''
     Post: Create the first user in the system
@@ -50,7 +50,7 @@ def UsersFirst():
 
 
 @user_bp.route('/users', methods=['POST','GET'])
-@user_bp.route('/Users', methods=['POST','GET'])
+#@user_bp.route('/Users', methods=['POST','GET'])
 @jwt_required()
 def Users():
     '''
@@ -92,7 +92,7 @@ def Users():
 
 
 @user_bp.route('/users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
-@user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
+#@user_bp.route('/Users/<id>', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
 @jwt_required()
 def User_id(id):
     '''
@@ -170,7 +170,7 @@ def User_id(id):
 
 
 @user_bp.route('/users/<id>/contracts', methods=['GET'])
-@user_bp.route('/Users/<id>/Contracts', methods=['GET'])
+#@user_bp.route('/Users/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def User_Contracts_id(id):
     '''

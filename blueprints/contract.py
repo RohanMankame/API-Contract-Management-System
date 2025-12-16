@@ -13,7 +13,7 @@ from uuid import UUID
 contract_bp = Blueprint('contract', __name__)
 
 @contract_bp.route('/contracts', methods=['POST','GET'])
-@contract_bp.route('/Contracts', methods=['POST','GET'])
+#@contract_bp.route('/Contracts', methods=['POST','GET'])
 @jwt_required()
 def Contracts():
     '''
@@ -55,7 +55,7 @@ def Contracts():
 
 
 @contract_bp.route('/contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
-@contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
+#@contract_bp.route('/Contracts/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Contract_id(id):
     ''' 
@@ -130,7 +130,7 @@ def Contract_id(id):
 
 
 @contract_bp.route('/contracts/<id>/product', methods=['GET'])
-@contract_bp.route('/Contracts/<id>/Product', methods=['GET'])
+#@contract_bp.route('/Contracts/<id>/Product', methods=['GET'])
 @jwt_required()
 def Contract_Product_id(id):
     '''

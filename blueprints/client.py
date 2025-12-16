@@ -13,7 +13,7 @@ client_bp = Blueprint('client', __name__)
 
 # Client Endpoints
 @client_bp.route('/clients', methods=['POST','GET'])
-@client_bp.route('/Clients', methods=['POST','GET'])
+#@client_bp.route('/Clients', methods=['POST','GET'])
 @jwt_required()
 def Clients():    
     '''
@@ -55,7 +55,7 @@ def Clients():
 
 
 @client_bp.route('/clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
-@client_bp.route('/Clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
+#@client_bp.route('/Clients/<id>', methods=['GET', 'PUT','PATCH', 'DELETE'])
 @jwt_required()
 def Client_id(id):
     '''
@@ -130,7 +130,7 @@ def Client_id(id):
 
 
 @client_bp.route('/clients/<id>/contracts', methods=['GET'])
-@client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
+#@client_bp.route('/Clients/<id>/Contracts', methods=['GET'])
 @jwt_required()
 def Client_Contracts_id(id):
     '''

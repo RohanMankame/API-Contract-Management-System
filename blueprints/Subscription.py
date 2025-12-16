@@ -12,7 +12,7 @@ subscription_bp = Blueprint('subscription', __name__)
 
 # Subscription Endpoints
 @subscription_bp.route('/subscriptions', methods=['POST', 'GET'])
-@subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
+#@subscription_bp.route('/Subscriptions', methods=['POST', 'GET'])
 @jwt_required()
 def Subscriptions():
     '''
@@ -52,7 +52,7 @@ def Subscriptions():
 
 
 @subscription_bp.route('/subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
-@subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
+#@subscription_bp.route('/Subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @jwt_required()
 def Subscription_id(id):
     ''' 
@@ -128,7 +128,7 @@ def Subscription_id(id):
 
 
 @subscription_bp.route('/subscriptions/<id>/tiers', methods=['GET'])
-@subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
+#@subscription_bp.route('/Subscriptions/<id>/Tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
     '''
