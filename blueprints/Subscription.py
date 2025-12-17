@@ -6,6 +6,7 @@ from schemas.subscription_schema import subscription_read_schema, subscriptions_
 from schemas.subscription_tier_schema import subscription_tiers_read_schema
 from marshmallow import ValidationError
 from uuid import UUID
+from utils.response import ok, created, bad_request, not_found, server_error
 
 # Initialize subscription Blueprint
 subscription_bp = Blueprint('subscription', __name__)
@@ -29,25 +30,32 @@ def Subscriptions():
             db.session.add(new_subscription)
             db.session.commit()
 
-            return jsonify({"message": "Subscription created successfully", "subscription": subscription_read_schema.dump(new_subscription)}), 201
+            #return jsonify({"message": "Subscription created successfully", "subscription": subscription_read_schema.dump(new_subscription)}), 201
+            return created(data={"subscription": subscription_read_schema.dump(new_subscription)}, message="Subscription created successfully")
+
 
         except ValidationError as ve:
             db.session.rollback()
-            return jsonify({"error": ve.messages}), 400
+            #return jsonify({"error": ve.messages}), 400
+            return bad_request(message="Validation Error", errors=ve.messages)
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": str(e)}), 400
+            #return jsonify({"error": str(e)}), 400
+            return server_error(message="Error creating subscription", errors=str(e))
 
     elif request.method == 'GET':
         try:
             subscriptions = db.session.query(Subscription).all()
             
-            return jsonify({"message": "Subscriptions fetched successfully","subscriptions": subscriptions_read_schema.dump(subscriptions)}), 200
+            #return jsonify({"message": "Subscriptions fetched successfully","subscriptions": subscriptions_read_schema.dump(subscriptions)}), 200
+            return ok(data={"subscriptions": subscriptions_read_schema.dump(subscriptions)}, message="Subscriptions fetched successfully")
+
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": "Error fetching subscriptions"}), 400
+            #return jsonify({"error": "Error fetching subscriptions"}), 400
+            return server_error(message="Error fetching subscriptions", errors=str(e))
 
 
 @subscription_bp.route('/subscriptions/<id>', methods=['GET','PUT','PATCH','DELETE'])
@@ -66,14 +74,17 @@ def Subscription_id(id):
             subscription = db.session.get(Subscription, id_obj)
             
             if not subscription:
-                return jsonify({"error": "Subscription not found"}), 404
+                #return jsonify({"error": "Subscription not found"}), 404
+                return not_found(message="Subscription not found")
 
-            return jsonify({"message": "Subscription fetched successfully", "subscription": subscription_read_schema.dump(subscription)}), 200
+            #return jsonify({"message": "Subscription fetched successfully", "subscription": subscription_read_schema.dump(subscription)}), 200
+            return ok(data={"subscription": subscription_read_schema.dump(subscription)}, message="Subscription fetched successfully")
         
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": "Error getting subscription"}), 400
+            #return jsonify({"error": "Error getting subscription"}), 400
+            return server_error(message="Error getting subscription")
         
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -85,7 +96,8 @@ def Subscription_id(id):
            
 
             if not subscription:
-                return jsonify({"error": "Subscription not found"}), 404
+                #return jsonify({"error": "Subscription not found"}), 404
+                return not_found(message="Subscription not found")
             
             validated = subscription_write_schema.load(data, partial=True)
 
@@ -95,15 +107,18 @@ def Subscription_id(id):
             subscription.updated_by = current_user_id
             db.session.commit()
 
-            return jsonify({"message": "Subscription updated successfully"}), 200
+            #return jsonify({"message": "Subscription updated successfully"}), 200
+            return ok(data={"subscription": subscription_read_schema.dump(subscription)}, message="Subscription updated successfully")
 
         except ValidationError as ve:
             db.session.rollback()
-            return jsonify({"error": "Validation error"}), 400
+            #return jsonify({"error": "Validation error"}), 400
+            return bad_request(message="Validation Error", errors=ve.messages)
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": "Error updating subscription"}), 500
+            #return jsonify({"error": "Error updating subscription"}), 500
+            return server_error(message="Error updating subscription", errors=str(e))
 
 
     elif request.method == 'DELETE':
@@ -112,17 +127,20 @@ def Subscription_id(id):
             subscription = db.session.get(Subscription, id_obj)
             
             if not subscription:
-                return jsonify({"error": "Subscription not found"}), 404
+                #return jsonify({"error": "Subscription not found"}), 404
+                return not_found(message="Subscription not found")
 
             subscription.is_archived = True
             subscription.updated_by = current_user_id
             db.session.commit()
 
-            return jsonify({"message": "Subscription has been archived successfully", "subscription": subscription_read_schema.dump(subscription)}), 200
+            #return jsonify({"message": "Subscription has been archived successfully", "subscription": subscription_read_schema.dump(subscription)}), 200
+            return ok(data={"subscription": subscription_read_schema.dump(subscription)}, message="Subscription has been archived successfully")    
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({"error": "Error archiving subscription"}), 500
+            #return jsonify({"error": "Error archiving subscription"}), 500
+            return server_error(message="Error archiving subscription", errors=str(e))
 
 
 @subscription_bp.route('/subscriptions/<id>/tiers', methods=['GET'])
@@ -137,15 +155,18 @@ def Subscription_Tiers_id(id):
             subscription = db.session.get(Subscription, id_obj)
             
             if not subscription:
-                return jsonify({"error": "Subscription not found"}), 404
+                #return jsonify({"error": "Subscription not found"}), 404
+                return not_found(message="Subscription not found") 
 
             tiers_objs = db.session.query(SubscriptionTier).filter(SubscriptionTier.subscription_id==id_obj).all()
             tiers = subscription_tiers_read_schema.dump(tiers_objs)
 
-            return jsonify({'tiers':tiers}), 200
+            #return jsonify({'tiers':tiers}), 200
+            return ok(data={"tiers": tiers}, message="Subscription tiers fetched successfully")
 
         except Exception as e:
-            return jsonify({"error": "Error fetching subscription tiers"}), 500
+            #return jsonify({"error": "Error fetching subscription tiers"}), 500
+            return server_error(message="Error fetching subscription tiers", errors=str(e))
 
 
 

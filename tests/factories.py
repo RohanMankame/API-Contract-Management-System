@@ -69,25 +69,27 @@ def subscription_tier_payload(subscription_id, **overrides):
 
 
 
+
+
 def create_user_using_api(client, auth_headers, payload=None):
     payload = payload or user_payload()
     res = client.post("/users", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_user failed: {res.get_data(as_text=True)}"
-    return res.get_json()["user"]
+    return res.get_json()["data"]["user"]
 
 # create client
 def create_client_using_api(client, auth_headers, payload=None):
     payload = payload or client_payload()
     res = client.post("/clients", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_client failed: {res.get_data(as_text=True)}"
-    return res.get_json()["client"]
+    return res.get_json()["data"]["client"]
 
 # create product
 def create_product_using_api(client, auth_headers, payload=None):
     payload = payload or product_payload()
     res = client.post("/products", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_product failed: {res.get_data(as_text=True)}"
-    return res.get_json()["product"]
+    return res.get_json()["data"]["product"]
 
 # create contract
 def create_contract_using_api(client, auth_headers, client_id=None, payload=None):
@@ -111,12 +113,14 @@ def create_subscription_using_api(client, auth_headers, contract_id, product_id,
     payload = payload or subscription_payload(contract_id, product_id)
     res = client.post("/subscriptions", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_subscription failed: {res.get_data(as_text=True)}"
-    return res.get_json()["subscription"]
+    return res.get_json()["data"]["subscription"]
 
 def create_subscription_tier_using_api(client, auth_headers, subscription_id, payload=None):
     payload =payload or subscription_tier_payload(subscription_id)
     res = client.post("/subscription-tiers", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_subscription_tier failed: {res.get_data(as_text=True)}"
-    return res.get_json()["subscription_tier"]
+    return res.get_json()["data"]["subscription_tier"]
+
+
 
 
