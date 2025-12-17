@@ -79,11 +79,10 @@ def test_update_patch_user(client, auth_headers):
         "full_name": "Updated User Name",
     }
 
-    res_put = client.put(f"/users/{user_id}", headers=auth_headers, json=update_payload)
-    assert res_put.status_code == 200
-    updated_user = res_put.get_json()["data"]["user"]
+    res_patch = client.patch(f"/users/{user_id}", headers=auth_headers, json=update_payload)
+    assert res_patch.status_code == 200
+    updated_user = res_patch.get_json()["data"]["user"]
     assert updated_user["full_name"] == "Updated User Name"
-
 
 def test_update_put_user(client, auth_headers):
     payload = user_payload()

@@ -1,4 +1,4 @@
-from flask import Flask, app, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint

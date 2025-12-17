@@ -26,13 +26,12 @@ def test_create_product_missing_fields(client, auth_headers):
 
 def test_create_product_invalid_fields(client, auth_headers):
     payload = {
-        "api_name": 88,  # Invalid: empty string
+        "api_name": 88,  # Invalid: integer instead of string
         "description": "A sample product description."
     }
     res_post = client.post("/products", headers=auth_headers, json=payload)
 
     assert res_post.status_code == 400
-
 
 
 def test_get_products(client, auth_headers):

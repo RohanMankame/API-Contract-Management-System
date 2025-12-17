@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from app import db
 from models import Client
 import validators
@@ -32,7 +32,6 @@ def Clients():
             db.session.add(new_client)
             db.session.commit()
 
-           
             return created(data={"client": client_read_schema.dump(new_client)}, message="Client created successfully")
 
         except ValidationError as ve:

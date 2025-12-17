@@ -49,7 +49,6 @@ def Subscriptions():
 
 
         except Exception as e:
-            db.session.rollback()
             return server_error(message="Error fetching subscriptions", errors=str(e))
 
 
