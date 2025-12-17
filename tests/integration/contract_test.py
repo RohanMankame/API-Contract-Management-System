@@ -5,7 +5,7 @@ def test_create_contract(client, auth_headers):
     # create client for contract
     client_payload_data = client_payload()
     res_client = client.post("/clients", headers=auth_headers, json=client_payload_data)
-    created_client = res_client.get_json()["client"]
+    created_client = res_client.get_json()["data"]["client"]
     client_id = created_client["id"]
 
     # create contract with the client_id
@@ -23,7 +23,7 @@ def test_get_contracts(client, auth_headers):
     # create client for contract
     client_payload_data = client_payload()
     res_client = client.post("/clients", headers=auth_headers, json=client_payload_data)
-    created_client = res_client.get_json()["client"]
+    created_client = res_client.get_json()["data"]["client"]
     client_id = created_client["id"]
 
     # create contract with the client_id
@@ -37,11 +37,12 @@ def test_get_contracts(client, auth_headers):
     assert len(contracts) >= 1
 
 
+
 def test_get_contract_by_id(client, auth_headers):
     # create client for contract
     client_payload_data = client_payload()
     res_client = client.post("/clients", headers=auth_headers, json=client_payload_data)
-    created_client = res_client.get_json()["client"]
+    created_client = res_client.get_json()["data"]["client"]
     client_id = created_client["id"]
 
     # create contract with the client_id
@@ -58,6 +59,9 @@ def test_get_contract_by_id(client, auth_headers):
     for key in payload:
         assert fetched_contract[key] == payload[key]
 
+
+
+
 def test_get_contract_by_id_not_found(client, auth_headers):
     non_existent_id = str(uuid.uuid4())
     res_get = client.get(f"/contracts/{non_existent_id}", headers=auth_headers)
@@ -70,7 +74,7 @@ def test_update_patch_contract(client, auth_headers):
     # create client for contract
     client_payload_data = client_payload()
     res_client = client.post("/clients", headers=auth_headers, json=client_payload_data)
-    created_client = res_client.get_json()["client"]
+    created_client = res_client.get_json()["data"]["client"]
     client_id = created_client["id"]
 
     # create contract with the client_id
@@ -94,7 +98,7 @@ def test_update_put_contract(client, auth_headers):
     # create client for contract
     client_payload_data = client_payload()
     res_client = client.post("/clients", headers=auth_headers, json=client_payload_data)
-    created_client = res_client.get_json()["client"]
+    created_client = res_client.get_json()["data"]["client"]
     client_id = created_client["id"]
 
     # create contract with the client_id
@@ -118,7 +122,7 @@ def test_delete_contract(client, auth_headers):
     # create client for contract
     client_payload_data = client_payload()
     res_client = client.post("/clients", headers=auth_headers, json=client_payload_data)
-    created_client = res_client.get_json()["client"]
+    created_client = res_client.get_json()["data"]["client"]
     client_id = created_client["id"]
 
     # create contract with the client_id
@@ -142,3 +146,6 @@ def test_delete_contract_not_found(client, auth_headers):
     res_delete = client.delete(f"/contracts/{non_existent_id}", headers=auth_headers)
     assert res_delete.status_code == 404
     assert res_delete.get_json()["error"] == "Contract not found"
+
+
+    
