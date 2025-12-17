@@ -32,17 +32,15 @@ def Clients():
             db.session.add(new_client)
             db.session.commit()
 
-            #return jsonify({"message":"Client created successfully", "client": client_read_schema.dump(new_client)}), 201
+           
             return created(data={"client": client_read_schema.dump(new_client)}, message="Client created successfully")
 
         except ValidationError as ve:
             db.session.rollback()
-            #return jsonify({"error": ve.messages}), 400
             return bad_request(message="Validation error", errors=ve.messages)
 
         except Exception as e:
             db.session.rollback()
-            #return jsonify({"error": str(e)}), 400
             return server_error(message="Error creating client", errors=str(e))
 
         
@@ -51,11 +49,9 @@ def Clients():
         try:
             clients = db.session.query(Client).all()
             
-            #return jsonify({"message":"Clients retrieved successfully", "clients": clients_read_schema.dump(clients)}), 200
             return ok(data={"clients": clients_read_schema.dump(clients)}, message="Clients retrieved successfully")
 
         except Exception as e:
-            #return jsonify({"error": str(e)}), 400
             return server_error(message="Error retrieving clients", errors=str(e))
 
 
@@ -75,15 +71,12 @@ def Client_id(id):
             client = db.session.get(Client, id_obj)
             
             if not client:
-                #return jsonify({"error": "Client not found"}), 404
                 return not_found(message="Client not found")
             
-            #return jsonify({"message":"Client retrieved successfully", "client": client_read_schema.dump(client)}), 200
             return ok(data={"client": client_read_schema.dump(client)}, message="Client retrieved successfully")
         
         except Exception as e:
             db.session.rollback()
-            #return jsonify({"error": str(e)}), 400
             return server_error(message="Error retrieving client", errors=str(e))
 
 
@@ -97,7 +90,6 @@ def Client_id(id):
             client = db.session.get(Client, id_obj)
             
             if not client:
-                #return jsonify({"error": "Client not found"}), 404
                 return not_found(message="Client not found")
 
             for key, value in validated.items():
@@ -106,17 +98,14 @@ def Client_id(id):
 
             db.session.commit()
 
-            #return jsonify({"message":"Client updated successfully", "client": client_read_schema.dump(client)}), 200
             return ok(data={"client": client_read_schema.dump(client)}, message="Client updated successfully")
         
         except ValidationError as ve:
             db.session.rollback()
-            #return jsonify({"error": ve.messages}), 500
             return bad_request(message="Validation error", errors=ve.messages)
 
         except Exception as e:
             db.session.rollback()
-            #return jsonify({"error": str(e)}), 400
             return server_error(message="Error updating client", errors=str(e))
 
 
@@ -127,19 +116,16 @@ def Client_id(id):
             client = db.session.get(Client, id_obj)
             
             if not client:
-                #return jsonify({"error": "Client not found"}), 404
                 return not_found(message="Client not found")
             
             client.is_archived = True
             client.updated_by = current_user_id
 
             db.session.commit()
-            #return jsonify({"message": "Client archived successfully", "client": client_read_schema.dump(client)}), 200
             return ok(data={"client": client_read_schema.dump(client)}, message="Client archived successfully")
 
         except Exception as e:
             db.session.rollback()
-            #return jsonify({"error": str(e)}), 400
             return server_error(message="Error archiving client", errors=str(e))
 
 
@@ -149,23 +135,19 @@ def Client_Contracts_id(id):
     '''
     Get: Get all contracts associated with a specific client
     '''
-    #current_user_id = get_jwt_identity()
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.get(Client, id_obj)
             
             if not client:
-                #return jsonify({"error": "Client not found"}), 404
                 return not_found(message="Client not found")
 
             contracts = client.contracts
-            #return jsonify({"message":"Client retrieved successfully", "contracts":contracts_read_schema.dump(contracts)}), 200
             return ok(data={"contracts": contracts_read_schema.dump(contracts)}, message="Contracts retrieved successfully")
 
         except Exception as e:
             db.session.rollback()
-            #return jsonify({"error": str(e)}), 400
             return server_error(message="Error retrieving contracts", errors=str(e))
 
 

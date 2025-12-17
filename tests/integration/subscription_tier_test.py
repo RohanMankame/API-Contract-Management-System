@@ -23,14 +23,15 @@ def test_create_subscription_tier(client, auth_headers):
     payload = subscription_tier_payload(subscription_id=subscription_obj["id"])
     res = client.post("/subscription-tiers", headers=auth_headers, json=payload)
     assert res.status_code == 201
-    created_tier = res.get_json()["subscription_tier"]
+    created_tier = res.get_json()["data"]["subscription_tier"]
 
-    #THIS IS CAUSING ISSUES WITH DATETIME COMPARISON AND FLOAT INT COMPARISON
-    '''
     for key in payload:
         if key != "start_date" and key != "end_date":
+            if key == "base_price" or key == "price_per_tier":
+                assert float(created_tier[key]) == float(payload[key])
+                continue
             assert created_tier[key] == payload[key]
-    '''
+
 
 
 
@@ -78,7 +79,7 @@ def test_get_subscription_tiers(client, auth_headers):
     assert res.status_code == 201
     res_get = client.get("/subscription-tiers", headers=auth_headers)
     assert res_get.status_code == 200
-    tiers = res_get.get_json()["subscription_tiers"]
+    tiers = res_get.get_json()["data"]["subscription_tiers"]
     assert isinstance(tiers, list)
     assert len(tiers) >= 1
 
@@ -98,12 +99,12 @@ def test_get_subscription_tier_by_id(client, auth_headers):
     payload = subscription_tier_payload(subscription_id=subscription_obj["id"])
     res_create = client.post("/subscription-tiers", headers=auth_headers, json=payload)
     assert res_create.status_code == 201
-    created_tier = res_create.get_json()["subscription_tier"]
+    created_tier = res_create.get_json()["data"]["subscription_tier"]
     tier_id = created_tier["id"]
 
     res_get = client.get(f"/subscription-tiers/{tier_id}", headers=auth_headers)
     assert res_get.status_code == 200
-    fetched_tier = res_get.get_json()["subscription_tier"]
+    fetched_tier = res_get.get_json()["data"]["subscription_tier"]
     assert fetched_tier["id"] == tier_id
 
 
@@ -129,7 +130,7 @@ def test_archived_subscription_tier(client, auth_headers):
     payload = subscription_tier_payload(subscription_id=subscription_obj["id"])
     res_create = client.post("/subscription-tiers", headers=auth_headers, json=payload)
     assert res_create.status_code == 201
-    created_tier = res_create.get_json()["subscription_tier"]
+    created_tier = res_create.get_json()["data"]["subscription_tier"]
     tier_id = created_tier["id"]
 
     res_delete = client.delete(f"/subscription-tiers/{tier_id}", headers=auth_headers)
@@ -137,7 +138,7 @@ def test_archived_subscription_tier(client, auth_headers):
 
     res_get = client.get(f"/subscription-tiers/{tier_id}", headers=auth_headers)
     assert res_get.status_code == 200
-    fetched_tier = res_get.get_json()["subscription_tier"]
+    fetched_tier = res_get.get_json()["data"]["subscription_tier"]
     assert fetched_tier["is_archived"] is True
 
 

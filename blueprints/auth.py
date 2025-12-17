@@ -17,34 +17,28 @@ def login():
             data = request.get_json()
             
             if not data:
-                #return {"error": "Invalid request body"}, 400
                 return bad_request(message="Invalid request body")
             
             email = data.get('email')
             password = data.get('password')
 
             if not email or not password:
-                #return {"error": "Email and password are required"}, 400
                 return bad_request(message="Email and password are required")
             
             user = User.query.filter_by(email=email).first()
 
             if not user or not user.check_password(password):
-                #return {"error": "Invalid credentials"}, 401
                 return bad_request(message="Invalid credentials")
     
             # identity is user.id
             access_token = create_access_token(identity=user.id)
             
-            #return jsonify({'token': access_token}), 200
             return ok(data={"token": access_token}, message="Login successful")
            
 
         except Exception as e:
-            #return {"error": "An error occurred during login"}, 500
             return server_error(message="An error occurred during login")
 
-    #return {"error": "Invalid request method"}, 405
 
 
 @auth_bp.route('/protected', methods=['GET'])
@@ -64,6 +58,6 @@ def protected():
         return ok(data={"email": current_user.email}, message="Protected endpoint accessed successfully")
         
     except Exception as e:
-        return server_error(message="An error occurred while fetching user data")
+        return server_error(message="An error occurred while fetching user data", errors=str(e))
 
     

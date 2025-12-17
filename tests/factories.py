@@ -61,7 +61,7 @@ def subscription_tier_payload(subscription_id, **overrides):
         "max_calls": 1000,
         "start_date": "2025-12-08T09:25:18.505Z",
         "end_date": "2027-11-08T09:25:18.505Z",
-        "base_price": 5000,
+        "base_price": 5000.00,
         "price_per_tier": 10
     }
     base.update(overrides)
