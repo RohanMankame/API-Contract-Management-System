@@ -2,8 +2,8 @@ from app import db
 from models.mixins import IdMixin, AuditMixin, OperatorMixin
 
 class Client(IdMixin, AuditMixin, OperatorMixin, db.Model):
-    company_name = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(60), unique=True, nullable=False)
+    company_name = db.Column(db.String(60), unique=True, nullable=False)
+    email = db.Column(db.String(254), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(200), nullable=False)
 

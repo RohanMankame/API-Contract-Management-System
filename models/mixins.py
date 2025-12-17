@@ -1,5 +1,5 @@
 # models/mixins.py
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from app import db
@@ -10,10 +10,9 @@ class IdMixin:
                    
 class AuditMixin:
     """Common audit columns: timestamps and soft-delete flag"""
-    is_archived = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    is_archived = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
 class OperatorMixin:
     """Columns referring to the creator/updater user id"""

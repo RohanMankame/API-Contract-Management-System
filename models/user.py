@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
+
 class User(IdMixin, AuditMixin, OperatorMixin, db.Model):
     '''
     Employees of business who have access to the system, they can create contracts
@@ -26,3 +27,4 @@ class User(IdMixin, AuditMixin, OperatorMixin, db.Model):
     
     def __repr__(self):
         return f'User_Id:{self.id}, User: {self.full_name}, Email: {self.email}'
+

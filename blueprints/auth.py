@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from app import db
 from models import User
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from uuid import UUID
+from utils.response import ok, created, bad_request, not_found, server_error
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -13,26 +15,30 @@ def login():
     if request.method == 'POST':
         try:
             data = request.get_json()
+            
+            if not data:
+                return bad_request(message="Invalid request body")
+            
+            email = data.get('email')
+            password = data.get('password')
 
-            email = data['email']
-            password = data['password']
-
+            if not email or not password:
+                return bad_request(message="Email and password are required")
+            
             user = User.query.filter_by(email=email).first()
-            if not user:
-                return {"error": "User not found"}, 404
 
             if not user or not user.check_password(password):
-                return {"error": "Wrong Password or Username"}, 401
-
+                return bad_request(message="Invalid credentials")
+    
             # identity is user.id
             access_token = create_access_token(identity=user.id)
-
-            return {"access_token": access_token}, 200
+            
+            return ok(data={"token": access_token}, message="Login successful")
+           
 
         except Exception as e:
-            return {"error": str(e)}, 500
+            return server_error(message="An error occurred during login")
 
-    return {"error": "Invalid request method"}, 405
 
 
 @auth_bp.route('/protected', methods=['GET'])
@@ -41,9 +47,17 @@ def protected():
     '''
     A test protected endpoint that requires a valid JWT to access
     '''
-    current_user_id = get_jwt_identity() 
-    current_user = User.query.get(current_user_id)
-    if not current_user:
-        return {"error": "User not found"}, 404
+    try:
+        current_user_id = get_jwt_identity() 
+        current_user_id_obj = UUID(current_user_id) if isinstance(current_user_id, str) else current_user_id
+        current_user = db.session.get(User, current_user_id_obj)
+        
+        if not current_user:
+            return not_found(message="User not found")
+        
+        return ok(data={"email": current_user.email}, message="Protected endpoint accessed successfully")
+        
+    except Exception as e:
+        return server_error(message="An error occurred while fetching user data", errors=str(e))
 
-    return jsonify(logged_in_as=current_user.email), 200
+    

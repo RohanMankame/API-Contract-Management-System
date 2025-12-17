@@ -1,129 +1,140 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from app import db
-from models import Subscription_tier
+from models import SubscriptionTier 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from schemas.subscription_tier_schema import subscription_tier_read_schema, subscription_tiers_read_schema, subscription_tier_write_schema
 from schemas.subscription_schema import subscription_read_schema
 from marshmallow import ValidationError
+from uuid import UUID
+from utils.response import ok, created, bad_request, not_found, server_error
 
 subscription_tier_bp = Blueprint('subscription_tier', __name__)
 
-
-@subscription_tier_bp.route('/Subscription_tiers', methods=['POST', 'GET'])
+@subscription_tier_bp.route('/subscription-tiers', methods=['POST', 'GET'])
 @jwt_required()
-def Subscription_tiers():
-    curr_user_id = get_jwt_identity()
+def Subscription_tier():
+    current_user_id = get_jwt_identity()
 
     if request.method == 'POST':
         try:
             data = request.get_json()
             validated = subscription_tier_write_schema.load(data)
 
-            new_tier = Subscription_tier(**validated,created_by=curr_user_id,updated_by=curr_user_id)
+            new_tier = SubscriptionTier(**validated, created_by=current_user_id, updated_by=current_user_id)
 
             db.session.add(new_tier)
             db.session.commit()
 
-            return jsonify(subscription_tier=subscription_tier_read_schema.dump(new_tier)), 201
-
+            return created(data={"subscription_tier": subscription_tier_read_schema.dump(new_tier)}, message="Subscription tier created successfully")
         except ValidationError as ve:
-            return jsonify({"error": ve.messages}), 400
+            return bad_request(message="Validation Error", errors=ve.messages)
 
         except Exception as e:
-            return jsonify({"error": str(e)}), 400
-    
+            db.session.rollback()
+            return server_error(message="Error creating subscription tier", errors=str(e))
     
     elif request.method == 'GET':
         try:
-            tiers = Subscription_tier.query.all()
-            return jsonify(subscription_tiers=subscription_tiers_read_schema.dump(tiers)), 200
+            tiers = db.session.query(SubscriptionTier).all()
+            
+            return ok(data={"subscription_tiers": subscription_tiers_read_schema.dump(tiers)}, message="Subscription tiers retrieved successfully")
 
         except Exception as e:
-            return jsonify({"error": str(e)}), 400
+            db.session.rollback()
+            return server_error(message="Error fetching subscription tiers", errors=str(e))
 
 
-
-@subscription_tier_bp.route('/Subscription_tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
+@subscription_tier_bp.route('/subscription-tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
 @jwt_required()
 def Subscription_tier_id(id):
-    curr_user_id = get_jwt_identity()
+    current_user_id = get_jwt_identity()
 
     if request.method == 'GET':
         try:
-            tier = Subscription_tier.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            tier = db.session.get(SubscriptionTier, id_obj)
+            
             if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+                return not_found(message="Subscription tier not found")
 
-            return jsonify(subscription_tier=subscription_tier_read_schema.dump(tier)), 200
+            return ok(data={"subscription_tier": subscription_tier_read_schema.dump(tier)}, message="Subscription tier retrieved successfully")
         
         except Exception as e:
-            return jsonify({'message': 'Error fetching subscription tier', 'error': str(e)}), 500
-    
+            db.session.rollback()
+            return server_error(message="Error getting subscription tier", errors=str(e))
 
 
 
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            tier = Subscription_tier.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            tier = db.session.get(SubscriptionTier, id_obj)
+            
             if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+                return not_found(message="Subscription tier not found")
 
             validated = subscription_tier_write_schema.load(data, partial=True)
 
             for key, value in validated.items():
                 setattr(tier, key, value)
-            tier.updated_by = curr_user_id
+            tier.updated_by = current_user_id
 
             db.session.commit()
-
-            return jsonify({'message': 'Subscription tier updated successfully'}), 200
+            return ok(message="Subscription tier updated successfully")
 
         except ValidationError as ve:
-            return jsonify({"error": ve.messages}), 400
-
+            db.session.rollback()
+            return bad_request(message="Validation Error", errors=ve.messages)
+        
         except Exception as e:
-            return jsonify({'message': 'Error updating subscription tier', 'error': str(e)}), 500
+            db.session.rollback()
+            return server_error(message="Error updating subscription tier", errors=str(e))
 
 
 
 
     elif request.method == 'DELETE':
         try:
-            tier = Subscription_tier.query.get(id)
+            id_obj = UUID(id) if isinstance(id, str) else id
+            tier = db.session.get(SubscriptionTier, id_obj)
+            
             if not tier:
-                return jsonify({'message': 'Subscription tier not found'}), 404
+                return not_found(message="Subscription tier not found")
 
             tier.is_archived = True
-            tier.updated_by = curr_user_id
+            tier.updated_by = current_user_id
 
             db.session.commit()
-            return jsonify({'message': 'Subscription tier archived successfully'}), 200
+            return ok(message="Subscription tier archived successfully")
 
         except Exception as e:
-            return jsonify({'message': 'Error archiving subscription tier', 'error': str(e)}), 500
+            db.session.rollback()
+            return server_error(message="Error archiving subscription tier", errors=str(e))
+        
 
 
-
-
-@subscription_tier_bp.route('/Subscription_tiers/<id>/Subscriptions', methods=['GET'])
+@subscription_tier_bp.route('/subscription-tiers/<id>/subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):
     '''
     Get: Get the subscription associated with a specific subscription tier ID
     '''
     try:
-        tier = Subscription_tier.query.get(id)
+        id_obj = UUID(id) if isinstance(id, str) else id
+        tier = db.session.get(SubscriptionTier, id_obj)
+        
         if not tier:
-            return jsonify({'message': 'Subscription tier not found'}), 404
+            return not_found(message="Subscription tier not found")
 
         subscription = getattr(tier, 'subscription', None)
         if not subscription:
-            return jsonify({'message': 'No subscription found for this tier'}), 404
+            return not_found(message="No subscription found for this tier")
 
         subscription_data = subscription_read_schema.dump(subscription)
-        return jsonify({'subscription': subscription_data}), 200
+        return ok(data={'subscription': subscription_data}, message="Subscription retrieved successfully")
 
     except Exception as e:
-        return jsonify({'message': 'Error fetching subscriptions for tier', 'error': str(e)}), 500
+        db.session.rollback()
+        return server_error(message="Error fetching subscriptions for tier", errors=str(e))
 

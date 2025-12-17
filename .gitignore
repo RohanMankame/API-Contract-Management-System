@@ -1,6 +1,7 @@
 .venv
 .env
 *.pyc
-.gitignore
 __pycache__/
-__pycache__
+__pycache____pycache__/
+.pytest_cache/
+.vscode
