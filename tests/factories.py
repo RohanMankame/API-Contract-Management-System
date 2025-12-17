@@ -99,7 +99,7 @@ def create_contract_using_api(client, auth_headers, client_id=None, payload=None
     payload = payload or contract_payload(client_id)
     res = client.post("/contracts", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_contract failed: {res.get_data(as_text=True)}"
-    return res.get_json()["contract"]
+    return res.get_json()["data"]["contract"]
 
 # create product + client + contract 
 def create_subscription_dependencies(client, auth_headers, client_payload=None, product_payload=None, contract_payload_overrides=None):
