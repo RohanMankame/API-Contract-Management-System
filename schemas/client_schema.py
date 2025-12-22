@@ -1,5 +1,6 @@
 from app import ma
 from models.client import Client
+from marshmallow.validate import Email, Length 
 
 class ClientReadSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -11,7 +12,7 @@ class ClientReadSchema(ma.SQLAlchemyAutoSchema):
 class ClientWriteSchema(ma.SQLAlchemySchema):
     
     company_name = ma.auto_field(required=True)
-    email = ma.auto_field(required=True)
+    email = ma.auto_field(required=True, validate=Email(error="Invalid email address"))
     phone_number = ma.auto_field()
     address = ma.auto_field()
     

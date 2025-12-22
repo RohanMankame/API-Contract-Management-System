@@ -1,5 +1,5 @@
 
-from tests.factories import client_payload
+from tests.factories import client_payload, invalid_client_payload
 from uuid import uuid4
 
 def test_create_client(client, auth_headers):
@@ -10,6 +10,35 @@ def test_create_client(client, auth_headers):
     created_client = res_post.get_json()["data"]["client"]
     for key in payload:
         assert created_client[key] == payload[key]
+    
+
+def test_create_client_validation_error(client, auth_headers):
+    payload = invalid_client_payload()
+    res_post = client.post("/clients", headers=auth_headers, json=payload)
+    assert res_post.status_code == 400
+    assert res_post.get_json()["message"] == "Validation error"
+    assert "email" in res_post.get_json()["errors"]
+    assert "Invalid email address" in res_post.get_json()["errors"]["email"]
+
+
+def test_create_client_missing_field(client, auth_headers):
+    payload = client_payload()
+    del payload["company_name"]
+    res_post = client.post("/clients", headers=auth_headers, json=payload)
+    assert res_post.status_code == 400
+    assert res_post.get_json()["message"] == "Validation error"
+    assert "company_name" in res_post.get_json()["errors"]
+
+
+def test_create_client_db_error(client, monkeypatch, auth_headers):
+    # make commit raise
+    def _boom():
+        raise Exception("DB failure")
+    monkeypatch.setattr("app.db.session.commit", _boom)
+
+    resp = client.post("/clients", json={"name": "X"}, headers=auth_headers)
+    assert resp.status_code == 400
+    assert resp.json["success"] is False
     
 
 
@@ -136,3 +165,17 @@ def test_archive_client_and_get(client, auth_headers):
     get_res = client.get(f"/clients/{client_id}", headers=auth_headers)
     assert get_res.status_code == 200
     assert get_res.get_json()["data"]["client"]["is_archived"] is True
+
+
+def test_client_contracts(client, auth_headers):
+    payload = client_payload()
+    res_post = client.post("/clients", headers=auth_headers, json=payload)
+    created_client = res_post.get_json()["data"]["client"]
+    client_id = created_client["id"]
+
+    res_get = client.get(f"/clients/{client_id}/contracts", headers=auth_headers)
+    assert res_get.status_code == 200
+    assert res_get.get_json()["message"] == "Contracts retrieved successfully"
+    contracts = res_get.get_json()["data"]["contracts"]
+    assert isinstance(contracts, list)
+

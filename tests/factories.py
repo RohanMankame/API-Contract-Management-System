@@ -32,6 +32,15 @@ def client_payload(**overrides):
     base.update(overrides)
     return base
 
+def invalid_client_payload(**overrides):
+    base = {
+        "company_name": "Test Client",
+        "email": "invalid-email-format",
+        "phone_number": "555-555-5555",
+        "address": "123 Test St",
+    }
+    base.update(overrides)
+    return base
 
 
 
@@ -44,6 +53,8 @@ def contract_payload(client_id, **overrides):
     return base
 
 
+
+
 def subscription_payload(contract_id, product_id, **overrides):
     base = {
         "contract_id": contract_id,
@@ -53,6 +64,9 @@ def subscription_payload(contract_id, product_id, **overrides):
     }
     base.update(overrides)
     return base
+
+
+
 
 def subscription_tier_payload(subscription_id, **overrides):
     base = {

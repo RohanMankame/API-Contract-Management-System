@@ -103,6 +103,25 @@ def test_archive_subscription(client, auth_headers):
     assert fetched_subscription["is_archived"] is True
 
 
+def test_update_subscription(client, auth_headers):
+    deps = create_subscription_dependencies(client, auth_headers)
+    payload = subscription_payload(contract_id=deps["contract"]["id"], product_id=deps["product"]["id"])
+    
+    res = client.post("/subscriptions", headers=auth_headers, json=payload)
+    assert res.status_code == 201
+    assert res.get_json()["message"] == "Subscription created successfully"
+    created_subscription = res.get_json()["data"]["subscription"]
+    for key in payload:
+        assert created_subscription[key] == payload[key]
+
+    updated_res = client.patch(f"/subscriptions/{created_subscription['id']}", headers=auth_headers, json={
+        "pricing_type": "Variable"
+        })
+    assert updated_res.status_code == 200
+
+
+
+
 def test_archive_subscription_not_found(client, auth_headers):
     non_existent_id = str(uuid4())
     res = client.delete(f"/subscriptions/{non_existent_id}", headers=auth_headers)
@@ -123,4 +142,3 @@ def test_subscription_invalid_parent_ids(client, auth_headers):
 def test_protected_endpoints_require_auth(client):
     res = client.get("/subscriptions")
     assert res.status_code == 401
-

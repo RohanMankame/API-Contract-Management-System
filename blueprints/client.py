@@ -42,7 +42,10 @@ def Clients():
             db.session.rollback()
             return server_error(message="Error creating client", errors=str(e))
 
-        
+
+
+
+
 
     elif request.method == 'GET':
         try:

@@ -1,4 +1,4 @@
-from tests.factories import product_payload
+from tests.factories import product_payload, contract_payload
 from uuid import uuid4
 
 
@@ -143,3 +143,5 @@ def test_cannot_update_archived_product(client, auth_headers):
     res = client.patch(f"/products/{pid}", headers=auth_headers, json={"api_name": "newname"})
     assert res.status_code == 400
     assert "Cannot update an archived product" == res.get_json()["message"]
+
+
