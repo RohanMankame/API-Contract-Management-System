@@ -35,7 +35,7 @@ def Subscription_tier():
     
     elif request.method == 'GET':
         try:
-            tiers = db.session.query(SubscriptionTier).all()
+            tiers = db.session.query(SubscriptionTier).filter_by(is_archived=False).all()
             
             return ok(data={"subscription_tiers": subscription_tiers_read_schema.dump(tiers)}, message="Subscription tiers retrieved successfully")
 
@@ -52,7 +52,7 @@ def Subscription_tier_id(id):
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
-            tier = db.session.get(SubscriptionTier, id_obj)
+            tier = db.session.query(SubscriptionTier).filter_by(id=id_obj, is_archived=False).first()
             
             if not tier:
                 return not_found(message="Subscription tier not found")

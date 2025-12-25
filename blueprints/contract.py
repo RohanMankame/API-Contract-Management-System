@@ -46,7 +46,7 @@ def Contracts():
 
     elif request.method == 'GET':
         try:
-            contracts = db.session.query(Contract).all()
+            contracts = db.session.query(Contract).filter_by(is_archived=False).all()
             
             return ok(data={"contracts": contracts_read_schema.dump(contracts)}, message="Contracts fetched successfully")
 
@@ -66,7 +66,7 @@ def Contract_id(id):
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
-            contract = db.session.get(Contract, id_obj)
+            contract = db.session.query(Contract).filter_by(id=id_obj, is_archived=False).first()
             
             if not contract:
                 return not_found(message="Contract not found")

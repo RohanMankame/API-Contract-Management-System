@@ -45,7 +45,7 @@ def Products():
 
     elif request.method == 'GET':
         try:
-            products = db.session.query(Product).all()
+            products = db.session.query(Product).filter_by(is_archived=False).all()
         
             return ok(data={"products": products_read_schema.dump(products)}, message="Products retrieved successfully")
 
@@ -65,7 +65,7 @@ def Product_id(id):
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
-            product = db.session.get(Product, id_obj)
+            product = db.session.query(Product).filter_by(id=id_obj, is_archived=False).first()
             
             if not product:
                 return not_found(message="Product not found")

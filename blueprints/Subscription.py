@@ -43,7 +43,7 @@ def Subscriptions():
 
     elif request.method == 'GET':
         try:
-            subscriptions = db.session.query(Subscription).all()
+            subscriptions = db.session.query(Subscription).filter_by(is_archived=False).all()
         
             return ok(data={"subscriptions": subscriptions_read_schema.dump(subscriptions)}, message="Subscriptions fetched successfully")
 
@@ -65,7 +65,7 @@ def Subscription_id(id):
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
-            subscription = db.session.get(Subscription, id_obj)
+            subscription = db.session.query(Subscription).filter_by(id=id_obj, is_archived=False).first()
             
             if not subscription:
                 return not_found(message="Subscription not found")

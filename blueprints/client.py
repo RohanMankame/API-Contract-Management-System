@@ -49,7 +49,7 @@ def Clients():
 
     elif request.method == 'GET':
         try:
-            clients = db.session.query(Client).all()
+            clients = db.session.query(Client).filter_by(is_archived=False).all()
             
             return ok(data={"clients": clients_read_schema.dump(clients)}, message="Clients retrieved successfully")
 
@@ -70,7 +70,7 @@ def Client_id(id):
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
-            client = db.session.get(Client, id_obj)
+            client = db.session.query(Client).filter_by(id=id_obj, is_archived=False).first()
             
             if not client:
                 return not_found(message="Client not found")
