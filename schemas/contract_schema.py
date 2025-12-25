@@ -22,6 +22,8 @@ class ContractWriteSchema(ma.SQLAlchemySchema):
     client_id = ma.auto_field(required=True)
     contract_name = ma.auto_field(required=True)
     is_archived = ma.auto_field()
+    start_date = ma.auto_field(required=True)
+    end_date = ma.auto_field(required=True)
     
     class Meta:
         model = Contract
@@ -34,6 +36,14 @@ class ContractWriteSchema(ma.SQLAlchemySchema):
             id_obj = UUID(client_id) if isinstance(client_id, str) else client_id
             if not db.session.get(Client, id_obj):
                 raise ValidationError({"client_id":"Client does not exist"})
+
+    @validates_schema
+    def check_end_date_after_start_date(self, data, **kwargs):
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+        if start_date and end_date and end_date <= start_date:
+            raise ValidationError({"end_date": "End date must be after start date"})
+
             
     
 
