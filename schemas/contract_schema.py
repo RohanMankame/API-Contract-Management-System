@@ -1,6 +1,6 @@
 from app import ma, db
 from models.contract import Contract
-from marshmallow import validates_schema, ValidationError
+from marshmallow import validates_schema, ValidationError, fields
 from models import Client
 from uuid import UUID
 from models.product import Product
@@ -9,13 +9,24 @@ from models.product import Product
 
 class ContractReadSchema(ma.SQLAlchemyAutoSchema):
 
-    subscriptions = ma.Nested('SubscriptionReadSchema', many=True)
+    subscriptions = fields.Method("get_active_subscriptions")
 
     class Meta:
         model = Contract
         load_instance = True
         include_fk = True
         exclude = ("created_by", "updated_by",)
+
+    def get_active_subscriptions(self, obj):
+        # Only include subscriptions that are not archived
+        active_subs = [s for s in obj.subscriptions if not getattr(s, "is_archived", False)]
+        from schemas.subscription_schema import SubscriptionReadSchema
+        return SubscriptionReadSchema(many=True).dump(active_subs)
+
+    
+
+
+
 
 class ContractWriteSchema(ma.SQLAlchemySchema):
     
