@@ -56,7 +56,18 @@ class SubscriptionWriteSchema(ma.SQLAlchemySchema):
             if not db.session.get(Product, id_obj_prod):
                 raise ValidationError({"error": "Product does not exist"})
 
-    
+    @validates_schema
+    def validate_pricing_and_strategy(self, data, **kwargs):
+        pricing_type = data.get("pricing_type")
+        strategy = data.get("strategy")
+        if pricing_type == "Fixed":
+            if strategy != "Fxed":
+                raise ValidationError({"strategy": "Strategy must be 'fixed' when pricing_type is 'Fixed'."})
+        elif pricing_type == "Variable":
+            if strategy == "fixed":
+                raise ValidationError({"strategy": "Strategy cannot be 'fixed' when pricing_type is 'Variable'."})
+            if strategy not in ["fill", "pick", "flat"]:
+                raise ValidationError({"strategy": "Strategy must be one of 'fill', 'pick', or 'flat' when pricing_type is 'Variable'."})
 
 subscription_read_schema = SubscriptionReadSchema()
 
