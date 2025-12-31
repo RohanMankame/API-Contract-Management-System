@@ -24,6 +24,11 @@ def Products():
     if request.method == 'POST':
         try:
             data = request.get_json()
+
+            existing = Product.query.filter_by(api_name=data.get('api_name')).first()
+            if existing:
+                return jsonify({"message": "Product with this API name already exists."}), 400
+            
             validated = product_write_schema.load(data)
 
             new_product = Product(**validated, created_by=current_user_id, updated_by=current_user_id)

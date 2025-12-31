@@ -31,7 +31,7 @@ def Subscription_tier():
 
         except Exception as e:
             db.session.rollback()
-            return server_error(message="Error creating subscription tier", errors=str(e))
+            return server_error(message=f"Error creating subscription tier: {e}")
     
     elif request.method == 'GET':
         try:
@@ -41,7 +41,7 @@ def Subscription_tier():
 
         except Exception as e:
             db.session.rollback()
-            return server_error(message="Error fetching subscription tiers", errors=str(e))
+            return server_error(message=f"Error fetching subscription tiers: {e}")
 
 
 @subscription_tier_bp.route('/subscription-tiers/<id>', methods=['GET','PUT','PATCH','DELETE'])
@@ -61,9 +61,7 @@ def Subscription_tier_id(id):
         
         except Exception as e:
             db.session.rollback()
-            return server_error(message="Error getting subscription tier", errors=str(e))
-
-
+            return server_error(message=f"Error getting subscription tier: {e}")
 
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
@@ -89,10 +87,7 @@ def Subscription_tier_id(id):
         
         except Exception as e:
             db.session.rollback()
-            return server_error(message="Error updating subscription tier", errors=str(e))
-
-
-
+            return server_error(message=f"Error updating subscription tier: {e}")
 
     elif request.method == 'DELETE':
         try:
@@ -110,9 +105,8 @@ def Subscription_tier_id(id):
 
         except Exception as e:
             db.session.rollback()
-            return server_error(message="Error archiving subscription tier", errors=str(e))
+            return server_error(message=f"Error archiving subscription tier: {e}")
         
-
 
 @subscription_tier_bp.route('/subscription-tiers/<id>/subscriptions', methods=['GET'])
 @jwt_required()
@@ -136,5 +130,4 @@ def Subscription_tier_Subscriptions_id(id):
 
     except Exception as e:
         db.session.rollback()
-        return server_error(message="Error fetching subscriptions for tier", errors=str(e))
-
+        return server_error(message=f"Error fetching subscriptions for tier: {e}")

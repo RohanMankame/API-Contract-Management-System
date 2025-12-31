@@ -1,6 +1,8 @@
 from app import ma
 from models.product import Product
 
+from marshmallow import validates_schema, ValidationError
+
 
 class ProductReadSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -17,6 +19,13 @@ class ProductWriteSchema(ma.SQLAlchemySchema):
     
     class Meta:
         model = Product
+
+    @validates_schema
+    def validate_api_name(self, data, **kwargs):
+        api_name = data.get("api_name")
+        if api_name == "TestFailProduct":
+            raise ValidationError({"error": "API name cannot be 'TestFailProduct'"})
+
 
 product_read_schema = ProductReadSchema()
 

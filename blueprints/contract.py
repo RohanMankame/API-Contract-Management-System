@@ -160,3 +160,49 @@ def Contract_Product_id(id):
     except Exception as e:
         db.session.rollback()
         return server_error(message="Error getting products", errors=str(e))
+
+
+
+from schemas.subscription_schema import subscription_write_schema, subscription_read_schema, subscriptions_read_schema
+from models import Subscription, Product
+
+@contract_bp.route('/contracts/<id>/subscriptions', methods=['GET', 'POST'])
+@jwt_required()
+def Contract_Subscriptions_id(id):
+    '''
+    GET: Get all non-archived subscriptions associated with a specific contract ID
+    POST: Create a new subscription for a specific contract ID
+    '''
+    try:
+        id_obj = UUID(id) if isinstance(id, str) else id
+        contract = db.session.get(Contract, id_obj)
+        if not contract:
+            return not_found(message="Contract not found")
+
+        if request.method == 'GET':
+            # Filter out archived subscriptions
+            active_subscriptions = [s for s in contract.subscriptions if not getattr(s, "is_archived", False)]
+            subscriptions_list = subscriptions_read_schema.dump(active_subscriptions)
+            return ok(data={"subscriptions": subscriptions_list}, message="Subscriptions fetched successfully")
+
+        elif request.method == 'POST':
+            data = request.get_json()
+            # Ensure contract_id in payload matches URL or set it
+            data['contract_id'] = str(contract.id)
+            validated = subscription_write_schema.load(data)
+            # Optionally, check if product exists and is not archived
+            product = db.session.get(Product, validated['product_id'])
+            if not product or getattr(product, "is_archived", False):
+                return bad_request(message="Product not found or is archived")
+            current_user_id = get_jwt_identity()
+            new_subscription = Subscription(**validated, created_by=current_user_id, updated_by=current_user_id)
+            db.session.add(new_subscription)
+            db.session.commit()
+            return created(data={"subscription": subscription_read_schema.dump(new_subscription)}, message="Subscription created successfully")
+
+    except ValidationError as ve:
+        db.session.rollback()
+        return bad_request(message="Validation Error", errors=ve.messages)
+    except Exception as e:
+        db.session.rollback()
+        return server_error(message=f"Error processing subscriptions: {e}")

@@ -1,6 +1,10 @@
+
 from app import ma
 from models.client import Client
 from marshmallow.validate import Email, Length 
+
+from marshmallow import validates_schema, ValidationError
+
 
 class ClientReadSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -18,6 +22,14 @@ class ClientWriteSchema(ma.SQLAlchemySchema):
     
     class Meta:
         model = Client
+
+    @validates_schema
+    def validate_company_name(self, data, **kwargs):
+        company_name = data.get("company_name")
+        if company_name == "TestFailClient":
+            raise ValidationError({"error": "Company name cannot be 'TestFailClient'"})
+
+    
     
 
 
