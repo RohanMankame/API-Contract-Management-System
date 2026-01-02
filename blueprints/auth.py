@@ -4,6 +4,7 @@ from models import User
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from uuid import UUID
 from utils.response import ok, created, bad_request, not_found, server_error
+from schemas.user_schema import user_read_schema
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -55,7 +56,8 @@ def protected():
         if not current_user:
             return not_found(message="User not found")
         
-        return ok(data={"email": current_user.email}, message="Protected endpoint accessed successfully")
+        user_data = user_read_schema.dump(current_user)
+        return ok(data=user_data, message="Protected endpoint accessed successfully")
         
     except Exception as e:
         return server_error(message="An error occurred while fetching user data", errors=str(e))
