@@ -16,5 +16,5 @@ def bad_request(message="Bad request", errors=None):
 def not_found(message="Not found"): 
     return _envelope(False, message, None, None, None, 404)
 
-def server_error(message="Server error"): 
-    return _envelope(False, message, None, None, None, 500)
+def server_error(message="Server error", errors=None): 
+    return _envelope(False, message, None, errors, None, 500)

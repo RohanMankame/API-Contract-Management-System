@@ -3,7 +3,7 @@ from app import db
 from models import User, Contract
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from schemas.user_schema import user_read_schema, users_read_schema, user_write_schema
+from schemas.user_schema import user_read_schema, users_read_schema, user_write_schema, UserWriteSchema
 from schemas.contract_schema import contracts_read_schema
 from marshmallow import ValidationError
 from uuid import UUID
@@ -26,13 +26,18 @@ def UsersFirst():
             email = data['email']
             password = data['password']
             full_name = data['full_name']
+            role = data['role']
 
             if not all([email, password, full_name]):
                 return bad_request(message="Missing required fields: email, password, full_name")
+            
+            if role not in ['employee', 'admin']:
+                return bad_request(message="Role must be 'employee' or 'admin'")
 
             new_user = User(
                 email=email,
                 full_name=full_name,
+                role=role,
                 created_by=None,
                 updated_by=None
              )
@@ -60,6 +65,12 @@ def Users():
 
     if request.method == 'POST':
         try:
+
+            current_user = db.session.get(User, current_user_id) 
+
+            if not current_user or current_user.role != 'admin':
+                return bad_request(message="Only admin users can create new users.")
+            
             data = request.get_json()
             validated = user_write_schema.load(data)
 
@@ -85,7 +96,7 @@ def Users():
     
     elif request.method == 'GET':
         try:
-            users = User.query.all()
+            users = User.query.filter_by(is_archived=False).all()
             return ok(data={"users": users_read_schema.dump(users)}, message="Users retrieved successfully")
         
         except Exception as e:
@@ -121,15 +132,21 @@ def User_id(id):
     elif request.method == 'PUT' or request.method == 'PATCH':
         try:
             data = request.get_json()
-            
             id_obj = UUID(id) if isinstance(id, str) else id
             user = db.session.get(User, id_obj)
-            
 
             if not user:
                 return not_found(message="User not found")
 
-            validated = user_write_schema.load(data, partial=True)
+            # Only allow admin to update other users
+            current_user = db.session.get(User, current_user_id)
+            if not current_user or current_user.role != 'admin':
+                return bad_request(message="Only admin users can update user accounts.")
+
+            
+            schema = UserWriteSchema()
+            schema.context = {"user_id": str(user.id)}
+            validated = schema.load(data, partial=True)
 
             for key, value in validated.items():
                 if key == 'password':
