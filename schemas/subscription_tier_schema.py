@@ -30,7 +30,7 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
     @validates_schema
     def validate_dependency(self, data, **kwargs):
         # check min/max
-        if "min_calls" in data and "max_calls" in data and data["min_calls"] > data["max_calls"]:
+        if data["min_calls"] > data["max_calls"] and data["max_calls"] != -1:
             raise ValidationError({"min_calls": "min_calls must be <= max_calls"})
         # check subscription exists
         subscription_id = data.get("subscription_id")
@@ -41,7 +41,7 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
                 raise ValidationError({"error": "Invalid UUID format"})
             if not db.session.get(Subscription, id_obj):
                 raise ValidationError({"error": "Subscription does not exist"})
-
+    
     @validates_schema
     def validate_dates(self, data, **kwargs):
         s = data.get("start_date")
