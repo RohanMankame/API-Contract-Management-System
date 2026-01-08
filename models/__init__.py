@@ -4,6 +4,7 @@ from .product import Product
 from .contract import Contract
 from .subscription import Subscription
 from .subscription_tier import SubscriptionTier 
+from .rate_card import RateCard
 
 __all__ = [
     "Client",
@@ -12,5 +13,5 @@ __all__ = [
     "Contract",
     "Subscription",
     "SubscriptionTier",
-    "Subscription_tier",
+    "RateCard",
 ]
