@@ -1,7 +1,7 @@
 from app import ma, db
 from models.subscription_tier import SubscriptionTier 
 from marshmallow import validates_schema, ValidationError
-from models import Subscription
+from models import RateCard
 from uuid import UUID
 from datetime import datetime
 
@@ -28,10 +28,12 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
     def validate_dependency(self, data, **kwargs):
         rate_card_id = data.get('rate_card_id')
         if rate_card_id:
-            rate_card = db.session.get(Subscription, UUID(rate_card_id))
-            if not rate_card:
-                raise ValidationError('rate_card_id does not exist.')
-       
+            try:
+                id_obj = UUID(rate_card_id) if isinstance(rate_card_id, str) else rate_card_id
+            except Exception:
+                raise ValidationError({"rate_card_id": "Invalid UUID format"})
+            if not db.session.get(RateCard, id_obj):
+                raise ValidationError({"rate_card_id": "RateCard does not exist"})
 
 
 subscription_tier_read_schema = SubscriptionTierReadSchema()

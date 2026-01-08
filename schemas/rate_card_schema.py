@@ -18,7 +18,7 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
     subscription_id = ma.auto_field(required=True)
     start_date = ma.auto_field(required=True)
     end_date = ma.auto_field(required=True)
-    is_active = ma.auto_field()
+    
 
     class Meta:
         model = RateCard

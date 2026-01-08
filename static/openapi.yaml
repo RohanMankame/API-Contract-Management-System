@@ -202,7 +202,6 @@ components:
         subscription_id: { type: string, format: uuid }
         start_date: { type: string, format: date-time }
         end_date: { type: string, format: date-time }
-        is_active: { type: boolean }
         is_archived: { type: boolean }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
@@ -218,7 +217,6 @@ components:
         subscription_id: { type: string, format: uuid }
         start_date: { type: string, format: date-time }
         end_date: { type: string, format: date-time }
-        is_active: { type: boolean }
 
     # SubscriptionTier (now belongs to RateCard)
     SubscriptionTier:
