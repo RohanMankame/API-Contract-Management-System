@@ -39,7 +39,7 @@ def create_app():
 
     # Swagger UI setup
     SWAGGER_URL = '/api/docs'
-    API_URL = '/static/swaggerDoc1.6.json'  
+    API_URL = '/static/openapi.yaml'  
     swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "API Contract Management System Project"},)
     app.register_blueprint(swaggerui_blueprint)
 

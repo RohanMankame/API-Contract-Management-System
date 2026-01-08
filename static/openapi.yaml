@@ -1,0 +1,727 @@
+openapi: 3.0.3
+info:
+  title: API Contract Management System
+  version: "1.0.0"
+  description: "Auto-generated OpenAPI spec for the API Contract Manager (includes RateCard changes and subscription-tier nesting)."
+servers:
+  - url: http://localhost:5000
+    description: Local dev server
+tags:
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: clients
+    description: Client management
+  - name: products
+    description: Product management
+  - name: contracts
+    description: Contract management
+  - name: subscriptions
+    description: Subscription management
+  - name: rate_cards
+    description: Rate Card management (new)
+  - name: subscription_tiers
+    description: Subscription Tier management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    idParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID of the resource
+
+  schemas:
+
+    Envelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+        errors:
+          type: object
+        meta:
+          type: object
+
+    # User
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [employee, admin]
+        is_archived:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateUser:
+      type: object
+      required: [email, password, full_name, role]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [employee, admin]
+
+    # Client
+    Client:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_name:
+          type: string
+        email:
+          type: string
+        phone_number:
+          type: string
+        address:
+          type: string
+        is_archived:
+          type: boolean
+
+    CreateClient:
+      type: object
+      required: [company_name, email]
+      properties:
+        company_name: { type: string }
+        email: { type: string }
+        phone_number: { type: string }
+        address: { type: string }
+
+    # Product
+    Product:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        api_name: { type: string }
+        description: { type: string }
+        is_archived: { type: boolean }
+
+    CreateProduct:
+      type: object
+      required: [api_name]
+      properties:
+        api_name: { type: string }
+        description: { type: string }
+
+    # Contract
+    Contract:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        client_id: { type: string, format: uuid }
+        contract_name: { type: string }
+        start_date: { type: string, format: date-time }
+        end_date: { type: string, format: date-time }
+        is_archived: { type: boolean }
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+
+    CreateContract:
+      type: object
+      required: [client_id, contract_name, start_date, end_date]
+      properties:
+        client_id: { type: string, format: uuid }
+        contract_name: { type: string }
+        start_date: { type: string, format: date-time }
+        end_date: { type: string, format: date-time }
+
+    # Subscription
+    Subscription:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        contract_id: { type: string, format: uuid }
+        product_id: { type: string, format: uuid }
+        pricing_type:
+          type: string
+          enum: [Fixed, Variable]
+        strategy:
+          type: string
+          enum: [Pick, Fill, Flat, Fixed]
+        is_archived: { type: boolean }
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionTier'
+
+    CreateSubscription:
+      type: object
+      required: [contract_id, product_id, pricing_type, strategy]
+      properties:
+        contract_id: { type: string, format: uuid }
+        product_id: { type: string, format: uuid }
+        pricing_type:
+          type: string
+          enum: [Fixed, Variable]
+        strategy:
+          type: string
+          enum: [Pick, Fill, Flat, Fixed]
+
+    # RateCard (new)
+    RateCard:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        subscription_id: { type: string, format: uuid }
+        start_date: { type: string, format: date-time }
+        end_date: { type: string, format: date-time }
+        is_active: { type: boolean }
+        is_archived: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionTier'
+
+    CreateRateCard:
+      type: object
+      required: [subscription_id, start_date, end_date]
+      properties:
+        subscription_id: { type: string, format: uuid }
+        start_date: { type: string, format: date-time }
+        end_date: { type: string, format: date-time }
+        is_active: { type: boolean }
+
+    # SubscriptionTier (now belongs to RateCard)
+    SubscriptionTier:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        rate_card_id: { type: string, format: uuid }
+        min_calls: { type: integer }
+        max_calls:
+          type: integer
+          description: -1 indicates infinite
+        unit_price:
+          type: number
+          format: float
+        is_archived: { type: boolean }
+
+    CreateSubscriptionTier:
+      type: object
+      required: [rate_card_id, min_calls, max_calls, unit_price]
+      properties:
+        rate_card_id: { type: string, format: uuid }
+        min_calls: { type: integer }
+        max_calls: { type: integer }
+        unit_price: { type: number, format: float }
+
+    # Auth
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string }
+
+paths:
+
+  /login:
+    post:
+      tags: [auth]
+      summary: Login and receive JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                example:
+                  success: true
+                  message: "Login successful"
+                  data: { token: "eyJ..." }
+
+  /users-first:
+    post:
+      tags: [users]
+      summary: Create the first user (no auth)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: First user created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /users:
+    get:
+      tags: [users]
+      summary: List users
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Users retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+    post:
+      tags: [users]
+      summary: Create a user (admin only)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUser' }
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+
+  /users/{id}:
+    get:
+      tags: [users]
+      summary: Get user by id
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: User returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+    put:
+      tags: [users]
+      summary: Update user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUser' }
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+    delete:
+      tags: [users]
+      summary: Archive (soft delete) a user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: User archived
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+
+  /clients:
+    get:
+      tags: [clients]
+      summary: List clients
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+    post:
+      tags: [clients]
+      summary: Create a client
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateClient' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+
+  /clients/{id}:
+    get:
+      tags: [clients]
+      summary: Get client
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+    put:
+      tags: [clients]
+      summary: Update client
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/idParam' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateClient' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+    delete:
+      tags: [clients]
+      summary: Archive client
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+
+  /products:
+    get:
+      tags: [products]
+      summary: List products
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+    post:
+      tags: [products]
+      summary: Create product
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateProduct' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+
+  /products/{id}:
+    get:
+      tags: [products]
+      summary: Get product
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    put:
+      tags: [products]
+      summary: Update product
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateProduct' }
+      responses:
+        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    delete:
+      tags: [products]
+      summary: Archive product
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /contracts:
+    get:
+      tags: [contracts]
+      summary: List contracts
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    post:
+      tags: [contracts]
+      summary: Create contract
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateContract' }
+      responses:
+        '201': { description: 'Created', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /contracts/{id}:
+    get:
+      tags: [contracts]
+      summary: Get contract
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    put:
+      tags: [contracts]
+      summary: Update contract
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateContract' }
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    delete:
+      tags: [contracts]
+      summary: Archive contract
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /contracts/{id}/subscriptions:
+    get:
+      tags: [contracts]
+      summary: Get subscriptions for a contract
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    post:
+      tags: [contracts]
+      summary: Create subscription under a contract
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSubscription' }
+      responses:
+        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /subscriptions:
+    get:
+      tags: [subscriptions]
+      summary: List subscriptions
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    post:
+      tags: [subscriptions]
+      summary: Create subscription
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSubscription' }
+      responses:
+        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /subscriptions/{id}:
+    get:
+      tags: [subscriptions]
+      summary: Get subscription
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    put:
+      tags: [subscriptions]
+      summary: Update subscription
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSubscription' }
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    delete:
+      tags: [subscriptions]
+      summary: Archive subscription
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /subscriptions/{id}/tiers:
+    get:
+      tags: [subscriptions]
+      summary: Get the subscription tiers for this subscription (active only)
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /rate-cards:
+    get:
+      tags: [rate_cards]
+      summary: List rate cards
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    post:
+      tags: [rate_cards]
+      summary: Create a rate card (belongs to subscription)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateRateCard' }
+      responses:
+        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /rate-cards/{id}:
+    get:
+      tags: [rate_cards]
+      summary: Get rate card
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    put:
+      tags: [rate_cards]
+      summary: Update rate card
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateRateCard' }
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    delete:
+      tags: [rate_cards]
+      summary: Archive rate card (soft-delete) and cascade to child tiers
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /rate-cards/{id}/subscription-tiers:
+    get:
+      tags: [rate_cards]
+      summary: Get subscription tiers for a rate card
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /subscription-tiers:
+    get:
+      tags: [subscription_tiers]
+      summary: List subscription tiers
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    post:
+      tags: [subscription_tiers]
+      summary: Create subscription tier under a rate card
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSubscriptionTier' }
+      responses:
+        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /subscription-tiers/{id}:
+    get:
+      tags: [subscription_tiers]
+      summary: Get subscription tier
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    put:
+      tags: [subscription_tiers]
+      summary: Update subscription tier
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSubscriptionTier' }
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+    delete:
+      tags: [subscription_tiers]
+      summary: Archive subscription tier (soft-delete)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+  /subscription-tiers/{id}/subscriptions:
+    get:
+      tags: [subscription_tiers]
+      summary: Get the subscription for a tier
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
+security:
+  - bearerAuth: []
