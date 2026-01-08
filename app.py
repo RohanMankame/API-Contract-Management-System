@@ -61,9 +61,16 @@ def create_app():
     # subscription
     from blueprints.subscription import subscription_bp
     app.register_blueprint(subscription_bp, url_prefix='/')
+
+    # rate_card
+    from blueprints.rate_card import rate_card_bp
+    app.register_blueprint(rate_card_bp, url_prefix='/')
+
     # subscription_tier
     from blueprints.subscription_tier import subscription_tier_bp
     app.register_blueprint(subscription_tier_bp, url_prefix='/')
+
+    
 
     # Create database tables if not exist
     with app.app_context():
