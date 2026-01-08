@@ -9,7 +9,6 @@ class SubscriptionReadSchema(ma.SQLAlchemyAutoSchema):
 
     product = ma.Nested('ProductReadSchema')
     #tiers = ma.Nested('SubscriptionTierReadSchema', many=True)
-    tiers = fields.Method("get_active_tiers")
 
     class Meta:
         model = Subscription
@@ -17,11 +16,7 @@ class SubscriptionReadSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         exclude = ("created_by", "updated_by",)
 
-    def get_active_tiers(self, obj):
-        # Only include tiers that are not archived
-        active_tiers = [t for t in obj.tiers if not getattr(t, "is_archived", False)]
-        from schemas.subscription_tier_schema import SubscriptionTierReadSchema
-        return SubscriptionTierReadSchema(many=True).dump(active_tiers)
+    
 
 class SubscriptionWriteSchema(ma.SQLAlchemySchema):
     

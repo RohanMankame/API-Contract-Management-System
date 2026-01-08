@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: API Contract Management System
   version: "1.0.0"
-  description: "Auto-generated OpenAPI spec for the API Contract Manager (includes RateCard changes and subscription-tier nesting)."
+  description: "API Contract Management System for managing clients, products, contracts, subscriptions, rate cards, and subscription tiers."
 servers:
   - url: http://localhost:5000
     description: Local dev server

@@ -23,6 +23,8 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
     class Meta:
         model = RateCard
 
+
+"""
     @validates_schema
     def validate_dates(self, data, **kwargs):
         start_date = data.get('start_date')
@@ -34,7 +36,7 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
 
         subscription_id = data.get('subscription_id')
         if subscription_id:
-            subscription = db.session.get(Subscription, UUID(subscription_id))
+            subscription = db.session.get(Subscription, subscription_id)
             if not subscription:
                 raise ValidationError('subscription_id does not exist.')
 
@@ -47,6 +49,7 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
 
                 if overlapping_rate_cards:
                     raise ValidationError('The provided date range overlaps with an existing rate card for this subscription.')
+"""
 
 rate_card_read_schema = RateCardReadSchema()
 rate_card_write_schema = RateCardWriteSchema()
