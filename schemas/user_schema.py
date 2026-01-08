@@ -15,9 +15,7 @@ class UserReadSchema(ma.SQLAlchemyAutoSchema):
 
 class UserWriteSchema(ma.SQLAlchemySchema):
     
-    
     email = ma.auto_field(required=True, validate=Email(error="Invalid email address"))
-    
     password = ma.String(required=True, load_only=True, validate=Length(min=8, error="Password must be at least 8 characters long"))
     full_name = ma.auto_field(required=True)
     role = ma.String(required=True, validate=OneOf(['employee', 'admin'], error="Role must be 'employee' or 'admin'"))

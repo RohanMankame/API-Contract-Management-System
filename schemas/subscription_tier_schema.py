@@ -18,8 +18,8 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
     subscription_id = ma.auto_field(required=True)
     min_calls = ma.auto_field(required=True)
     max_calls = ma.auto_field(required=True)
-    start_date = ma.auto_field()
-    end_date = ma.auto_field()
+    start_date = ma.auto_field(required=True)
+    end_date = ma.auto_field(required=True)
     base_price = ma.auto_field(required=True)
     price_per_tier = ma.auto_field(required=True)
     is_archived = ma.auto_field()
@@ -29,9 +29,11 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
 
     @validates_schema
     def validate_dependency(self, data, **kwargs):
-        # check min/max
+        # check min is less than or equal to max
+        # note: -1 for max_calls means infinite
         if data["min_calls"] > data["max_calls"] and data["max_calls"] != -1:
             raise ValidationError({"min_calls": "min_calls must be <= max_calls"})
+        
         # check subscription exists
         subscription_id = data.get("subscription_id")
         if subscription_id:
