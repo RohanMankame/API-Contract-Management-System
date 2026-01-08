@@ -27,8 +27,9 @@ def Subscription_tier():
             return created(data={"subscription_tier": subscription_tier_read_schema.dump(new_tier)}, message="Subscription tier created successfully")
         
         except ValidationError as ve:
+            db.session.rollback()
             return bad_request(message="Validation Error", errors=ve.messages)
-
+        
         except Exception as e:
             db.session.rollback()
             return server_error(message=f"Error creating subscription tier: {e}")
@@ -59,8 +60,10 @@ def Subscription_tier_id(id):
 
             return ok(data={"subscription_tier": subscription_tier_read_schema.dump(tier)}, message="Subscription tier retrieved successfully")
         
+        except ValidationError as ve:
+            return bad_request(message="Validation Error", errors=ve.messages)
+
         except Exception as e:
-            db.session.rollback()
             return server_error(message=f"Error getting subscription tier: {e}")
 
     elif request.method == 'PUT' or request.method == 'PATCH':
@@ -102,6 +105,10 @@ def Subscription_tier_id(id):
 
             db.session.commit()
             return ok(message="Subscription tier archived successfully")
+        
+        except ValidationError as ve:
+            db.session.rollback()
+            return bad_request(message="Validation Error", errors=ve.messages)
 
         except Exception as e:
             db.session.rollback()

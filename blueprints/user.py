@@ -28,12 +28,11 @@ def UsersFirst():
             full_name = data['full_name']
             role = data['role']
 
-            if not all([email, password, full_name]):
-                return bad_request(message="Missing required fields: email, password, full_name")
+            if not all([email, password, full_name, role]):
+                return bad_request(message="Missing required fields: email, password, full_name, role")
             
             if role not in ['employee', 'admin']:
                 return bad_request(message="Role must be 'employee' or 'admin'")
-
             new_user = User(
                 email=email,
                 full_name=full_name,
