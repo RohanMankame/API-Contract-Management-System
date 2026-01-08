@@ -23,14 +23,18 @@ def create_app():
     load_dotenv()
     CORS(app)
 
+    database_url = os.environ.get('DATABASE_URL')
+    jwt_secret_key = os.environ.get('JWT_SECRET_KEY')
+
+
     # Database and Marshmallow initialization
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     ma.init_app(app)
 
     # JWT Manager setup
-    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+    app.config['JWT_SECRET_KEY'] = jwt_secret_key
     jwt = JWTManager(app)
 
     # Swagger UI setup
