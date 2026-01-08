@@ -14,7 +14,9 @@ class Subscription(IdMixin, AuditMixin, OperatorMixin, db.Model):
     strategy = db.Column(db.Enum("Pick", "Fill", "Flat", "Fixed", name="strategy_enum"),nullable=False)
     is_archived = db.Column(db.Boolean, default=False)
 
-    tiers = db.relationship('SubscriptionTier', backref='subscription', lazy=True)
+    #tiers = db.relationship('SubscriptionTier', backref='subscription', lazy=True)
+    # updated
+    rate_cards = db.relationship('RateCard', back_populates='subscription', cascade='all, delete-orphan', lazy=True)
 
     def __repr__(self):
         return f'Subscription_ID: {self.id}, Contract_ID: {self.contract_id}, Product_ID: {self.product_id}'

@@ -15,13 +15,10 @@ class SubscriptionTierReadSchema(ma.SQLAlchemyAutoSchema):
 
 class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
 
-    subscription_id = ma.auto_field(required=True)
+    rate_card_id = ma.auto_field(required=True)
     min_calls = ma.auto_field(required=True)
     max_calls = ma.auto_field(required=True)
-    start_date = ma.auto_field(required=True)
-    end_date = ma.auto_field(required=True)
-    base_price = ma.auto_field(required=True)
-    price_per_tier = ma.auto_field(required=True)
+    unit_price = ma.auto_field(required=True)
     is_archived = ma.auto_field()
     
     class Meta:
@@ -29,42 +26,12 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
 
     @validates_schema
     def validate_dependency(self, data, **kwargs):
-        # check min is less than or equal to max
-        # note: -1 for max_calls means infinite
-        if data["min_calls"] > data["max_calls"] and data["max_calls"] != -1:
-            raise ValidationError({"min_calls": "min_calls must be <= max_calls"})
-        
-        # check subscription exists
-        subscription_id = data.get("subscription_id")
-        if subscription_id:
-            try:
-                id_obj = UUID(subscription_id) if isinstance(subscription_id, str) else subscription_id
-            except Exception:
-                raise ValidationError({"error": "Invalid UUID format"})
-            if not db.session.get(Subscription, id_obj):
-                raise ValidationError({"error": "Subscription does not exist"})
-    
-    @validates_schema
-    def validate_dates(self, data, **kwargs):
-        s = data.get("start_date")
-        e = data.get("end_date")
-        if s is not None and e is not None:
-            
-            if isinstance(s, str):
-                try:
-                    s = datetime.fromisoformat(s)
-                except Exception:
-                    raise ValidationError({"error": "Invalid start_date format; expected ISO-8601."})
-            if isinstance(e, str):
-                try:
-                    e = datetime.fromisoformat(e)
-                except Exception:
-                    raise ValidationError({"error": "Invalid end_date format; expected ISO-8601."})
-            if s >= e:
-                raise ValidationError({"error": "start_date must be before end_date."})
-
-
-
+        rate_card_id = data.get('rate_card_id')
+        if rate_card_id:
+            rate_card = db.session.get(Subscription, UUID(rate_card_id))
+            if not rate_card:
+                raise ValidationError('rate_card_id does not exist.')
+       
 
 
 subscription_tier_read_schema = SubscriptionTierReadSchema()

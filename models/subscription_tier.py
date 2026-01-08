@@ -7,11 +7,16 @@ class SubscriptionTier(IdMixin, AuditMixin, OperatorMixin, DurationMixin, db.Mod
     tiers for subscriptions
     '''
     __tablename__ = "subscription_tier"
-    subscription_id = db.Column(UUID(as_uuid=True), db.ForeignKey('subscription.id'), nullable=False)
-    min_calls = db.Column(db.Integer, nullable=False)
-    max_calls = db.Column(db.Integer, nullable=False)
-    base_price = db.Column(db.Numeric(10, 2), nullable=True) 
-    price_per_tier = db.Column(db.Numeric(10, 2), nullable=True)
+    rate_card_id = db.Column(UUID(as_uuid=True), db.ForeignKey('rate_card.id'), nullable=False)
+    #subscription_id = db.Column(UUID(as_uuid=True), db.ForeignKey('subscription.id'), nullable=False)
+    #min_calls = db.Column(db.Integer, nullable=False)
+    #max_calls = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=True) 
+    #price_per_tier = db.Column(db.Numeric(10, 2), nullable=True)
+
+
+    
+
     def __repr__(self):
         return f'Tier_id: {self.id}, sub_id:{self.subscription_id}, calls:{self.min_calls}-{self.max_calls}'
 
