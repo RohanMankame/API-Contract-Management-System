@@ -103,3 +103,22 @@ def Rate_card_id(id):
         except Exception as e:
             db.session.rollback()
             return server_error(message=f"Error archiving rate card: {e}")
+        
+
+@rate_card_bp.route('/rate-cards/<id>/subscription-tiers', methods=['GET'])
+@jwt_required()
+def Rate_card_subscription_tiers(id):
+    try:
+        id_obj = UUID(id) if isinstance(id, str) else id
+        rate_card_item = db.session.query(rate_card).filter_by(id=id_obj, is_archived=False).first()
+
+        if not rate_card_item:
+            return not_found(message="Rate card not found")
+
+        subscription_tiers = rate_card_item.subscription_tiers.filter_by(is_archived=False).all()
+
+        return ok(data={"subscription_tiers": rate_cards_read_schema.dump(subscription_tiers)}, message=f"Subscription tiers for id:{id} retrieved successfully")
+
+    except Exception as e:
+        db.session.rollback()
+        return server_error(message=f"Error fetching subscription tiers for rate card: {e}")
