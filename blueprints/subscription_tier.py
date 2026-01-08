@@ -24,8 +24,8 @@ def Subscription_tier():
 
             db.session.add(new_tier)
             db.session.commit()
-
             return created(data={"subscription_tier": subscription_tier_read_schema.dump(new_tier)}, message="Subscription tier created successfully")
+        
         except ValidationError as ve:
             return bad_request(message="Validation Error", errors=ve.messages)
 

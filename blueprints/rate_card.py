@@ -23,8 +23,8 @@ def Rate_card():
 
             db.session.add(new_rate_card)
             db.session.commit()
-
             return created(data={"rate_card": rate_card_read_schema.dump(new_rate_card)}, message="Rate card created successfully")
+        
         except ValidationError as ve:
             return bad_request(message="Validation Error", errors=ve.messages)
 
@@ -41,3 +41,65 @@ def Rate_card():
         except Exception as e:
             db.session.rollback()
             return server_error(message=f"Error fetching rate cards: {e}")
+        
+
+@rate_card_bp.route('/rate-cards/<id>', methods=['GET','PUT','PATCH','DELETE'])
+@jwt_required()
+def Rate_card_id(id):
+    current_user_id = get_jwt_identity()
+
+    if request.method == 'GET':
+        try:
+            id_obj = UUID(id) if isinstance(id, str) else id
+            rate_card_item = db.session.query(rate_card).filter_by(id=id_obj, is_archived=False).first()
+            
+            if not rate_card_item:
+                return not_found(message="Rate card not found")
+
+            return ok(data={"rate_card": rate_card_read_schema.dump(rate_card_item)}, message="Rate card retrieved successfully")
+        except Exception as e:
+            db.session.rollback()
+            return server_error(message=f"Error fetching rate card: {e}")
+        
+    elif request.method in ['PUT', 'PATCH']:
+        try:
+            id_obj = UUID(id) if isinstance(id, str) else id
+            rate_card_item = db.session.query(rate_card).filter_by(id=id_obj, is_archived=False).first()
+
+            if not rate_card_item:
+                return not_found(message="Rate card not found")
+
+            data = request.get_json()
+            validated = rate_card_write_schema.load(data, partial=(request.method == 'PATCH'))
+
+            for key, value in validated.items():
+                setattr(rate_card_item, key, value)
+            rate_card_item.updated_by = current_user_id
+
+            db.session.commit()
+            return ok(data={"rate_card": rate_card_read_schema.dump(rate_card_item)}, message="Rate card updated successfully")
+
+        except ValidationError as ve:
+            return bad_request(message="Validation Error", errors=ve.messages)
+
+        except Exception as e:
+            db.session.rollback()
+            return server_error(message=f"Error updating rate card: {e}")
+
+    elif request.method == 'DELETE':
+        try:
+            id_obj = UUID(id) if isinstance(id, str) else id
+            rate_card_item = db.session.query(rate_card).filter_by(id=id_obj, is_archived=False).first()
+
+            if not rate_card_item:
+                return not_found(message="Rate card not found")
+
+            rate_card_item.is_archived = True
+            rate_card_item.updated_by = current_user_id
+
+            db.session.commit()
+            return ok(message="Rate card archived successfully")
+
+        except Exception as e:
+            db.session.rollback()
+            return server_error(message=f"Error archiving rate card: {e}")
