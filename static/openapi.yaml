@@ -20,7 +20,7 @@ tags:
   - name: subscriptions
     description: Subscription management
   - name: rate_cards
-    description: Rate Card management (new)
+    description: Rate Card management
   - name: subscription_tiers
     description: Subscription Tier management
 
@@ -176,6 +176,8 @@ components:
           type: string
           enum: [Pick, Fill, Flat, Fixed]
         is_archived: { type: boolean }
+        product:
+          $ref: '#/components/schemas/Product'
         tiers:
           type: array
           items:
@@ -194,7 +196,7 @@ components:
           type: string
           enum: [Pick, Fill, Flat, Fixed]
 
-    # RateCard (new)
+    # RateCard
     RateCard:
       type: object
       properties:
@@ -218,7 +220,7 @@ components:
         start_date: { type: string, format: date-time }
         end_date: { type: string, format: date-time }
 
-    # SubscriptionTier (now belongs to RateCard)
+    # SubscriptionTier
     SubscriptionTier:
       type: object
       properties:
@@ -250,13 +252,7 @@ components:
         email: { type: string }
         password: { type: string }
 
-    LoginResponse:
-      type: object
-      properties:
-        token: { type: string }
-
 paths:
-
   /login:
     post:
       tags: [auth]
@@ -273,19 +269,44 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success: { type: boolean }
-                  message: { type: string }
-                  data:
-                    type: object
-                    properties:
-                      token:
-                        type: string
-                example:
-                  success: true
-                  message: "Login successful"
-                  data: { token: "eyJ..." }
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                loginSuccess:
+                  value:
+                    success: true
+                    message: "Login successful"
+                    data:
+                      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    errors: null
+                    meta: null
+
+  /protected:
+    get:
+      tags: [auth]
+      summary: Access protected endpoint (requires JWT)
+      description: Returns the current authenticated user; requires Authorization header with a valid JWT.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Protected endpoint accessed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                protectedSuccess:
+                  value:
+                    success: true
+                    message: "Protected endpoint accessed successfully"
+                    data:
+                      user:
+                        id: "11111111-1111-1111-1111-111111111111"
+                        email: "admin@example.com"
+                        full_name: "Admin User"
+                        role: "admin"
+                    errors: null
+                    meta: null
 
   /users-first:
     post:
@@ -304,6 +325,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Envelope'
+              examples:
+                createdFirstUser:
+                  value:
+                    success: true
+                    message: "First user created successfully"
+                    data:
+                      user_id: "11111111-1111-1111-1111-111111111111"
+                    errors: null
+                    meta: null
 
   /users:
     get:
@@ -317,6 +347,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Envelope'
+              examples:
+                usersList:
+                  value:
+                    success: true
+                    message: "Users retrieved successfully"
+                    data:
+                      users:
+                        - id: "11111111-1111-1111-1111-111111111111"
+                          email: "admin@example.com"
+                          full_name: "Admin User"
+                          role: "admin"
+                          is_archived: false
+                        - id: "22222222-2222-2222-2222-222222222222"
+                          email: "employee@example.com"
+                          full_name: "Employee One"
+                          role: "employee"
+                          is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [users]
       summary: Create a user (admin only)
@@ -325,13 +374,29 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateUser' }
+            schema:
+              $ref: '#/components/schemas/CreateUser'
       responses:
         '201':
           description: User created
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                userCreated:
+                  value:
+                    success: true
+                    message: "User created successfully"
+                    data:
+                      user:
+                        id: "33333333-3333-3333-3333-333333333333"
+                        email: "new@example.com"
+                        full_name: "New User"
+                        role: "employee"
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /users/{id}:
     get:
@@ -345,7 +410,22 @@ paths:
           description: User returned
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                userGet:
+                  value:
+                    success: true
+                    message: "User retrieved successfully"
+                    data:
+                      user:
+                        id: "11111111-1111-1111-1111-111111111111"
+                        email: "admin@example.com"
+                        full_name: "Admin User"
+                        role: "admin"
+                        is_archived: false
+                    errors: null
+                    meta: null
     put:
       tags: [users]
       summary: Update user
@@ -355,13 +435,29 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateUser' }
+            schema:
+              $ref: '#/components/schemas/CreateUser'
       responses:
         '200':
           description: User updated
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                userUpdated:
+                  value:
+                    success: true
+                    message: "User updated successfully"
+                    data:
+                      user:
+                        id: "11111111-1111-1111-1111-111111111111"
+                        email: "admin@updated.com"
+                        full_name: "Admin User"
+                        role: "admin"
+                        is_archived: false
+                    errors: null
+                    meta: null
     delete:
       tags: [users]
       summary: Archive (soft delete) a user
@@ -373,7 +469,20 @@ paths:
           description: User archived
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                userArchived:
+                  value:
+                    success: true
+                    message: "User archived successfully"
+                    data:
+                      user:
+                        id: "11111111-1111-1111-1111-111111111111"
+                        email: "admin@example.com"
+                        is_archived: true
+                    errors: null
+                    meta: null
 
   /clients:
     get:
@@ -382,9 +491,26 @@ paths:
       security: [{ bearerAuth: [] }]
       responses:
         '200':
+          description: Clients retrieved
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientsList:
+                  value:
+                    success: true
+                    message: "Clients retrieved successfully"
+                    data:
+                      clients:
+                        - id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                          company_name: "Acme Corp"
+                          email: "contact@acme.example"
+                          phone_number: "+1-555-0100"
+                          address: "123 Main St"
+                          is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [clients]
       summary: Create a client
@@ -392,49 +518,28 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateClient' }
+            schema:
+              $ref: '#/components/schemas/CreateClient'
       responses:
         '201':
+          description: Client created
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
-
-  /clients/{id}:
-    get:
-      tags: [clients]
-      summary: Get client
-      security: [{ bearerAuth: [] }]
-      parameters: [ { $ref: '#/components/parameters/idParam' } ]
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
-    put:
-      tags: [clients]
-      summary: Update client
-      security: [{ bearerAuth: [] }]
-      parameters: [{ $ref: '#/components/parameters/idParam' }]
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CreateClient' }
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
-    delete:
-      tags: [clients]
-      summary: Archive client
-      security: [{ bearerAuth: [] }]
-      parameters:
-        - $ref: '#/components/parameters/idParam'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientCreated:
+                  value:
+                    success: true
+                    message: "Client created successfully"
+                    data:
+                      client:
+                        id: "aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2"
+                        company_name: "NewCo LLC"
+                        email: "info@newco.example"
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /products:
     get:
@@ -443,9 +548,28 @@ paths:
       security: [{ bearerAuth: [] }]
       responses:
         '200':
+          description: Products retrieved
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                productsList:
+                  value:
+                    success: true
+                    message: "Products retrieved successfully"
+                    data:
+                      products:
+                        - id: "p1111111-1111-1111-1111-111111111111"
+                          api_name: "Billing API"
+                          description: "Endpoints for billing and invoicing"
+                          is_archived: false
+                        - id: "p2222222-2222-2222-2222-222222222222"
+                          api_name: "Reporting API"
+                          description: "Usage and reporting endpoints"
+                          is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [products]
       summary: Create product
@@ -453,12 +577,33 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateProduct' }
+            schema:
+              $ref: '#/components/schemas/CreateProduct'
+            examples:
+              createProductExample:
+                value:
+                  api_name: "New API"
+                  description: "A new API product"
       responses:
         '201':
+          description: Product created
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Envelope' }
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                productCreated:
+                  value:
+                    success: true
+                    message: "Product created successfully"
+                    data:
+                      product:
+                        id: "p3333333-3333-3333-3333-333333333333"
+                        api_name: "New API"
+                        description: "A new API product"
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /products/{id}:
     get:
@@ -467,7 +612,25 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Product retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                productGet:
+                  value:
+                    success: true
+                    message: "Product retrieved successfully"
+                    data:
+                      product:
+                        id: "p1111111-1111-1111-1111-111111111111"
+                        api_name: "Billing API"
+                        description: "Endpoints for billing and invoicing"
+                        is_archived: false
+                    errors: null
+                    meta: null
     put:
       tags: [products]
       summary: Update product
@@ -476,16 +639,51 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateProduct' }
+            schema:
+              $ref: '#/components/schemas/CreateProduct'
       responses:
-        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                productUpdated:
+                  value:
+                    success: true
+                    message: "Product updated successfully"
+                    data:
+                      product:
+                        id: "p1111111-1111-1111-1111-111111111111"
+                        api_name: "Billing API"
+                        description: "Updated description"
+                        is_archived: false
+                    errors: null
+                    meta: null
     delete:
       tags: [products]
       summary: Archive product
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Product archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                productArchived:
+                  value:
+                    success: true
+                    message: "Product has been archived successfully"
+                    data:
+                      product:
+                        id: "p1111111-1111-1111-1111-111111111111"
+                        is_archived: true
+                    errors: null
+                    meta: null
 
   /contracts:
     get:
@@ -493,7 +691,27 @@ paths:
       summary: List contracts
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Contracts retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractsList:
+                  value:
+                    success: true
+                    message: "Contracts retrieved successfully"
+                    data:
+                      contracts:
+                        - id: "c1111111-1111-1111-1111-111111111111"
+                          client_id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                          contract_name: "Acme Annual"
+                          start_date: "2026-01-01T00:00:00Z"
+                          end_date: "2026-12-31T23:59:59Z"
+                          is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [contracts]
       summary: Create contract
@@ -501,9 +719,30 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateContract' }
+            schema:
+              $ref: '#/components/schemas/CreateContract'
       responses:
-        '201': { description: 'Created', content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '201':
+          description: Contract created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractCreated:
+                  value:
+                    success: true
+                    message: "Contract created successfully"
+                    data:
+                      contract:
+                        id: "c2222222-2222-2222-2222-222222222222"
+                        client_id: "aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2"
+                        contract_name: "NewCo 2026"
+                        start_date: "2026-02-01T00:00:00Z"
+                        end_date: "2027-01-31T23:59:59Z"
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /contracts/{id}:
     get:
@@ -512,25 +751,37 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
-    put:
-      tags: [contracts]
-      summary: Update contract
-      security: [{ bearerAuth: [] }]
-      parameters: [ { $ref: '#/components/parameters/idParam' } ]
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CreateContract' }
-      responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
-    delete:
-      tags: [contracts]
-      summary: Archive contract
-      security: [{ bearerAuth: [] }]
-      parameters: [ { $ref: '#/components/parameters/idParam' } ]
-      responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Contract retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractGet:
+                  value:
+                    success: true
+                    message: "Contract retrieved successfully"
+                    data:
+                      contract:
+                        id: "c1111111-1111-1111-1111-111111111111"
+                        client_id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                        contract_name: "Acme Annual"
+                        start_date: "2026-01-01T00:00:00Z"
+                        end_date: "2026-12-31T23:59:59Z"
+                        is_archived: false
+                        subscriptions:
+                          - id: "s1111111-1111-1111-1111-111111111111"
+                            contract_id: "c1111111-1111-1111-1111-111111111111"
+                            product_id: "p1111111-1111-1111-1111-111111111111"
+                            pricing_type: "Variable"
+                            strategy: "Fill"
+                            is_archived: false
+                            product:
+                              id: "p1111111-1111-1111-1111-111111111111"
+                              api_name: "Billing API"
+                    errors: null
+                    meta: null
 
   /contracts/{id}/subscriptions:
     get:
@@ -539,7 +790,27 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscriptions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionsForContract:
+                  value:
+                    success: true
+                    message: "Subscriptions retrieved successfully"
+                    data:
+                      subscriptions:
+                        - id: "s1111111-1111-1111-1111-111111111111"
+                          contract_id: "c1111111-1111-1111-1111-111111111111"
+                          product_id: "p1111111-1111-1111-1111-111111111111"
+                          pricing_type: "Variable"
+                          strategy: "Fill"
+                          is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [contracts]
       summary: Create subscription under a contract
@@ -549,9 +820,30 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSubscription' }
+            schema:
+              $ref: '#/components/schemas/CreateSubscription'
       responses:
-        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '201':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionCreated:
+                  value:
+                    success: true
+                    message: "Subscription created successfully"
+                    data:
+                      subscription:
+                        id: "s2222222-2222-2222-2222-222222222222"
+                        contract_id: "c1111111-1111-1111-1111-111111111111"
+                        product_id: "p2222222-2222-2222-2222-222222222222"
+                        pricing_type: "Fixed"
+                        strategy: "Fixed"
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /subscriptions:
     get:
@@ -559,7 +851,36 @@ paths:
       summary: List subscriptions
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscriptions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionsList:
+                  value:
+                    success: true
+                    message: "Subscriptions fetched successfully"
+                    data:
+                      subscriptions:
+                        - id: "s1111111-1111-1111-1111-111111111111"
+                          contract_id: "c1111111-1111-1111-1111-111111111111"
+                          product_id: "p1111111-1111-1111-1111-111111111111"
+                          pricing_type: "Variable"
+                          strategy: "Fill"
+                          product:
+                            id: "p1111111-1111-1111-1111-111111111111"
+                            api_name: "Billing API"
+                          tiers:
+                            - id: "t11111111-1111-1111-1111-111111111111"
+                              rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                              min_calls: 0
+                              max_calls: 100
+                              unit_price: 12.50
+                              is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [subscriptions]
       summary: Create subscription
@@ -567,9 +888,30 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSubscription' }
+            schema:
+              $ref: '#/components/schemas/CreateSubscription'
       responses:
-        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '201':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionCreated:
+                  value:
+                    success: true
+                    message: "Subscription created successfully"
+                    data:
+                      subscription:
+                        id: "s3333333-3333-3333-3333-333333333333"
+                        contract_id: "c1111111-1111-1111-1111-111111111111"
+                        product_id: "p3333333-3333-3333-3333-333333333333"
+                        pricing_type: "Variable"
+                        strategy: "Pick"
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /subscriptions/{id}:
     get:
@@ -578,7 +920,35 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionGet:
+                  value:
+                    success: true
+                    message: "Subscription fetched successfully"
+                    data:
+                      subscription:
+                        id: "s1111111-1111-1111-1111-111111111111"
+                        contract_id: "c1111111-1111-1111-1111-111111111111"
+                        product:
+                          id: "p1111111-1111-1111-1111-111111111111"
+                          api_name: "Billing API"
+                        pricing_type: "Variable"
+                        strategy: "Fill"
+                        tiers:
+                          - id: "t11111111-1111-1111-1111-111111111111"
+                            rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                            min_calls: 0
+                            max_calls: 100
+                            unit_price: 12.50
+                            is_archived: false
+                    errors: null
+                    meta: null
     put:
       tags: [subscriptions]
       summary: Update subscription
@@ -587,16 +957,50 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSubscription' }
+            schema:
+              $ref: '#/components/schemas/CreateSubscription'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionUpdated:
+                  value:
+                    success: true
+                    message: "Subscription updated successfully"
+                    data:
+                      subscription:
+                        id: "s1111111-1111-1111-1111-111111111111"
+                        pricing_type: "Fixed"
+                        strategy: "Fixed"
+                    errors: null
+                    meta: null
     delete:
       tags: [subscriptions]
       summary: Archive subscription
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionArchived:
+                  value:
+                    success: true
+                    message: "Subscription has been archived successfully"
+                    data:
+                      subscription:
+                        id: "s1111111-1111-1111-1111-111111111111"
+                        is_archived: true
+                    errors: null
+                    meta: null
 
   /subscriptions/{id}/tiers:
     get:
@@ -605,7 +1009,27 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription tiers retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionTiersForSubscription:
+                  value:
+                    success: true
+                    message: "Subscription tiers fetched successfully"
+                    data:
+                      tiers:
+                        - id: "t11111111-1111-1111-1111-111111111111"
+                          rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                          min_calls: 0
+                          max_calls: 100
+                          unit_price: 12.50
+                          is_archived: false
+                    errors: null
+                    meta: null
 
   /rate-cards:
     get:
@@ -613,7 +1037,32 @@ paths:
       summary: List rate cards
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Rate cards retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                rateCardsList:
+                  value:
+                    success: true
+                    message: "Rate cards retrieved successfully"
+                    data:
+                      rate_cards:
+                        - id: "rc111111-1111-1111-1111-111111111111"
+                          subscription_id: "s1111111-1111-1111-1111-111111111111"
+                          start_date: "2026-01-01T00:00:00Z"
+                          end_date: "2026-12-31T23:59:59Z"
+                          tiers:
+                            - id: "t11111111-1111-1111-1111-111111111111"
+                              rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                              min_calls: 0
+                              max_calls: 100
+                              unit_price: 12.50
+                              is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [rate_cards]
       summary: Create a rate card (belongs to subscription)
@@ -621,9 +1070,35 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateRateCard' }
+            schema:
+              $ref: '#/components/schemas/CreateRateCard'
+            examples:
+              createRateCard:
+                value:
+                  subscription_id: "s1111111-1111-1111-1111-111111111111"
+                  start_date: "2026-01-01T00:00:00Z"
+                  end_date: "2026-12-31T23:59:59Z"
       responses:
-        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '201':
+          description: Rate card created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                rateCardCreated:
+                  value:
+                    success: true
+                    message: "Rate card created successfully"
+                    data:
+                      rate_card:
+                        id: "rc222222-2222-2222-2222-222222222222"
+                        subscription_id: "s1111111-1111-1111-1111-111111111111"
+                        start_date: "2026-02-01T00:00:00Z"
+                        end_date: "2026-08-31T23:59:59Z"
+                        tiers: []
+                    errors: null
+                    meta: null
 
   /rate-cards/{id}:
     get:
@@ -632,7 +1107,32 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Rate card retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                rateCardGet:
+                  value:
+                    success: true
+                    message: "Rate card retrieved successfully"
+                    data:
+                      rate_card:
+                        id: "rc111111-1111-1111-1111-111111111111"
+                        subscription_id: "s1111111-1111-1111-1111-111111111111"
+                        start_date: "2026-01-01T00:00:00Z"
+                        end_date: "2026-12-31T23:59:59Z"
+                        tiers:
+                          - id: "t11111111-1111-1111-1111-111111111111"
+                            rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                            min_calls: 0
+                            max_calls: 100
+                            unit_price: 12.50
+                            is_archived: false
+                    errors: null
+                    meta: null
     put:
       tags: [rate_cards]
       summary: Update rate card
@@ -641,9 +1141,27 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateRateCard' }
+            schema:
+              $ref: '#/components/schemas/CreateRateCard'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Rate card updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                rateCardUpdated:
+                  value:
+                    success: true
+                    message: "Rate card updated successfully"
+                    data:
+                      rate_card:
+                        id: "rc111111-1111-1111-1111-111111111111"
+                        start_date: "2026-01-01T00:00:00Z"
+                        end_date: "2026-12-31T23:59:59Z"
+                    errors: null
+                    meta: null
     delete:
       tags: [rate_cards]
       summary: Archive rate card (soft-delete) and cascade to child tiers
@@ -651,7 +1169,23 @@ paths:
       parameters:
         - $ref: '#/components/parameters/idParam'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Rate card archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                rateCardArchived:
+                  value:
+                    success: true
+                    message: "Rate card archived successfully"
+                    data:
+                      rate_card:
+                        id: "rc111111-1111-1111-1111-111111111111"
+                        is_archived: true
+                    errors: null
+                    meta: null
 
   /rate-cards/{id}/subscription-tiers:
     get:
@@ -661,7 +1195,27 @@ paths:
       parameters:
         - $ref: '#/components/parameters/idParam'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription tiers for rate card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tiersForRateCard:
+                  value:
+                    success: true
+                    message: "Subscription tiers for rate card retrieved successfully"
+                    data:
+                      subscription_tiers:
+                        - id: "t11111111-1111-1111-1111-111111111111"
+                          rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                          min_calls: 0
+                          max_calls: 100
+                          unit_price: 12.50
+                          is_archived: false
+                    errors: null
+                    meta: null
 
   /subscription-tiers:
     get:
@@ -669,7 +1223,27 @@ paths:
       summary: List subscription tiers
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription tiers retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tiersList:
+                  value:
+                    success: true
+                    message: "Subscription tiers retrieved successfully"
+                    data:
+                      subscription_tiers:
+                        - id: "t11111111-1111-1111-1111-111111111111"
+                          rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                          min_calls: 0
+                          max_calls: 100
+                          unit_price: 12.50
+                          is_archived: false
+                    errors: null
+                    meta: null
     post:
       tags: [subscription_tiers]
       summary: Create subscription tier under a rate card
@@ -677,9 +1251,37 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSubscriptionTier' }
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionTier'
+            examples:
+              createTierExample:
+                value:
+                  rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                  min_calls: 0
+                  max_calls: 100
+                  unit_price: 12.50
       responses:
-        '201': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '201':
+          description: Subscription tier created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tierCreated:
+                  value:
+                    success: true
+                    message: "Subscription tier created successfully"
+                    data:
+                      subscription_tier:
+                        id: "t22222222-2222-2222-2222-222222222222"
+                        rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                        min_calls: 0
+                        max_calls: 100
+                        unit_price: 15.00
+                        is_archived: false
+                    errors: null
+                    meta: null
 
   /subscription-tiers/{id}:
     get:
@@ -689,7 +1291,27 @@ paths:
       parameters:
         - $ref: '#/components/parameters/idParam'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription tier retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tierGet:
+                  value:
+                    success: true
+                    message: "Subscription tier retrieved successfully"
+                    data:
+                      subscription_tier:
+                        id: "t11111111-1111-1111-1111-111111111111"
+                        rate_card_id: "rc111111-1111-1111-1111-111111111111"
+                        min_calls: 0
+                        max_calls: 100
+                        unit_price: 12.50
+                        is_archived: false
+                    errors: null
+                    meta: null
     put:
       tags: [subscription_tiers]
       summary: Update subscription tier
@@ -699,9 +1321,29 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSubscriptionTier' }
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionTier'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription tier updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tierUpdated:
+                  value:
+                    success: true
+                    message: "Subscription tier updated successfully"
+                    data:
+                      subscription_tier:
+                        id: "t11111111-1111-1111-1111-111111111111"
+                        min_calls: 10
+                        max_calls: 200
+                        unit_price: 10.00
+                        is_archived: false
+                    errors: null
+                    meta: null
     delete:
       tags: [subscription_tiers]
       summary: Archive subscription tier (soft-delete)
@@ -709,7 +1351,23 @@ paths:
       parameters:
         - $ref: '#/components/parameters/idParam'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription tier archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tierArchived:
+                  value:
+                    success: true
+                    message: "Subscription tier archived successfully"
+                    data:
+                      subscription_tier:
+                        id: "t11111111-1111-1111-1111-111111111111"
+                        is_archived: true
+                    errors: null
+                    meta: null
 
   /subscription-tiers/{id}/subscriptions:
     get:
@@ -719,7 +1377,28 @@ paths:
       parameters:
         - $ref: '#/components/parameters/idParam'
       responses:
-        '200': { content: { 'application/json': { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '200':
+          description: Subscription for tier retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tierSubscription:
+                  value:
+                    success: true
+                    message: "Subscription retrieved successfully"
+                    data:
+                      subscription:
+                        id: "s1111111-1111-1111-1111-111111111111"
+                        contract_id: "c1111111-1111-1111-1111-111111111111"
+                        product:
+                          id: "p1111111-1111-1111-1111-111111111111"
+                          api_name: "Billing API"
+                        pricing_type: "Variable"
+                        strategy: "Fill"
+                    errors: null
+                    meta: null
 
 security:
   - bearerAuth: []
