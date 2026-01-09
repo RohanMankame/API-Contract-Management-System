@@ -428,7 +428,7 @@ paths:
                     meta: null
     put:
       tags: [users]
-      summary: Update user
+      summary: Update user (replace)
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: '#/components/parameters/idParam'
@@ -437,6 +437,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateUser'
+            examples:
+              userPutExample:
+                value:
+                  email: "admin@updated.com"
+                  password: "newstrongpassword"
+                  full_name: "Admin User"
+                  role: "admin"
       responses:
         '200':
           description: User updated
@@ -456,6 +463,39 @@ paths:
                         full_name: "Admin User"
                         role: "admin"
                         is_archived: false
+                    errors: null
+                    meta: null
+    patch:
+      tags: [users]
+      summary: Update user (partial)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              userPatchExample:
+                value:
+                  full_name: "Admin User Updated"
+      responses:
+        '200':
+          description: User partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                userPatched:
+                  value:
+                    success: true
+                    message: "User updated successfully"
+                    data:
+                      user:
+                        id: "11111111-1111-1111-1111-111111111111"
+                        full_name: "Admin User Updated"
                     errors: null
                     meta: null
     delete:
@@ -520,6 +560,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateClient'
+            examples:
+              createClientExample:
+                value:
+                  company_name: "NewCo LLC"
+                  email: "info@newco.example"
+                  phone_number: "+1-555-0123"
+                  address: "456 Market St"
       responses:
         '201':
           description: Client created
@@ -538,6 +585,158 @@ paths:
                         company_name: "NewCo LLC"
                         email: "info@newco.example"
                         is_archived: false
+                    errors: null
+                    meta: null
+
+  /clients/{id}:
+    get:
+      tags: [clients]
+      summary: Get client by id
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: Client retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientGet:
+                  value:
+                    success: true
+                    message: "Client retrieved successfully"
+                    data:
+                      client:
+                        id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                        company_name: "Acme Corp"
+                        email: "contact@acme.example"
+                        phone_number: "+1-555-0100"
+                        address: "123 Main St"
+                        is_archived: false
+                    errors: null
+                    meta: null
+    put:
+      tags: [clients]
+      summary: Update client (replace)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClient'
+            examples:
+              clientPutExample:
+                value:
+                  company_name: "Acme Incorporated"
+                  email: "contact@acme.example"
+                  phone_number: "+1-555-0100"
+                  address: "123 Main St"
+      responses:
+        '200':
+          description: Client updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientUpdated:
+                  value:
+                    success: true
+                    message: "Client updated successfully"
+                    data:
+                      client:
+                        id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                        company_name: "Acme Incorporated"
+                        email: "contact@acme.example"
+                        is_archived: false
+                    errors: null
+                    meta: null
+    patch:
+      tags: [clients]
+      summary: Update client (partial)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              clientPatchExample:
+                value:
+                  phone_number: "+1-555-0200"
+      responses:
+        '200':
+          description: Client partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientPatched:
+                  value:
+                    success: true
+                    message: "Client updated successfully"
+                    data:
+                      client:
+                        id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                        phone_number: "+1-555-0200"
+                    errors: null
+                    meta: null
+    delete:
+      tags: [clients]
+      summary: Archive client
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: Client archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientArchived:
+                  value:
+                    success: true
+                    message: "Client archived successfully"
+                    data:
+                      client:
+                        id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
+                        is_archived: true
+                    errors: null
+                    meta: null
+
+  /clients/{id}/contracts:
+    get:
+      tags: [clients]
+      summary: Get contracts for a client
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: Contracts retrieved for client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                clientContracts:
+                  value:
+                    success: true
+                    message: "Contracts retrieved successfully"
+                    data:
+                      contracts:
+                        - id: "c1111111-1111-1111-1111-111111111111"
+                          contract_name: "Acme Annual"
+                          client_id: "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"
                     errors: null
                     meta: null
 
@@ -633,7 +832,7 @@ paths:
                     meta: null
     put:
       tags: [products]
-      summary: Update product
+      summary: Update product (replace)
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       requestBody:
@@ -659,6 +858,38 @@ paths:
                         api_name: "Billing API"
                         description: "Updated description"
                         is_archived: false
+                    errors: null
+                    meta: null
+    patch:
+      tags: [products]
+      summary: Update product (partial)
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              productPatchExample:
+                value:
+                  description: "Updated description"
+      responses:
+        '200':
+          description: Product partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                productPatched:
+                  value:
+                    success: true
+                    message: "Product updated successfully"
+                    data:
+                      product:
+                        id: "p1111111-1111-1111-1111-111111111111"
+                        description: "Updated description"
                     errors: null
                     meta: null
     delete:
@@ -782,6 +1013,115 @@ paths:
                               api_name: "Billing API"
                     errors: null
                     meta: null
+    put:
+      tags: [contracts]
+      summary: Update contract (replace)
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContract'
+      responses:
+        '200':
+          description: Contract updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractUpdated:
+                  value:
+                    success: true
+                    message: "Contract updated successfully"
+                    data:
+                      contract:
+                        id: "c1111111-1111-1111-1111-111111111111"
+                        contract_name: "Acme Annual (updated)"
+                    errors: null
+                    meta: null
+    patch:
+      tags: [contracts]
+      summary: Update contract (partial)
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              contractPatchExample:
+                value:
+                  contract_name: "Acme Annual (Q2 update)"
+      responses:
+        '200':
+          description: Contract partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractPatched:
+                  value:
+                    success: true
+                    message: "Contract updated successfully"
+                    data:
+                      contract:
+                        id: "c1111111-1111-1111-1111-111111111111"
+                        contract_name: "Acme Annual (Q2 update)"
+                    errors: null
+                    meta: null
+    delete:
+      tags: [contracts]
+      summary: Archive contract
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      responses:
+        '200':
+          description: Contract archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractArchived:
+                  value:
+                    success: true
+                    message: "Contract archived successfully"
+                    data:
+                      contract:
+                        id: "c1111111-1111-1111-1111-111111111111"
+                        is_archived: true
+                    errors: null
+                    meta: null
+
+  /contracts/{id}/product:
+    get:
+      tags: [contracts]
+      summary: Get product for a contract
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: Product for contract
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                contractProduct:
+                  value:
+                    success: true
+                    message: "Product retrieved successfully"
+                    data:
+                      product:
+                        id: "p1111111-1111-1111-1111-111111111111"
+                        api_name: "Billing API"
+                    errors: null
+                    meta: null
 
   /contracts/{id}/subscriptions:
     get:
@@ -805,10 +1145,6 @@ paths:
                       subscriptions:
                         - id: "s1111111-1111-1111-1111-111111111111"
                           contract_id: "c1111111-1111-1111-1111-111111111111"
-                          product_id: "p1111111-1111-1111-1111-111111111111"
-                          pricing_type: "Variable"
-                          strategy: "Fill"
-                          is_archived: false
                     errors: null
                     meta: null
     post:
@@ -951,7 +1287,7 @@ paths:
                     meta: null
     put:
       tags: [subscriptions]
-      summary: Update subscription
+      summary: Update subscription (replace)
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       requestBody:
@@ -976,6 +1312,38 @@ paths:
                         id: "s1111111-1111-1111-1111-111111111111"
                         pricing_type: "Fixed"
                         strategy: "Fixed"
+                    errors: null
+                    meta: null
+    patch:
+      tags: [subscriptions]
+      summary: Update subscription (partial)
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              subscriptionPatchExample:
+                value:
+                  strategy: "Pick"
+      responses:
+        '200':
+          description: Subscription partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                subscriptionPatched:
+                  value:
+                    success: true
+                    message: "Subscription updated successfully"
+                    data:
+                      subscription:
+                        id: "s1111111-1111-1111-1111-111111111111"
+                        strategy: "Pick"
                     errors: null
                     meta: null
     delete:
@@ -1135,7 +1503,7 @@ paths:
                     meta: null
     put:
       tags: [rate_cards]
-      summary: Update rate card
+      summary: Update rate card (replace)
       security: [{ bearerAuth: [] }]
       parameters: [ { $ref: '#/components/parameters/idParam' } ]
       requestBody:
@@ -1160,6 +1528,38 @@ paths:
                         id: "rc111111-1111-1111-1111-111111111111"
                         start_date: "2026-01-01T00:00:00Z"
                         end_date: "2026-12-31T23:59:59Z"
+                    errors: null
+                    meta: null
+    patch:
+      tags: [rate_cards]
+      summary: Update rate card (partial)
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/idParam' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              rateCardPatchExample:
+                value:
+                  end_date: "2026-10-31T23:59:59Z"
+      responses:
+        '200':
+          description: Rate card partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                rateCardPatched:
+                  value:
+                    success: true
+                    message: "Rate card updated successfully"
+                    data:
+                      rate_card:
+                        id: "rc111111-1111-1111-1111-111111111111"
+                        end_date: "2026-10-31T23:59:59Z"
                     errors: null
                     meta: null
     delete:
@@ -1314,7 +1714,7 @@ paths:
                     meta: null
     put:
       tags: [subscription_tiers]
-      summary: Update subscription tier
+      summary: Update subscription tier (replace)
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: '#/components/parameters/idParam'
@@ -1342,6 +1742,39 @@ paths:
                         max_calls: 200
                         unit_price: 10.00
                         is_archived: false
+                    errors: null
+                    meta: null
+    patch:
+      tags: [subscription_tiers]
+      summary: Update subscription tier (partial)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              tierPatchExample:
+                value:
+                  unit_price: 11.00
+      responses:
+        '200':
+          description: Subscription tier partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+              examples:
+                tierPatched:
+                  value:
+                    success: true
+                    message: "Subscription tier updated successfully"
+                    data:
+                      subscription_tier:
+                        id: "t11111111-1111-1111-1111-111111111111"
+                        unit_price: 11.00
                     errors: null
                     meta: null
     delete:
