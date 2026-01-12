@@ -2,7 +2,7 @@ from app import db
 from models.mixins import IdMixin, AuditMixin, OperatorMixin, DurationMixin
 from sqlalchemy.dialects.postgresql import UUID
 
-class SubscriptionTier(IdMixin, AuditMixin, OperatorMixin, DurationMixin, db.Model):
+class SubscriptionTier(IdMixin, AuditMixin, OperatorMixin, db.Model):
     '''
     tiers for subscriptions
     '''

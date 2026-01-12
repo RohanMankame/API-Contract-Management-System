@@ -6,6 +6,8 @@ from uuid import UUID
 from datetime import datetime
 
 class RateCardReadSchema(ma.SQLAlchemyAutoSchema):
+    tiers = ma.Nested('SubscriptionTierReadSchema', many=True)
+    
     class Meta:
         model = RateCard
         load_instance = True

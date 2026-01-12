@@ -8,7 +8,7 @@ from datetime import datetime
 class SubscriptionReadSchema(ma.SQLAlchemyAutoSchema):
 
     product = ma.Nested('ProductReadSchema')
-    #tiers = ma.Nested('SubscriptionTierReadSchema', many=True)
+    rate_cards = ma.Nested('RateCardReadSchema', many=True)
 
     class Meta:
         model = Subscription
