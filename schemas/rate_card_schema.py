@@ -1,18 +1,24 @@
 from app import ma, db
-from marshmallow import validates_schema, ValidationError
+from marshmallow import validates_schema, ValidationError, fields
 from models.rate_card import RateCard
 from models import Subscription
 from uuid import UUID
 from datetime import datetime
 
 class RateCardReadSchema(ma.SQLAlchemyAutoSchema):
-    tiers = ma.Nested('SubscriptionTierReadSchema', many=True)
+    tiers = fields.Method("get_active_tiers")
     
     class Meta:
         model = RateCard
         load_instance = True
         include_fk = True
         exclude = ("created_by", "updated_by",)
+
+    def get_active_tiers(self, obj):
+        # Only include tiers that are not archived
+        active_tiers = [t for t in obj.tiers if not getattr(t, "is_archived", False)]
+        from schemas.subscription_tier_schema import SubscriptionTierReadSchema
+        return SubscriptionTierReadSchema(many=True).dump(active_tiers)
 
 
 

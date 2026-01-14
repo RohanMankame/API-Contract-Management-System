@@ -8,13 +8,19 @@ from datetime import datetime
 class SubscriptionReadSchema(ma.SQLAlchemyAutoSchema):
 
     product = ma.Nested('ProductReadSchema')
-    rate_cards = ma.Nested('RateCardReadSchema', many=True)
+    rate_cards = fields.Method("get_active_rate_cards")
 
     class Meta:
         model = Subscription
         load_instance = True
         include_fk = True
         exclude = ("created_by", "updated_by",)
+
+    def get_active_rate_cards(self, obj):
+        # Only include rate cards that are not archived
+        active_rate_cards = [rc for rc in obj.rate_cards if not getattr(rc, "is_archived", False)]
+        from schemas.rate_card_schema import RateCardReadSchema
+        return RateCardReadSchema(many=True).dump(active_rate_cards)
 
     
 
