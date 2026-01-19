@@ -9,7 +9,7 @@ class ProductReadSchema(ma.SQLAlchemyAutoSchema):
         model = Product
         load_instance = True
         include_fk = True
-        exclude = ("created_by", "updated_by",)
+        #exclude = ("created_by", "updated_by",)
 
 class ProductWriteSchema(ma.SQLAlchemySchema):
     

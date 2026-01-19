@@ -15,7 +15,7 @@ class ContractReadSchema(ma.SQLAlchemyAutoSchema):
         model = Contract
         load_instance = True
         include_fk = True
-        exclude = ("created_by", "updated_by",)
+        #exclude = ("created_by", "updated_by",)
 
     def get_active_subscriptions(self, obj):
         # Only include subscriptions that are not archived
