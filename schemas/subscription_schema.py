@@ -68,12 +68,12 @@ class SubscriptionWriteSchema(ma.SQLAlchemySchema):
         # if Fixed pricing_type, strategy must be Fixed
         if pricing_type == "Fixed":
             if strategy != "Fixed":
-                raise ValidationError({"strategy": "Strategy must be 'Fixed' when pricing_type is 'Fixed'."})
+                raise ValidationError({"error": "Strategy must be 'Fixed' when pricing_type is 'Fixed'."})
             
         # if Variable pricing_type, strategy must be one of Fill, Pick, or Flat
         elif pricing_type == "Variable":
             if strategy not in ["Fill", "Pick", "Flat"]:
-                raise ValidationError({"strategy": "Strategy must be one of 'Fill', 'Pick', or 'Flat' when pricing_type is 'Variable'."})
+                raise ValidationError({"error": "Strategy must be one of 'Fill', 'Pick', or 'Flat' when pricing_type is 'Variable'."})
 
 
     @validates_schema

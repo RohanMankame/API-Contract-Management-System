@@ -1,9 +1,10 @@
 from app import ma, db
 from marshmallow import validates_schema, ValidationError, fields
 from models.rate_card import RateCard
+from models import Subscription, Contract
 from models import Subscription
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 
 class RateCardReadSchema(ma.SQLAlchemyAutoSchema):
     tiers = fields.Method("get_active_tiers")
@@ -35,28 +36,46 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
 
     @validates_schema
     def validate_dates(self, data, **kwargs):
-        start_date = data.get('start_date')
-        end_date = data.get('end_date')
+        def _to_utc_aware(dt):
+            if dt is None:
+                return None
+            if dt.tzinfo is None:
+                return dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc)
 
-        if start_date and end_date:
-            if start_date >= end_date:
-                raise ValidationError('start_date must be before end_date.')
+        start_date = _to_utc_aware(data.get('start_date'))
+        end_date = _to_utc_aware(data.get('end_date'))
+
+        if start_date and end_date and start_date >= end_date:
+            raise ValidationError({"error": "The start date must be before the end date. Please correct the dates."})
 
         subscription_id = data.get('subscription_id')
         if subscription_id:
             subscription = db.session.get(Subscription, subscription_id)
             if not subscription:
-                raise ValidationError('subscription_id does not exist.')
+                raise ValidationError({"error": "subscription_id does not exist."})
 
-            if start_date and end_date:
-                overlapping_rate_cards = RateCard.query.filter(
-                    RateCard.subscription_id == subscription_id,
-                    RateCard.start_date < end_date,
-                    RateCard.end_date > start_date
-                ).all()
+            contract = db.session.get(Contract, subscription.contract_id)
+            if not contract:
+                raise ValidationError({"error": "Parent contract not found for subscription."})
 
-                if overlapping_rate_cards:
-                    raise ValidationError('The provided date range overlaps with an existing rate card for this subscription.')
+            contract_start = _to_utc_aware(contract.start_date)
+            contract_end = _to_utc_aware(contract.end_date)
+
+            if start_date and contract_start and start_date < contract_start:
+                raise ValidationError({"error": "Rate card start_date cannot be before the contract start_date."})
+
+            if end_date and contract_end and end_date > contract_end:
+                raise ValidationError({"error": "Rate card end_date cannot be after the contract end_date."})
+
+            overlapping_rate_cards = RateCard.query.filter(
+                RateCard.subscription_id == subscription_id,
+                RateCard.start_date < end_date,
+                RateCard.end_date > start_date
+            ).all()
+
+            if overlapping_rate_cards:
+                raise ValidationError({"error": "The provided date range overlaps with an existing rate card for this subscription. Please choose a different date range."})
 
 
 rate_card_read_schema = RateCardReadSchema()
