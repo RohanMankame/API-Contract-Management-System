@@ -20,6 +20,7 @@ class ProductWriteSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Product
 
+    # For test purpose only
     @validates_schema
     def validate_api_name(self, data, **kwargs):
         api_name = data.get("api_name")

@@ -54,6 +54,13 @@ class ContractWriteSchema(ma.SQLAlchemySchema):
         end_date = data.get("end_date")
         if start_date and end_date and end_date <= start_date:
             raise ValidationError({"error": "End date must be after start date"})
+        
+    # For test purpose only    
+    @validates_schema
+    def validate_contract_name(self, data, **kwargs):
+        contract_name = data.get("contract_name")
+        if contract_name == "TestFailContract":
+            raise ValidationError({"error": "Contract name cannot be 'TestFailContract'"})
 
             
     

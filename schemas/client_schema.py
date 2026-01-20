@@ -23,6 +23,7 @@ class ClientWriteSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Client
 
+    # For test purpose only
     @validates_schema
     def validate_company_name(self, data, **kwargs):
         company_name = data.get("company_name")

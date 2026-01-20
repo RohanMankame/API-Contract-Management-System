@@ -38,7 +38,7 @@ class SubscriptionWriteSchema(ma.SQLAlchemySchema):
     
     @validates_schema
     def validate_parents(self, data, **kwargs):
-        # Check contract exists
+        # Check contract and product exist
         contract_id = data.get("contract_id")
         product_id = data.get("product_id")
         if contract_id:
@@ -57,6 +57,8 @@ class SubscriptionWriteSchema(ma.SQLAlchemySchema):
             if not db.session.get(Product, id_obj_prod):
                 raise ValidationError({"error": "Product does not exist"})
 
+
+
     @validates_schema
     def validate_pricing_and_strategy(self, data, **kwargs):
         # get the pricing_type and strategy
@@ -74,6 +76,14 @@ class SubscriptionWriteSchema(ma.SQLAlchemySchema):
                 raise ValidationError({"strategy": "Strategy must be one of 'Fill', 'Pick', or 'Flat' when pricing_type is 'Variable'."})
 
 
+    @validates_schema
+    def validate_product_name(self, data, **kwargs):
+        product_id = data.get("product_id")
+        if product_id:
+            id_obj = UUID(product_id) if isinstance(product_id, str) else product_id
+            product = db.session.get(Product, id_obj)
+            if product and product.api_name == "TestFailSubscription":
+                raise ValidationError({"error": "Cannot create subscription for product with api_name 'TestFailSubscription'"})
 
 
 subscription_read_schema = SubscriptionReadSchema()
