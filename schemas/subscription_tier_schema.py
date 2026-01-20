@@ -31,9 +31,26 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
             try:
                 id_obj = UUID(rate_card_id) if isinstance(rate_card_id, str) else rate_card_id
             except Exception:
-                raise ValidationError({"rate_card_id": "Invalid UUID format"})
+                raise ValidationError({"error": "Invalid UUID format"})
             if not db.session.get(RateCard, id_obj):
-                raise ValidationError({"rate_card_id": "RateCard does not exist"})
+                raise ValidationError({"error": "RateCard does not exist"})
+            
+        if 'unit_price' in data:
+            unit_price = data.get('unit_price')
+            if unit_price < 0:
+                raise ValidationError({"error": "Unit price must be non-negative"})
+            
+        min_calls = data.get('min_calls')
+        max_calls = data.get('max_calls')
+
+        if min_calls is not None and max_calls is not None:
+            if min_calls < 0 or max_calls < -1:
+                raise ValidationError({"error": "Call limits must be non-negative"})
+            if min_calls >= max_calls:
+                raise ValidationError({"error": "min_calls must be less than max_calls"})
+            
+            
+
 
 
 subscription_tier_read_schema = SubscriptionTierReadSchema()
