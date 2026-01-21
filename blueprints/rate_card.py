@@ -80,6 +80,10 @@ def Rate_card_id(id):
                 return not_found(message="Rate card not found")
 
             data = request.get_json() or {}
+            #validated = rate_card_write_schema.load(data, partial=(request.method == 'PATCH'))
+
+            # Set context on schema instance
+            rate_card_write_schema.context = {"current_rate_card_id": id_obj}
             validated = rate_card_write_schema.load(data, partial=(request.method == 'PATCH'))
 
             for key, value in validated.items():

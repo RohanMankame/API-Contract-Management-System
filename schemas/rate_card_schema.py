@@ -68,14 +68,25 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
             if end_date and contract_end and end_date > contract_end:
                 raise ValidationError({"error": "Rate card end_date cannot be after the contract end_date."})
 
-            overlapping_rate_cards = RateCard.query.filter(
+            current_id = self.context.get("current_rate_card_id")
+            query = RateCard.query.filter(
                 RateCard.subscription_id == subscription_id,
+                RateCard.is_archived == False,
                 RateCard.start_date < end_date,
                 RateCard.end_date > start_date
-            ).all()
+            )
+            if current_id:
+                try:
+                    current_uuid = UUID(current_id) if isinstance(current_id, str) else current_id
+                    query = query.filter(RateCard.id != current_uuid)
+                except Exception:
+                    pass
+
+            overlapping_rate_cards = query.all()
 
             if overlapping_rate_cards:
                 raise ValidationError({"error": "The provided date range overlaps with an existing rate card for this subscription. Please choose a different date range."})
+
 
 
 rate_card_read_schema = RateCardReadSchema()
