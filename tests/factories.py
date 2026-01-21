@@ -13,10 +13,9 @@ def user_payload(**overrides):
     return base
 
 
-
 def product_payload(**overrides):
     base = {
-        "api_name": "Test API",
+        "api_name": f"Test API {uuid.uuid4().hex[:8]}",
         "description": "This is a test API product.",
     }
     base.update(overrides)
@@ -33,6 +32,7 @@ def client_payload(**overrides):
     base.update(overrides)
     return base
 
+
 def invalid_client_payload(**overrides):
     base = {
         "company_name": "Test Client",
@@ -44,16 +44,15 @@ def invalid_client_payload(**overrides):
     return base
 
 
-
 def contract_payload(client_id, **overrides):
     base = {
         "client_id": client_id,
         "contract_name": "Test Contract",
+        "start_date": "2025-01-01T00:00:00.000Z",
+        "end_date": "2026-12-31T23:59:59.999Z",
     }
     base.update(overrides)
     return base
-
-
 
 
 def subscription_payload(contract_id, product_id, **overrides):
@@ -67,24 +66,30 @@ def subscription_payload(contract_id, product_id, **overrides):
     return base
 
 
-
-
-def subscription_tier_payload(subscription_id, **overrides):
+def rate_card_payload(subscription_id, **overrides):
+    """Factory for creating rate card payloads"""
     base = {
         "subscription_id": subscription_id,
-        "min_calls": 0,
-        "max_calls": 1000,
         "start_date": "2025-12-08T09:25:18.505Z",
         "end_date": "2027-11-08T09:25:18.505Z",
-        "base_price": 5000.00,
-        "price_per_tier": 10
     }
     base.update(overrides)
     return base
 
 
+def subscription_tier_payload(rate_card_id, **overrides):
+    """Factory for creating subscription tier payloads - now links to rate_card, not subscription"""
+    base = {
+        "rate_card_id": rate_card_id,
+        "min_calls": 0,
+        "max_calls": 1000,
+        "unit_price": 10.00,
+    }
+    base.update(overrides)
+    return base
 
 
+# --- API Helper Functions ---
 
 def create_user_using_api(client, auth_headers, payload=None):
     payload = payload or user_payload()
@@ -92,21 +97,21 @@ def create_user_using_api(client, auth_headers, payload=None):
     assert res.status_code == 201, f"create_user failed: {res.get_data(as_text=True)}"
     return res.get_json()["data"]["user"]
 
-# create client
+
 def create_client_using_api(client, auth_headers, payload=None):
     payload = payload or client_payload()
     res = client.post("/clients", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_client failed: {res.get_data(as_text=True)}"
     return res.get_json()["data"]["client"]
 
-# create product
+
 def create_product_using_api(client, auth_headers, payload=None):
     payload = payload or product_payload()
     res = client.post("/products", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_product failed: {res.get_data(as_text=True)}"
     return res.get_json()["data"]["product"]
 
-# create contract
+
 def create_contract_using_api(client, auth_headers, client_id=None, payload=None):
     if client_id is None:
         client_obj = create_client_using_api(client, auth_headers)
@@ -116,10 +121,11 @@ def create_contract_using_api(client, auth_headers, client_id=None, payload=None
     assert res.status_code == 201, f"create_contract failed: {res.get_data(as_text=True)}"
     return res.get_json()["data"]["contract"]
 
-# create product + client + contract 
-def create_subscription_dependencies(client, auth_headers, client_payload=None, product_payload=None, contract_payload_overrides=None):
-    product_obj = create_product_using_api(client, auth_headers, product_payload)
-    client_obj = create_client_using_api(client, auth_headers, client_payload)
+
+def create_subscription_dependencies(client, auth_headers, client_payload_arg=None, product_payload_arg=None, contract_payload_overrides=None):
+    """Create product, client, and contract for subscription tests"""
+    product_obj = create_product_using_api(client, auth_headers, product_payload_arg)
+    client_obj = create_client_using_api(client, auth_headers, client_payload_arg)
     contract_obj = create_contract_using_api(client, auth_headers, client_obj["id"], payload=contract_payload_overrides)
     return {"product": product_obj, "client": client_obj, "contract": contract_obj}
 
@@ -130,12 +136,18 @@ def create_subscription_using_api(client, auth_headers, contract_id, product_id,
     assert res.status_code == 201, f"create_subscription failed: {res.get_data(as_text=True)}"
     return res.get_json()["data"]["subscription"]
 
-def create_subscription_tier_using_api(client, auth_headers, subscription_id, payload=None):
-    payload =payload or subscription_tier_payload(subscription_id)
+
+def create_rate_card_using_api(client, auth_headers, subscription_id, payload=None):
+    """Create a rate card for a subscription"""
+    payload = payload or rate_card_payload(subscription_id)
+    res = client.post("/rate-cards", headers=auth_headers, json=payload)
+    assert res.status_code == 201, f"create_rate_card failed: {res.get_data(as_text=True)}"
+    return res.get_json()["data"]["rate_card"]
+
+
+def create_subscription_tier_using_api(client, auth_headers, rate_card_id, payload=None):
+    """Create a subscription tier for a rate card"""
+    payload = payload or subscription_tier_payload(rate_card_id)
     res = client.post("/subscription-tiers", headers=auth_headers, json=payload)
     assert res.status_code == 201, f"create_subscription_tier failed: {res.get_data(as_text=True)}"
     return res.get_json()["data"]["subscription_tier"]
-
-
-
-
