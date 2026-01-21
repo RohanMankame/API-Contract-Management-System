@@ -71,6 +71,7 @@ def Client_id(id):
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
             client = db.session.query(Client).filter_by(id=id_obj, is_archived=False).first()
+
             
             if not client:
                 return not_found(message="Client not found")
@@ -78,7 +79,7 @@ def Client_id(id):
             return ok(data={"client": client_read_schema.dump(client)}, message="Client retrieved successfully")
         
         except Exception as e:
-            db.session.rollback()
+            #db.session.rollback()
             return server_error(message="Error retrieving client", errors=str(e))
 
 
