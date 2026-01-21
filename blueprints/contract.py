@@ -149,8 +149,8 @@ def Contract_Product_id(id):
             product = subscription.product
             
 
-            if getattr(product, "is_archived", False):
-                continue 
+            #if getattr(product, "is_archived", False):
+                #continue 
 
             unique_products[str(product.id)] = product
 
