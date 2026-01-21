@@ -82,7 +82,7 @@ def Subscription_tier_id(id):
             tier.updated_by = current_user_id
 
             db.session.commit()
-            return ok(message="Subscription tier updated successfully")
+            return ok(data={"subscription_tier": subscription_tier_read_schema.dump(tier)}, message="Subscription tier updated successfully")
 
         except ValidationError as ve:
             db.session.rollback()
@@ -104,7 +104,7 @@ def Subscription_tier_id(id):
             tier.updated_by = current_user_id
 
             db.session.commit()
-            return ok(message="Subscription tier archived successfully")
+            return ok(data={"subscription_tier": subscription_tier_read_schema.dump(tier)}, message="Subscription tier archived successfully")
         
         except ValidationError as ve:
             db.session.rollback()

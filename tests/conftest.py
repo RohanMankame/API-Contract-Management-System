@@ -32,7 +32,7 @@ def clean_db(app):
 def saved_token(app, monkeypatch):
     # create unique user in test DB
     with app.app_context():
-        user = User(email=f"testuser-{uuid.uuid4().hex}@example.com", full_name="Test")
+        user = User(email=f"testuser-{uuid.uuid4().hex}@example.com", full_name="Test", role="admin")
         user.set_password("pass12345")
         _db.session.add(user)
         _db.session.commit()

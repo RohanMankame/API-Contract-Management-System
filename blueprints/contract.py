@@ -119,7 +119,7 @@ def Contract_id(id):
             contract.updated_by = get_jwt_identity()
 
             db.session.commit()
-            return ok(message="Contract has been archived successfully")
+            return ok(data={"contract": contract_read_schema.dump(contract)}, message="Contract has been archived successfully")
 
         except Exception as e:
             db.session.rollback()

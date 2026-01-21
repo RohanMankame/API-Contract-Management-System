@@ -115,7 +115,7 @@ def User_id(id):
     if request.method == 'GET':
         try:
             id_obj = UUID(id) if isinstance(id, str) else id
-            user = db.session.get(User, id_obj)
+            user = db.session.query(User).filter_by(id=id_obj, is_archived=False).first()
             
             if not user:
                 return not_found(message="User not found")
