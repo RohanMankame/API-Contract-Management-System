@@ -10,14 +10,6 @@ from utils.response import ok, created, bad_request, not_found, server_error
 
 rate_card_bp = Blueprint('rate_card', __name__)
 
-def _parse_uuid(val):
-    """Accept both str and uuid.UUID; raise ValueError on invalid."""
-    if isinstance(val, UUID):
-        return val
-    if isinstance(val, str):
-        return UUID(val)
-    raise ValueError("Invalid UUID value")
-
 @rate_card_bp.route('/rate-cards', methods=['POST', 'GET'])
 @jwt_required()
 def Rate_card():
@@ -59,7 +51,7 @@ def Rate_card_id(id):
     current_user_id = get_jwt_identity()
 
     try:
-        id_obj = _parse_uuid(id) if isinstance(id, str) else id
+        id_obj = UUID(id) if isinstance(id, str) else id
     except Exception:
         return bad_request(message="Invalid rate card id format", errors={"id": "Invalid UUID format"})
 
@@ -129,7 +121,7 @@ def Rate_card_id(id):
 @jwt_required()
 def Rate_card_subscription_tiers(id):
     try:
-        id_obj = _parse_uuid(id) if isinstance(id, str) else id
+        id_obj = UUID(id) if isinstance(id, str) else id
     except Exception:
         return bad_request(message="Invalid rate card id format", errors={"id": "Invalid UUID format"})
 
