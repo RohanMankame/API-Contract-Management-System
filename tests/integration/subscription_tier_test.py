@@ -223,8 +223,6 @@ def test_create_subscription_tier_validation_error_exception(client, auth_header
 
 
 
-# ===== SUBSCRIPTION-TIERS ENDPOINT (GET - List) =====
-
 def test_get_subscription_tiers_success(client, auth_headers):
     """Test getting all subscription tiers"""
     deps = create_subscription_dependencies(client, auth_headers)
@@ -270,7 +268,6 @@ def test_get_subscription_tiers_db_error(client, auth_headers, monkeypatch):
     assert "Error fetching subscription tiers" in res.get_json()["message"]
 
 
-# ===== SUBSCRIPTION-TIERS/<ID> ENDPOINT (GET) =====
 
 def test_get_subscription_tier_by_id_success(client, auth_headers):
     """Test getting a subscription tier by ID"""
