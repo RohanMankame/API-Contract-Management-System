@@ -26,6 +26,7 @@ def Rate_card():
     if request.method == 'POST':
         try:
             data = request.get_json() or {}
+            rate_card_write_schema.context = {"current_rate_card_id": None}
             validated = rate_card_write_schema.load(data)
 
             new_rate_card = RateCard(**validated, created_by=current_user_id, updated_by=current_user_id)

@@ -130,7 +130,7 @@ def Subscription_id(id):
 
 
 
-"""
+
 @subscription_bp.route('/subscriptions/<id>/tiers', methods=['GET'])
 @jwt_required()
 def Subscription_Tiers_id(id):
@@ -154,5 +154,5 @@ def Subscription_Tiers_id(id):
             return server_error(message="Error fetching subscription tiers", errors=str(e))
 
 
-"""
+
 

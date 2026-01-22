@@ -46,7 +46,7 @@ class SubscriptionTierWriteSchema(ma.SQLAlchemySchema):
         if min_calls is not None and max_calls is not None:
             if min_calls < 0 or max_calls < -1:
                 raise ValidationError({"error": "Call limits must be non-negative"})
-            if min_calls >= max_calls and max_calls != -1:
+            if max_calls != -1 and min_calls >= max_calls:
                 raise ValidationError({"error": "min_calls must be less than max_calls"})
             
             
