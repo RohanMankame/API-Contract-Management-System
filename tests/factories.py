@@ -70,8 +70,8 @@ def rate_card_payload(subscription_id, **overrides):
     """Factory for creating rate card payloads"""
     base = {
         "subscription_id": subscription_id,
-        "start_date": "2025-12-08T09:25:18.505Z",
-        "end_date": "2027-11-08T09:25:18.505Z",
+        "start_date": "2025-01-01T00:00:00.000Z",  
+        "end_date": "2026-12-31T23:59:59.999Z",   
     }
     base.update(overrides)
     return base

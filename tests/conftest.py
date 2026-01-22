@@ -51,6 +51,7 @@ def saved_token(app, monkeypatch):
         "blueprints.product",
         "blueprints.subscription",
         "blueprints.subscription_tier",
+        "blueprints.rate_card",
     ]
     for mod in modules_to_patch:
         monkeypatch.setattr(f"{mod}.get_jwt_identity", lambda: uuid_identity)

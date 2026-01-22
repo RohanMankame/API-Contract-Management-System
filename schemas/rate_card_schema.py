@@ -69,7 +69,8 @@ class RateCardWriteSchema(ma.SQLAlchemySchema):
                 raise ValidationError({"error": "Rate card end_date cannot be after the contract end_date."})
 
             current_id = self.context.get("current_rate_card_id")
-            query = RateCard.query.filter(
+            # Changed syntax !!!
+            query = query = db.session.query(RateCard).filter(
                 RateCard.subscription_id == subscription_id,
                 RateCard.is_archived == False,
                 RateCard.start_date < end_date,

@@ -115,6 +115,8 @@ def Subscription_tier_id(id):
             return server_error(message=f"Error archiving subscription tier: {e}")
         
 
+
+"""
 @subscription_tier_bp.route('/subscription-tiers/<id>/subscriptions', methods=['GET'])
 @jwt_required()
 def Subscription_tier_Subscriptions_id(id):
@@ -138,3 +140,5 @@ def Subscription_tier_Subscriptions_id(id):
     except Exception as e:
         db.session.rollback()
         return server_error(message=f"Error fetching subscriptions for tier: {e}")
+
+"""
