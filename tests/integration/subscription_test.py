@@ -3,8 +3,6 @@ from tests.factories import (
     create_subscription_dependencies,
     create_subscription_using_api,
     create_product_using_api,
-    create_client_using_api,
-    create_contract_using_api,
     product_payload,
 )
 from uuid import uuid4

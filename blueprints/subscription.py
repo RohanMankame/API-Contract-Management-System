@@ -129,7 +129,8 @@ def Subscription_id(id):
 
 
 
-
+# NO LONGER IN USE, RATECARD IS NOW IN BETWEEN SUBSCRIPTION AND TIERS
+"""
 
 @subscription_bp.route('/subscriptions/<id>/tiers', methods=['GET'])
 @jwt_required()
@@ -153,6 +154,4 @@ def Subscription_Tiers_id(id):
         except Exception as e:
             return server_error(message="Error fetching subscription tiers", errors=str(e))
 
-
-
-
+"""
