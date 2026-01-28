@@ -26,7 +26,8 @@ def create_app():
     database_url = os.environ.get('DATABASE_URL')
     jwt_secret_key = os.environ.get('JWT_SECRET_KEY')
 
-
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600
+    
     # Database and Marshmallow initialization
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -80,7 +81,6 @@ def create_app():
     with app.app_context():
 
         
-        #db.drop_all()
         db.create_all()
     
     return app
